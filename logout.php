@@ -20,6 +20,6 @@ session_destroy();
 
 // Redirect to login page
 // Note: If you are using your .htaccess clean URL rule, you can just use "login" instead of "login.php"
-header("Location: login.php");
+header("Location: login");
 exit;
 ?>

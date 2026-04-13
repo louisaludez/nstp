@@ -83,9 +83,9 @@ $avatar_bg = ($role === 'Admin') ? '#4F46E5' : '#00695C';
                 <small class="fw-medium text-muted"><?= htmlspecialchars($role === 'Instructor' ? 'Prof. ' . $user_name : $user_name) ?></small>
             </div>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="border-radius: 8px;">
-                <li><a class="dropdown-item text-dark fw-medium small mb-1" href="profile.php"><i class="bi bi-person-circle me-2 text-muted"></i>View Profile</a></li>
+                <li><a class="dropdown-item text-dark fw-medium small mb-1" href="profile"><i class="bi bi-person-circle me-2 text-muted"></i>View Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger small fw-medium" href="../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Sign out</a></li>
+                <li><a class="dropdown-item text-danger small fw-medium" href="../logout"><i class="bi bi-box-arrow-right me-2"></i>Sign out</a></li>
             </ul>
         </div>
     </div>

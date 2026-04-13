@@ -26,39 +26,39 @@ $current_page = basename($_SERVER['PHP_SELF']);
     
     <ul class="nav flex-column mb-auto gap-1 mt-2">
         <li class="nav-item">
-            <a href="dashboard.php" class="nav-link <?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">
+            <a href="dashboard" class="nav-link <?= ($current_page == 'dashboard.php' || $current_page == 'dashboard') ? 'active' : '' ?>">
                 <i class="bi bi-grid me-3"></i> Dashboard
             </a>
         </li>
         <li class="nav-item">
-            <a href="my_section.php" class="nav-link <?= ($current_page == 'my_section.php') ? 'active' : '' ?>">
+            <a href="my_section" class="nav-link <?= ($current_page == 'my_section.php' || $current_page == 'my_section') ? 'active' : '' ?>">
                 <i class="bi bi-person-video3 me-3"></i> My Section
             </a>
         </li>
         <li class="nav-item">
-            <a href="students.php" class="nav-link <?= ($current_page == 'students.php') ? 'active' : '' ?>">
+            <a href="students" class="nav-link <?= ($current_page == 'students.php' || $current_page == 'students') ? 'active' : '' ?>">
                 <i class="bi bi-people me-3"></i> Students
             </a>
         </li>
 
         <li class="nav-item">
-            <a href="activity_plans.php" class="nav-link <?= ($current_page == 'activity_plans.php') ? 'active' : '' ?>">
+            <a href="activity_plans" class="nav-link <?= ($current_page == 'activity_plans.php' || $current_page == 'activity_plans') ? 'active' : '' ?>">
                 <i class="bi bi-file-earmark-text me-3"></i> Activity Plans
             </a>
         </li>
         <li class="nav-item">
-            <a href="reports.php" class="nav-link <?= ($current_page == 'reports.php') ? 'active' : '' ?>">
+            <a href="reports" class="nav-link <?= ($current_page == 'reports.php' || $current_page == 'reports') ? 'active' : '' ?>">
                 <i class="bi bi-clipboard-check me-3"></i> Reports
             </a>
         </li>
         <li class="nav-item">
-            <a href="activities.php" class="nav-link <?= ($current_page == 'activities.php') ? 'active' : '' ?>">
+            <a href="activities" class="nav-link <?= ($current_page == 'activities.php' || $current_page == 'activities') ? 'active' : '' ?>">
                 <i class="bi bi-book me-3"></i> Activities
             </a>
         </li>
     </ul>
     
     <div class="mt-auto mb-2 text-center pt-4">
-        <a href="../logout.php" class="btn btn-sm btn-light w-100 text-muted fw-medium">Sign Out</a>
+        <a href="../logout" class="btn btn-sm btn-light w-100 text-muted fw-medium">Sign Out</a>
     </div>
 </div>

@@ -4,7 +4,7 @@ require '../config/db.php';
 
 // Security check
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Instructor') {
-    header("Location: ../login.php");
+    header("Location: ../login");
     exit;
 }
 

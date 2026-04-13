@@ -31,9 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // 3. ROLE-BASED REDIRECT: (Using Clean URLs without .php)
         if ($_SESSION['role'] === 'Admin') {
-            header("Location: admin/dashboard.php");
+            header("Location: admin/dashboard");
         } else if ($_SESSION['role'] === 'Instructor') {
-            header("Location: instructor/dashboard.php");
+            header("Location: instructor/dashboard");
         } else {
             $error = "Unauthorized role. Please contact the administrator.";
         }
