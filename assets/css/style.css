@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* New Figma Color Palette */
+    --primary-bg: #2B2866;       /* Deep indigo sidebar */
+    --primary-active: #4A46D6;   /* Vibrant blue/purple for active menu */
+    --text-sidebar: #D1D5DB;     /* Light gray for unselected menu items */
+    --bg-light: #F4F6F9;         /* Main content off-white background */
+    
+    /* Icon Colors */
+    --icon-blue: #3B82F6;
+    --icon-green: #10B981;
+    --icon-red: #EF4444;
+    --icon-purple: #8B5CF6;
+    --icon-orange: #F97316;
+}
+
+body {
+    background-color: var(--bg-light);
+    font-family: 'Inter', sans-serif; /* Modern sans-serif from the mockup */
+    color: #333;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    background-color: var(--primary-bg);
+    min-height: 100vh;
+}
+
+.sidebar-brand {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.sidebar .nav-link {
+    color: var(--text-sidebar);
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 5px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--primary-active);
+    color: #fff;
+}
+
+/* Card Styling */
+.card {
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    background-color: #fff;
+}
+
+/* Circular Icons for Stat Cards */
+.icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+/* Custom Progress Bars */
+.progress {
+    height: 8px;
+    border-radius: 10px;
+    background-color: #E5E7EB;
+}
+.progress-bar {
+    background-color: var(--primary-active);
+    border-radius: 10px;
+}
