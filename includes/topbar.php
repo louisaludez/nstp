@@ -18,7 +18,7 @@ $unread_count = $notif_stmt->fetchColumn();
 $avatar_bg = ($role === 'Admin') ? '#4F46E5' : '#00695C';
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom w-100">
+<div class="topbar-fixed bg-white d-flex justify-content-between align-items-center shadow-sm border-bottom m-0">
     <div class="d-flex align-items-center">
         <!-- Desktop Sidebar Toggle Button -->
         <button id="sidebarToggleBtn" class="btn btn-sm btn-light border-0 me-3 d-none d-lg-block" style="background: transparent;" aria-label="Toggle Sidebar">

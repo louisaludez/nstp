@@ -37,13 +37,36 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
             min-height: 100vh; 
         }
         
-        /* Mobile View Adjustments (Screens smaller than 992px) */
         @media (max-width: 991.98px) {
             .flex-grow-1 { 
-                padding-top: 90px !important; 
-                padding-left: 20px !important; 
-                padding-right: 20px !important; 
+                padding-top: 160px !important; /* Clear both stacked mobile headers */
+                padding-left: 15px !important; 
+                padding-right: 15px !important; 
             }
+            .topbar-fixed {
+                left: 0 !important;
+                top: 74px !important; /* Slide under the mobile brand roof */
+                padding: 0 1.5rem !important;
+                z-index: 1020 !important;
+            }
+        }
+
+        /* Topbar Fixed Styles */
+        .topbar-fixed {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 260px;
+            height: 75px;
+            z-index: 1030;
+            background-color: #fff;
+            padding: 0 3rem;
+            border-bottom: 1px solid #E5E7EB;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html.sidebar-collapsed .topbar-fixed {
+            left: 80px;
         }
         
         /* Desktop View Adjustments (Screens 992px and larger) */
@@ -100,6 +123,7 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
                 overflow-x: hidden;
                 flex-grow: 1;
                 min-width: 0; 
+                padding-top: 100px !important; /* Push beneath 75px topbar */
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
         }

@@ -164,7 +164,7 @@ include '../includes/admin_sidebar.php';
         <div class="col-md-4">
             <div class="component-card p-4 h-100">
                 <div class="d-flex align-items-center mb-4">
-                    <div class="icon-circle-lg bg-blue-brand me-3">C</div>
+                    <img src="../assets/images/dnsc_logo.png" alt="CWTS Logo" style="width: 55px; height: 55px; object-fit: contain;" class="me-3 drop-shadow-sm rounded-circle">
                     <div>
                         <h5 class="fw-bold mb-0">CWTS</h5>
                         <small class="text-muted">Civic Welfare Training Service</small>
@@ -187,7 +187,7 @@ include '../includes/admin_sidebar.php';
         <div class="col-md-4">
             <div class="component-card p-4 h-100">
                 <div class="d-flex align-items-center mb-4">
-                    <div class="icon-circle-lg bg-green-brand me-3">L</div>
+                    <img src="../assets/images/dnsc_logo.png" alt="LTS Logo" style="width: 55px; height: 55px; object-fit: contain;" class="me-3 drop-shadow-sm rounded-circle">
                     <div>
                         <h5 class="fw-bold mb-0">LTS</h5>
                         <small class="text-muted">Literacy Training Service</small>
@@ -210,7 +210,7 @@ include '../includes/admin_sidebar.php';
         <div class="col-md-4">
             <div class="component-card p-4 h-100">
                 <div class="d-flex align-items-center mb-4">
-                    <div class="icon-circle-lg bg-red-brand me-3">R</div>
+                    <img src="../assets/images/rotc_logo.png" alt="ROTC Logo" style="width: 55px; height: 55px; object-fit: contain;" class="me-3 drop-shadow-sm rounded-circle">
                     <div>
                         <h5 class="fw-bold mb-0">ROTC</h5>
                         <small class="text-muted">Reserve Officers' Training Corps</small>
