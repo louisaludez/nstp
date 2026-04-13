@@ -22,7 +22,7 @@ if (count($sections) > 0) {
     $secIds = array_column($sections, 'id');
     $placeholders = implode(',', array_fill(0, count($secIds), '?'));
     $stmtStu = $pdo->prepare("
-        SELECT s.*, sec.section_name as section
+        SELECT s.*, sec.section_name as section, e.section_id
         FROM students s
         JOIN enrollments e ON s.student_id = e.student_id
         LEFT JOIN sections sec ON e.section_id = sec.id
@@ -168,12 +168,12 @@ include '../includes/instructor_sidebar.php';
         <div class="search-bar-container">
             <div class="search-input-wrapper">
                 <i class="bi bi-search"></i>
-                <input type="text" class="search-input" placeholder="Search by name or student ID...">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by name or student ID...">
             </div>
-            <select class="filter-select">
-                <option>All Sections</option>
+            <select id="sectionFilter" class="filter-select">
+                <option value="All">All Sections</option>
                 <?php foreach($sections as $sec): ?>
-                    <option value="<?= $sec['id'] ?>"><?= htmlspecialchars($sec['section_name']) ?></option>
+                    <option value="<?= htmlspecialchars($sec['id']) ?>"><?= htmlspecialchars($sec['section_name']) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -192,9 +192,17 @@ include '../includes/instructor_sidebar.php';
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="studentsTableBody">
+                    <?php if (count($students) === 0): ?>
+                        <tr id="emptyStateRow">
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No students found.
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                     <?php foreach ($students as $student): ?>
-                        <tr>
+                        <tr class="student-row" data-section-id="<?= htmlspecialchars($student['section_id'] ?? '') ?>">
                             <td class="text-muted"><?= htmlspecialchars($student['student_id']) ?></td>
                             <td><?= htmlspecialchars($student['first_name'] . ' ' . $student['last_name']) ?></td>
                             <td class="text-muted"><?= htmlspecialchars($student['course'] ?? '') ?></td>
@@ -218,7 +226,17 @@ include '../includes/instructor_sidebar.php';
                                 <span class="badge-status"><?= htmlspecialchars($student['status']) ?></span>
                             </td>
                             <td>
-                                <a href="#" class="action-icon"><i class="bi bi-eye"></i></a>
+                                <a href="#" class="action-icon view-student-btn" 
+                                   data-id="<?= htmlspecialchars($student['student_id']) ?>"
+                                   data-name="<?= htmlspecialchars($student['first_name'] . ' ' . $student['last_name']) ?>"
+                                   data-course="<?= htmlspecialchars($student['course'] ?? '') ?>"
+                                   data-section="<?= htmlspecialchars($student['section'] ?? '') ?>"
+                                   data-attendance="<?= htmlspecialchars($student['attendance']) ?>"
+                                   data-grade="<?= htmlspecialchars($student['grade']) ?>"
+                                   data-status="<?= htmlspecialchars($student['status']) ?>"
+                                   data-bs-toggle="modal" data-bs-target="#viewStudentModal">
+                                   <i class="bi bi-eye"></i>
+                                </a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -229,6 +247,124 @@ include '../includes/instructor_sidebar.php';
     </div>
 </div>
 
-</div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- View Student Modal -->
+<div class="modal fade" id="viewStudentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold" style="color: #111827;">Student Overview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-3 pb-4 px-4">
+        <div class="d-flex align-items-center mb-4">
+            <div class="rounded-circle bg-light d-flex justify-content-center align-items-center me-3" style="width: 60px; height: 60px;">
+                <i class="bi bi-person fs-1 text-muted"></i>
+            </div>
+            <div>
+                <h4 class="fw-bold mb-0" id="modalStudentName">--</h4>
+                <div class="text-muted small" id="modalStudentId">--</div>
+            </div>
+        </div>
+        
+        <div class="row g-3 mb-4">
+            <div class="col-6">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="text-muted small mb-1">Course</div>
+                    <div class="fw-bold text-dark" id="modalStudentCourse" style="font-size: 0.9rem;">--</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="text-muted small mb-1">Section</div>
+                    <div class="fw-bold text-dark" id="modalStudentSection" style="font-size: 0.9rem;">--</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="text-muted small mb-1">Attendance</div>
+                    <div class="fw-bold text-dark" id="modalStudentAttendance" style="font-size: 0.9rem;">--</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="text-muted small mb-1">Grade Final</div>
+                    <div class="fw-bold text-dark" id="modalStudentGrade" style="font-size: 0.9rem;">--</div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center p-3 rounded-3" style="background-color: #F9FAFB; border: 1px dashed #D1D5DB;">
+            <span class="text-muted fw-medium small">Current Status</span>
+            <span class="badge-status" id="modalStudentStatus">--</span>
+        </div>
+      </div>
+      <div class="modal-footer border-top-0 pt-0">
+        <button type="button" class="btn btn-light w-100 fw-medium" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div> 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById("searchInput");
+        const sectionFilter = document.getElementById("sectionFilter");
+        const tableBody = document.getElementById("studentsTableBody");
+        const tableRows = document.querySelectorAll(".student-row");
+
+        // Create No Results Row dynamically
+        const noResultsRow = document.createElement("tr");
+        noResultsRow.id = "noResultsRow";
+        noResultsRow.style.display = "none";
+        noResultsRow.innerHTML = `
+            <td colspan="8" class="text-center py-5 text-muted">
+                <i class="bi bi-search fs-1 d-block mb-2"></i>
+                No matching students found.
+            </td>
+        `;
+        tableBody.appendChild(noResultsRow);
+
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const filterSection = sectionFilter.value;
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const textContent = row.textContent.toLowerCase();
+                const rowSectionId = row.getAttribute("data-section-id");
+                
+                const matchesSearch = textContent.includes(searchTerm);
+                const matchesSection = filterSection === "All" || rowSectionId === filterSection;
+
+                if (matchesSearch && matchesSection) {
+                    row.style.display = "";
+                    visibleCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Toggle No Results Message
+            noResultsRow.style.display = (visibleCount === 0 && tableRows.length > 0) ? "" : "none";
+        }
+
+        searchInput.addEventListener("input", filterTable);
+        sectionFilter.addEventListener("change", filterTable);
+
+        // Populate Modal Action dynamically
+        document.querySelectorAll('.view-student-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('modalStudentName').textContent = this.getAttribute('data-name');
+                document.getElementById('modalStudentId').textContent = this.getAttribute('data-id');
+                document.getElementById('modalStudentCourse').textContent = this.getAttribute('data-course');
+                document.getElementById('modalStudentSection').textContent = this.getAttribute('data-section');
+                document.getElementById('modalStudentAttendance').textContent = this.getAttribute('data-attendance') + '%';
+                document.getElementById('modalStudentGrade').textContent = this.getAttribute('data-grade');
+                document.getElementById('modalStudentStatus').textContent = this.getAttribute('data-status');
+            });
+        });
+    });
+</script>
 </body>
 </html>
