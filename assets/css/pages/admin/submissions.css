@@ -1,0 +1,34 @@
+/* assets/css/pages/submissions.css */
+.stat-card { border-radius: 12px; padding: 24px; height: 100%; background-color: #fff; }
+.stat-blue { border: 1px solid #BFDBFE; background-color: #EFF6FF; }
+.stat-blue i, .stat-blue h3, .stat-blue span { color: #1D4ED8; }
+.stat-yellow { border: 1px solid #FDE68A; background-color: #FEF3C7; }
+.stat-yellow i, .stat-yellow h3, .stat-yellow span { color: #D97706; }
+.stat-green { border: 1px solid #BBF7D0; background-color: #F0FDF4; }
+.stat-green i, .stat-green h3, .stat-green span { color: #15803D; }
+.stat-purple { border: 1px solid #E9D5FF; background-color: #FAF5FF; }
+.stat-purple i, .stat-purple h3, .stat-purple span { color: #7E22CE; }
+.nav-tabs-custom { border-bottom: 1px solid #E5E7EB; margin-bottom: 24px; }
+.nav-tabs-custom .nav-link { border: none; color: #6B7280; font-weight: 600; padding: 12px 24px; background: transparent; }
+.nav-tabs-custom .nav-link:hover { color: #111827; }
+.nav-tabs-custom .nav-link.active { color: #2563EB; border-bottom: 2px solid #2563EB; }
+.search-filter-bar { display: flex; gap: 16px; margin-bottom: 24px; }
+.search-wrapper { position: relative; flex-grow: 1; }
+.search-wrapper i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #9CA3AF; }
+.search-wrapper input { width: 100%; padding: 10px 16px 10px 40px; border: 1px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem; }
+.filter-btn { border: 1px solid #D1D5DB; background-color: white; border-radius: 8px; padding: 8px 16px; color: #374151; font-weight: 500; }
+.submission-card { border: 1px solid #E5E7EB; border-radius: 12px; padding: 24px; background-color: #fff; margin-bottom: 16px; }
+.badge-status { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+.bg-approved, .bg-reviewed { background-color: #D1FAE5; color: #065F46; }
+.bg-pending { background-color: #FEF3C7; color: #92400E; }
+.btn-approve { background-color: #10B981; color: white; border-radius: 8px; font-weight: 500; padding: 6px 20px; border: none; }
+.btn-approve:hover { background-color: #059669; }
+.btn-reject { background-color: #EF4444; color: white; border-radius: 8px; font-weight: 500; padding: 6px 20px; border: none; }
+.btn-reject:hover { background-color: #DC2626; }
+.btn-details { background-color: #F3F4F6; color: #374151; border-radius: 8px; font-weight: 500; padding: 6px 20px; border: none; }
+.btn-details:hover { background-color: #E5E7EB; }
+.btn-download { background-color: #E0E7FF; color: #4338CA; border-radius: 8px; font-weight: 500; padding: 6px 20px; border: none; }
+.btn-download:hover { background-color: #C7D2FE; }
+.obj-toggle { color: #2563EB; font-size: 0.85rem; font-weight: 500; text-decoration: none; cursor: pointer; display: inline-block; margin-top: 8px; margin-bottom: 12px; }
+.obj-toggle:hover { color: #1D4ED8; }
+.accomplishment-block { border-left: 2px solid #6EE7B7; padding-left: 12px; margin-top: 6px; color: #4B5563; font-size: 0.9rem; }

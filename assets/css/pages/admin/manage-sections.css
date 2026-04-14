@@ -1,0 +1,15 @@
+/* assets/css/pages/manage-sections.css */
+.component-card { border-radius: 12px; border: 1px solid #E5E7EB; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.icon-circle-lg { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.25rem; }
+.bg-blue-brand { background-color: #2563EB; }
+.bg-green-brand { background-color: #16A34A; }
+.bg-red-brand { background-color: #DC2626; }
+.text-blue-brand { color: #2563EB; }
+.text-green-brand { color: #16A34A; }
+.text-red-brand { color: #DC2626; }
+.progress-thin { height: 6px; border-radius: 10px; background-color: #F3F4F6; margin-top: 8px; margin-bottom: 16px; }
+.unassigned-container { border-radius: 12px; border: 1px solid #E5E7EB; background-color: #fff; padding: 24px; }
+.student-row { border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; transition: 0.2s; }
+.student-row:hover { border-color: #D1D5DB; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.btn-assign { font-size: 0.85rem; font-weight: 500; padding: 8px 16px; border-radius: 6px; color: white; border: none; transition: opacity 0.2s; }
+.btn-assign:hover { opacity: 0.9; }

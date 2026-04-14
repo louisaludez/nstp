@@ -1,0 +1,13 @@
+/* assets/css/pages/reports.css */
+.panel-container { background-color: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 24px; height: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.btn-brand { background-color: var(--primary-active, #4A46D6); color: white; font-weight: 500; border-radius: 8px; padding: 8px 16px; }
+.btn-brand:hover { background-color: var(--primary-bg, #2B2866); color: white; }
+.icon-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.25rem; }
+.bg-green-brand { background-color: #10B981; }
+.bg-blue-brand { background-color: #3B82F6; }
+.bg-purple-brand { background-color: #8B5CF6; }
+.table-workload th { font-size: 0.85rem; color: #111827; font-weight: 600; background-color: #F9FAFB; border-bottom: 1px solid #E5E7EB; padding: 12px 16px; }
+.table-workload td { padding: 16px; color: #4B5563; border-bottom: 1px solid #F3F4F6; }
+.badge-high { background-color: #FEE2E2; color: #DC2626; padding: 4px 10px; border-radius: 12px; font-weight: 500; font-size: 0.75rem; }
+.badge-medium { background-color: #FEF3C7; color: #D97706; padding: 4px 10px; border-radius: 12px; font-weight: 500; font-size: 0.75rem; }
+.badge-low { background-color: #D1FAE5; color: #059669; padding: 4px 10px; border-radius: 12px; font-weight: 500; font-size: 0.75rem; }

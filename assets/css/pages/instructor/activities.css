@@ -1,0 +1,24 @@
+/* assets/css/pages/instructor-activities.css */
+.activity-card { background-color: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 24px; height: 100%; display: flex; flex-direction: column; transition: box-shadow 0.2s; }
+.activity-card:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+.card-title { font-size: 1.1rem; font-weight: 700; color: #111827; margin-bottom: 0; }
+.card-meta { font-size: 0.85rem; color: #6B7280; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.card-meta i { font-size: 1rem; color: #9CA3AF; width: 16px; text-align: center; }
+.card-desc { font-size: 0.85rem; color: #4B5563; margin-top: 16px; margin-bottom: 24px; line-height: 1.5; flex-grow: 1; }
+.badge-status { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 500; }
+.bg-approved { background-color: #D1FAE5; color: #065F46; }
+.bg-pending { background-color: #FEF3C7; color: #92400E; }
+.bg-draft { background-color: #F3F4F6; color: #4B5563; }
+.btn-teal { background-color: #00897B; color: white; font-weight: 500; border-radius: 8px; padding: 8px 16px; border: none; transition: background-color 0.2s; }
+.btn-teal:hover { background-color: #00695C; color: white; }
+.btn-gray-fill { background-color: #F3F4F6; color: #374151; font-weight: 500; border-radius: 8px; padding: 8px 16px; border: none; transition: background-color 0.2s; }
+.btn-gray-fill:hover { background-color: #E5E7EB; color: #111827; }
+.btn-outline-custom { background-color: white; color: #374151; font-weight: 500; border-radius: 8px; padding: 8px 16px; border: 1px solid #D1D5DB; }
+.btn-outline-custom:hover { background-color: #F9FAFB; }
+.modal-content { border-radius: 16px; border: none; }
+.modal-header { border-bottom: none; padding: 24px 24px 16px 24px; }
+.modal-body { padding: 0 24px 24px 24px; }
+.modal-footer { border-top: none; padding: 16px 24px 24px 24px; }
+.upload-zone { border: 2px dashed #D1D5DB; border-radius: 8px; padding: 24px; text-align: center; background-color: #F9FAFB; cursor: pointer; transition: background-color 0.2s; }
+.upload-zone:hover { background-color: #F3F4F6; }
+.upload-icon { font-size: 1.8rem; color: #9CA3AF; margin-bottom: 8px; }

@@ -2,143 +2,17 @@
 session_start();
 require '../config/db.php';
 
-// Security check
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
-    header("Location: ../login.php");
+    header("Location: ../login");
     exit;
 }
 
-$message = '';
-$msgType = '';
+require 'controllers/ManageSectionsController.php';
 
-// Handle student assignment
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_component'])) {
-    $student_id = $_POST['student_id'];
-    $component = $_POST['component']; // 'CWTS', 'LTS', or 'ROTC'
-    
-    try {
-        $stmt = $pdo->prepare("UPDATE students SET component = ? WHERE student_id = ?");
-        $stmt->execute([$component, $student_id]);
-        
-        $message = "Student successfully assigned to $component.";
-        $msgType = "success";
-    } catch (PDOException $e) {
-        $message = "Database Error: " . $e->getMessage();
-        $msgType = "danger";
-    }
-}
-
-// Handle Section Creation
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_section'])) {
-    $section_name = trim($_POST['section_name']);
-    $component = $_POST['component'];
-    $school_year = trim($_POST['school_year']);
-    $semester = $_POST['semester'];
-    
-    try {
-        $stmt = $pdo->prepare("INSERT INTO sections (component, section_name, school_year, semester) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$component, $section_name, $school_year, $semester]);
-        $message = "Section $section_name ($component) successfully created!";
-        $msgType = "success";
-    } catch (PDOException $e) {
-        $message = "Database Error: " . $e->getMessage();
-        $msgType = "danger";
-    }
-}
-
-// 1. Fetch counts for the top stat cards
-$stmtCounts = $pdo->query("SELECT component, COUNT(*) as total FROM students WHERE component IS NOT NULL GROUP BY component");
-$counts = $stmtCounts->fetchAll(PDO::FETCH_KEY_PAIR); 
-// Defaults to 0 if no students are assigned yet
-$cwts_count = $counts['CWTS'] ?? 0;
-$lts_count  = $counts['LTS'] ?? 0;
-$rotc_count = $counts['ROTC'] ?? 0;
-
-// Program component capacities (Current operational limits)
-$cwts_cap = 800;
-$lts_cap = 400;
-$rotc_cap = 400;
-
-// 2. Fetch all Unassigned Students
-$stmtUnassigned = $pdo->query("SELECT * FROM students WHERE component IS NULL ORDER BY created_at DESC");
-$unassigned_students = $stmtUnassigned->fetchAll();
-
+$extra_css = ['../assets/css/pages/admin/manage-sections.css'];
 include '../includes/header.php';
 include '../includes/admin_sidebar.php';
 ?>
-
-<style>
-    /* Component Card Styling */
-    .component-card {
-        border-radius: 12px;
-        border: 1px solid #E5E7EB;
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
-    
-    .icon-circle-lg {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 1.25rem;
-    }
-    
-    /* Branding Colors based on Figma */
-    .bg-blue-brand { background-color: #2563EB; }
-    .bg-green-brand { background-color: #16A34A; }
-    .bg-red-brand { background-color: #DC2626; }
-    
-    .text-blue-brand { color: #2563EB; }
-    .text-green-brand { color: #16A34A; }
-    .text-red-brand { color: #DC2626; }
-
-    /* Thin Progress Bars */
-    .progress-thin {
-        height: 6px;
-        border-radius: 10px;
-        background-color: #F3F4F6;
-        margin-top: 8px;
-        margin-bottom: 16px;
-    }
-    
-    /* Unassigned Student List Styling */
-    .unassigned-container {
-        border-radius: 12px;
-        border: 1px solid #E5E7EB;
-        background-color: #fff;
-        padding: 24px;
-    }
-    
-    .student-row {
-        border: 1px solid #E5E7EB;
-        border-radius: 8px;
-        padding: 16px 20px;
-        margin-bottom: 12px;
-        transition: 0.2s;
-    }
-    .student-row:hover {
-        border-color: #D1D5DB;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    
-    .btn-assign {
-        font-size: 0.85rem;
-        font-weight: 500;
-        padding: 8px 16px;
-        border-radius: 6px;
-        color: white;
-        border: none;
-        transition: opacity 0.2s;
-    }
-    .btn-assign:hover {
-        opacity: 0.9;
-    }
-</style>
 
 <div class="flex-grow-1 p-5 w-100">
     
@@ -174,16 +48,12 @@ include '../includes/admin_sidebar.php';
                     <span>Students</span>
                     <span style="color: #111827;"><?= $cwts_count ?> / <?= $cwts_cap ?></span>
                 </div>
-                <div class="progress-thin">
-                    <div class="progress-bar bg-blue-brand" style="width: <?= ($cwts_count / $cwts_cap) * 100 ?>%"></div>
-                </div>
+                <div class="progress-thin"><div class="progress-bar bg-blue-brand" style="width: <?= ($cwts_count / $cwts_cap) * 100 ?>%"></div></div>
                 <div class="d-flex justify-content-between text-muted small fw-medium">
-                    <span>Sections</span>
-                    <span style="color: #111827;">12</span> 
+                    <span>Sections</span><span style="color: #111827;">12</span>
                 </div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="component-card p-4 h-100">
                 <div class="d-flex align-items-center mb-4">
@@ -197,16 +67,12 @@ include '../includes/admin_sidebar.php';
                     <span>Students</span>
                     <span style="color: #111827;"><?= $lts_count ?> / <?= $lts_cap ?></span>
                 </div>
-                <div class="progress-thin">
-                    <div class="progress-bar bg-green-brand" style="width: <?= ($lts_count / $lts_cap) * 100 ?>%"></div>
-                </div>
+                <div class="progress-thin"><div class="progress-bar bg-green-brand" style="width: <?= ($lts_count / $lts_cap) * 100 ?>%"></div></div>
                 <div class="d-flex justify-content-between text-muted small fw-medium">
-                    <span>Sections</span>
-                    <span style="color: #111827;">8</span>
+                    <span>Sections</span><span style="color: #111827;">8</span>
                 </div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="component-card p-4 h-100">
                 <div class="d-flex align-items-center mb-4">
@@ -220,12 +86,9 @@ include '../includes/admin_sidebar.php';
                     <span>Students</span>
                     <span style="color: #111827;"><?= $rotc_count ?> / <?= $rotc_cap ?></span>
                 </div>
-                <div class="progress-thin">
-                    <div class="progress-bar bg-red-brand" style="width: <?= ($rotc_count / $rotc_cap) * 100 ?>%"></div>
-                </div>
+                <div class="progress-thin"><div class="progress-bar bg-red-brand" style="width: <?= ($rotc_count / $rotc_cap) * 100 ?>%"></div></div>
                 <div class="d-flex justify-content-between text-muted small fw-medium">
-                    <span>Sections</span>
-                    <span style="color: #111827;">6</span>
+                    <span>Sections</span><span style="color: #111827;">6</span>
                 </div>
             </div>
         </div>
@@ -247,19 +110,11 @@ include '../includes/admin_sidebar.php';
                             <?= htmlspecialchars($student['course'] ?? 'N/A') ?> Year <?= htmlspecialchars($student['year_level'] ?? 'N/A') ?>
                         </small>
                     </div>
-                    
                     <form method="POST" action="" class="d-flex gap-2 mb-0">
                         <input type="hidden" name="student_id" value="<?= htmlspecialchars($student['student_id']) ?>">
-                        
-                        <button type="submit" name="component" value="CWTS" class="btn-assign bg-blue-brand">
-                            Assign to CWTS
-                        </button>
-                        <button type="submit" name="component" value="LTS" class="btn-assign bg-green-brand">
-                            Assign to LTS
-                        </button>
-                        <button type="submit" name="component" value="ROTC" class="btn-assign bg-red-brand">
-                            Assign to ROTC
-                        </button>
+                        <button type="submit" name="component" value="CWTS" class="btn-assign bg-blue-brand">Assign to CWTS</button>
+                        <button type="submit" name="component" value="LTS" class="btn-assign bg-green-brand">Assign to LTS</button>
+                        <button type="submit" name="component" value="ROTC" class="btn-assign bg-red-brand">Assign to ROTC</button>
                         <input type="hidden" name="assign_component" value="1">
                     </form>
                 </div>
@@ -271,9 +126,8 @@ include '../includes/admin_sidebar.php';
                 <p class="text-muted small">There are currently no unassigned students.</p>
             </div>
         <?php endif; ?>
-
     </div>
-</div> 
+</div>
 
 <!-- Create Section Modal -->
 <div class="modal fade" id="createSectionModal" tabindex="-1">

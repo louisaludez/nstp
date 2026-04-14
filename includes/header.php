@@ -128,6 +128,17 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
             }
         }
     </style>
+    
+    <?php if (isset($extra_css)): ?>
+        <?php foreach((array)$extra_css as $css_file): ?>
+            <link href="<?= htmlspecialchars($css_file) ?>" rel="stylesheet">
+        <?php endforeach; ?>
+    <?php endif; ?>
+    <?php if (isset($extra_js_head)): ?>
+        <?php foreach((array)$extra_js_head as $js_file): ?>
+            <script src="<?= htmlspecialchars($js_file) ?>"></script>
+        <?php endforeach; ?>
+    <?php endif; ?>
 </head>
 <body style="background-color: var(--bg-light, #F4F6F9);">
     <div class="d-flex flex-column flex-lg-row wrapper">

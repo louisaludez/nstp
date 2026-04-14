@@ -1,6 +1,11 @@
 RewriteEngine On
+RewriteBase /nstp/
 
-# If the request is not a directory or a valid file, append .php to it
+# Remove .php extension (301 redirect for canonical URLs)
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+nstp/(.+)\.php[\s?] [NC]
+RewriteRule ^ /nstp/%1 [R=301,L]
+
+# Internally serve the .php file for extensionless requests
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php [NC,L]

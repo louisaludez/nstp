@@ -5,5 +5,5 @@
  */
 
 // Since .htaccess drops the extension, we can safely redirect to '/login'
-header("Location: login");
+header("Location: login.php");
 exit;

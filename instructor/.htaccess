@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteBase /nstp/instructor/
+
+# Remove .php extension (301 redirect for canonical URLs)
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+nstp/instructor/(.+)\.php[\s?] [NC]
+RewriteRule ^ /nstp/instructor/%1 [R=301,L]
+
+# Internally serve the .php file for extensionless requests
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [NC,L]

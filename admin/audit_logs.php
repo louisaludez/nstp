@@ -2,113 +2,18 @@
 session_start();
 require '../config/db.php';
 
-// Security check
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
-    header("Location: ../login.php");
+    header("Location: ../login");
     exit;
 }
 
-// Fetch all audit logs
-$stmt = $pdo->query("SELECT * FROM audit_logs ORDER BY created_at DESC");
-$logs = $stmt->fetchAll();
+require 'controllers/AuditLogsController.php';
 
-// Helper function for badges
-function getBadgeStyle($action)
-{
-    if (strpos($action, 'Created') !== false)
-        return 'bg-success bg-opacity-10 text-success';
-    if (strpos($action, 'Updated') !== false)
-        return 'bg-info bg-opacity-10 text-primary';
-    if (strpos($action, 'Assigned') !== false)
-        return 'bg-purple-light text-purple';
-    return 'bg-secondary bg-opacity-10 text-secondary';
-}
-
+$extra_css = ['../assets/css/pages/admin/audit-logs.css'];
+$extra_js = ['../assets/js/pages/admin/audit-logs.js'];
 include '../includes/header.php';
 include '../includes/admin_sidebar.php';
 ?>
-
-<style>
-    /* Panel styling - Removed height: 100% to stop the stretching */
-    .panel-container {
-        background-color: #fff;
-        border: 1px solid #E5E7EB;
-        border-radius: 12px;
-        padding: 24px;
-        width: 100%;
-    }
-
-    .btn-brand {
-        background-color: var(--primary-active, #4A46D6);
-        color: white;
-        font-weight: 500;
-        border-radius: 8px;
-        padding: 8px 16px;
-    }
-
-    /* Search & Filter Bar */
-    .filter-bar {
-        border: 1px solid #E5E7EB;
-        border-radius: 8px;
-        padding: 4px;
-        margin-bottom: 24px;
-        background-color: white;
-    }
-
-    .search-input {
-        border: none;
-        box-shadow: none;
-        background: transparent;
-    }
-
-    .search-input:focus {
-        outline: none;
-        box-shadow: none;
-    }
-
-    .filter-select {
-        border: 1px solid #E5E7EB;
-        border-radius: 6px;
-        padding: 6px 32px 6px 12px;
-        font-size: 0.9rem;
-        color: #4B5563;
-        background-color: white;
-    }
-
-    /* Log Cards */
-    .log-card {
-        border: 1px solid #E5E7EB;
-        border-radius: 8px;
-        padding: 16px 20px;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: flex-start;
-        background-color: white;
-    }
-
-    .shield-icon {
-        color: var(--primary-active, #4A46D6);
-        font-size: 1.2rem;
-        margin-right: 16px;
-        margin-top: 2px;
-    }
-
-    .bg-purple-light {
-        background-color: #F3E8FF;
-    }
-
-    .text-purple {
-        color: #9333EA;
-    }
-
-    .action-badge {
-        font-size: 0.75rem;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-weight: 500;
-        margin-right: 12px;
-    }
-</style>
 
 <div class="flex-grow-1 p-5 d-flex flex-column align-items-start">
 
@@ -174,45 +79,5 @@ include '../includes/admin_sidebar.php';
 
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    document.getElementById('logSearch').addEventListener('keyup', function () {
-        // 1. Get what the user typed and convert to lowercase
-        let filter = this.value.toLowerCase();
-
-        // 2. Grab all the log cards
-        let cards = document.querySelectorAll('.log-card');
-
-        cards.forEach(card => {
-            // 3. Get the text content from the badge, user name, and details
-            let text = card.textContent.toLowerCase();
-
-            // 4. If the text matches, show the card; otherwise, hide it
-            if (text.includes(filter)) {
-                card.style.display = ""; // Shows the card
-            } else {
-                card.style.display = "none"; // Hides the card
-            }
-        });
-    });
-
-    // Optional: Filter by Action Type dropdown
-    document.querySelector('.filter-select').addEventListener('change', function () {
-        let selectedAction = this.value.toLowerCase();
-        let cards = document.querySelectorAll('.log-card');
-
-        cards.forEach(card => {
-            let actionBadge = card.querySelector('.action-badge').textContent.toLowerCase();
-
-            if (selectedAction === "all actions" || actionBadge.includes(selectedAction)) {
-                card.style.display = "";
-            } else {
-                card.style.display = "none";
-            }
-        });
-    });
-
-</script>
 </body>
-
 </html>

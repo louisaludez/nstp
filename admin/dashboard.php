@@ -7,67 +7,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
     exit;
 }
 
-// Fetch total students and their component distribution
-$stmt = $pdo->query("
-    SELECT 
-        COUNT(*) as total_students,
-        SUM(CASE WHEN component = 'CWTS' THEN 1 ELSE 0 END) as cwts_count,
-        SUM(CASE WHEN component = 'LTS' THEN 1 ELSE 0 END) as lts_count,
-        SUM(CASE WHEN component = 'ROTC' THEN 1 ELSE 0 END) as rotc_count
-    FROM students
-");
-$stats = $stmt->fetch();
-$total_students = $stats['total_students'] ?: 0;
-$cwts_count = $stats['cwts_count'] ?: 0;
-$lts_count = $stats['lts_count'] ?: 0;
-$rotc_count = $stats['rotc_count'] ?: 0;
+require 'controllers/DashboardController.php';
 
-$cwts_percent = $total_students > 0 ? round(($cwts_count / $total_students) * 100) : 0;
-$lts_percent = $total_students > 0 ? round(($lts_count / $total_students) * 100) : 0;
-$rotc_percent = $total_students > 0 ? round(($rotc_count / $total_students) * 100) : 0;
-
-// Fetch additional metrics
-$stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'Instructor'");
-$active_instructors = $stmt->fetchColumn() ?: 0;
-
-$stmt = $pdo->query("SELECT COUNT(*) FROM enrollments WHERE status = 'Passed'");
-$passed_students = $stmt->fetchColumn() ?: 0;
-
-$stmt = $pdo->query("SELECT COUNT(*) FROM enrollments WHERE status = 'Failed'");
-$failed_students = $stmt->fetchColumn() ?: 0;
-
-$stmt = $pdo->query("SELECT COUNT(*) FROM enrollments WHERE serial_number IS NOT NULL AND serial_number != ''");
-$certificates_issued = $stmt->fetchColumn() ?: 0;
-
-$stmt = $pdo->query("SELECT COUNT(*) FROM activities WHERE activity_date >= CURDATE()");
-$upcoming_activities = $stmt->fetchColumn() ?: 0;
-
-// Fetch recent activities
-try {
-    $recent_stmt = $pdo->query("SELECT * FROM audit_logs ORDER BY id DESC LIMIT 5");
-    $recent_activities = $recent_stmt->fetchAll();
-} catch (PDOException $e) {
-    $recent_activities = []; // fallback if audit_logs table isn't accessible
-}
-
-function time_elapsed_string($datetime) {
-    if (!$datetime) return 'just now';
-    try {
-        $now = new DateTime();
-        $ago = new DateTime($datetime);
-        $diff = $now->diff($ago);
-        
-        if ($diff->y > 0) return $diff->y . ' yr' . ($diff->y > 1 ? 's' : '') . ' ago';
-        if ($diff->m > 0) return $diff->m . ' mo' . ($diff->m > 1 ? 's' : '') . ' ago';
-        if ($diff->d > 0) return $diff->d . ' day' . ($diff->d > 1 ? 's' : '') . ' ago';
-        if ($diff->h > 0) return $diff->h . ' hr' . ($diff->h > 1 ? 's' : '') . ' ago';
-        if ($diff->i > 0) return $diff->i . ' min' . ($diff->i > 1 ? 's' : '') . ' ago';
-        return 'just now';
-    } catch (Exception $e) {
-        return 'recently';
-    }
-}
-
+$extra_css = ['../assets/css/pages/admin-dashboard.css'];
 include '../includes/header.php';
 include '../includes/admin_sidebar.php';
 ?>
@@ -170,35 +112,26 @@ include '../includes/admin_sidebar.php';
         <div class="col-md-8">
             <div class="card p-4 h-100">
                 <h6 class="fw-bold mb-4">Component Distribution</h6>
-                
                 <div class="mb-4">
                     <div class="d-flex justify-content-between mb-1">
                         <span class="fw-medium">CWTS</span>
                         <span class="text-muted small"><?= $cwts_count ?> students (<?= $cwts_percent ?>%)</span>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: <?= $cwts_percent ?>%"></div>
-                    </div>
+                    <div class="progress"><div class="progress-bar" style="width: <?= $cwts_percent ?>%"></div></div>
                 </div>
-
                 <div class="mb-4">
                     <div class="d-flex justify-content-between mb-1">
                         <span class="fw-medium">LTS</span>
                         <span class="text-muted small"><?= $lts_count ?> students (<?= $lts_percent ?>%)</span>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: <?= $lts_percent ?>%"></div>
-                    </div>
+                    <div class="progress"><div class="progress-bar" style="width: <?= $lts_percent ?>%"></div></div>
                 </div>
-
                 <div>
                     <div class="d-flex justify-content-between mb-1">
                         <span class="fw-medium">ROTC</span>
                         <span class="text-muted small"><?= $rotc_count ?> students (<?= $rotc_percent ?>%)</span>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: <?= $rotc_percent ?>%"></div>
-                    </div>
+                    <div class="progress"><div class="progress-bar" style="width: <?= $rotc_percent ?>%"></div></div>
                 </div>
             </div>
         </div>
@@ -232,8 +165,8 @@ include '../includes/admin_sidebar.php';
         </div>
     </div>
 
-</div> 
-</div> 
+</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

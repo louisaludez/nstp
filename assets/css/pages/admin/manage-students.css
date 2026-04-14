@@ -1,0 +1,89 @@
+/* Button & Input Styling to match Figma */
+.btn-brand {
+    background-color: var(--primary-active, #4A46D6);
+    color: white;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 8px 16px;
+}
+
+.btn-brand:hover {
+    background-color: var(--primary-bg, #2B2866);
+    color: white;
+}
+
+.btn-outline-cancel {
+    border: 1px solid #D1D5DB;
+    color: #111827;
+    font-weight: 500;
+    background-color: white;
+}
+
+.btn-outline-cancel:hover {
+    background-color: #F3F4F6;
+}
+
+.search-bar-container {
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.search-input {
+    border: none;
+    box-shadow: none;
+}
+
+.search-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Custom Pill Badges */
+.badge-cwts {
+    background-color: #E0E7FF;
+    color: #4338CA;
+}
+
+.badge-lts {
+    background-color: #D1FAE5;
+    color: #059669;
+}
+
+.badge-rotc {
+    background-color: #FEE2E2;
+    color: #DC2626;
+}
+
+.badge-active {
+    background-color: #DCFCE7;
+    color: #16A34A;
+}
+
+.action-icon {
+    cursor: pointer;
+    color: #6B7280;
+    transition: 0.2s;
+}
+
+.action-icon:hover {
+    color: var(--primary-active);
+}
+
+.action-icon.delete:hover {
+    color: #DC2626;
+}
+
+/* Form Inputs */
+.modal-form-control {
+    border-radius: 8px;
+    border: 1px solid #D1D5DB;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+}
+
+.modal-form-control:focus {
+    border-color: var(--primary-active, #4A46D6);
+    box-shadow: 0 0 0 3px rgba(74, 70, 214, 0.1);
+    outline: none;
+}
