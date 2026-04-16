@@ -6,25 +6,41 @@ $msgType = '';
 
 // Handle form submission to insert a new student
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_student'])) {
-    $student_id = trim($_POST['student_id']);
-    $full_name = trim($_POST['full_name']);
-    $course = trim($_POST['course']);
-    $year_level = $_POST['year_level'];
-    $contact = trim($_POST['contact_number']);
-    $email = trim($_POST['email']);
+    $student_id  = trim($_POST['student_id']);
+    $full_name   = trim($_POST['full_name']);
+    $course      = trim($_POST['course']);
+    $year_level  = $_POST['year_level'];
+    $contact     = trim($_POST['contact_number']);
+    $email       = trim($_POST['email']);
+    $section_id  = !empty($_POST['section_id']) ? (int)$_POST['section_id'] : null;
 
     // Auto-split the Full Name into first and last name for the database
     $name_parts = explode(' ', $full_name, 2);
     $first_name = $name_parts[0];
-    $last_name = $name_parts[1] ?? ''; // If they only enter one name, avoid an error
+    $last_name  = $name_parts[1] ?? '';
+
+    // Determine component from selected section (if any)
+    $component = null;
+    if ($section_id) {
+        $stmtSec = $pdo->prepare("SELECT component FROM sections WHERE id = ?");
+        $stmtSec->execute([$section_id]);
+        $secRow = $stmtSec->fetch();
+        $component = $secRow ? $secRow['component'] : null;
+    }
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO students (student_id, first_name, last_name, course, year_level, contact_number, email) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$student_id, $first_name, $last_name, $course, $year_level, $contact, $email]);
+        $stmt = $pdo->prepare("INSERT INTO students (student_id, first_name, last_name, course, year_level, contact_number, email, component) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$student_id, $first_name, $last_name, $course, $year_level, $contact, $email, $component]);
 
-        $message = "Student successfully enrolled.";
+        // Enroll into section if selected
+        if ($section_id) {
+            $stmtE = $pdo->prepare("INSERT INTO enrollments (student_id, section_id, status) VALUES (?, ?, 'Pending')");
+            $stmtE->execute([$student_id, $section_id]);
+        }
+
+        $message = "Student successfully added" . ($section_id ? " and enrolled into section." : ".");
         $msgType = "success";
-        logAction($pdo, 'Created Student', "Enrolled $first_name $last_name ($student_id) under $course");
+        logAction($pdo, 'Created Student', "Added $first_name $last_name ($student_id) under $course" . ($component ? " [$component]" : ""));
     } catch (PDOException $e) {
         if ($e->getCode() == 23000) {
             $message = "Error: A student with ID $student_id already exists.";
@@ -100,6 +116,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enroll_student'])) {
     } catch (PDOException $e) {
         $message = "Database Error: " . $e->getMessage();
         $msgType = "danger";
+    }
+}
+
+// Handle bulk CSV import
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_import'])) {
+    $section_id = !empty($_POST['bulk_section_id']) ? (int)$_POST['bulk_section_id'] : null;
+
+    if (!$section_id) {
+        $message = "Please select a section before importing.";
+        $msgType = "danger";
+    } elseif (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
+        $message = "Please upload a valid CSV file.";
+        $msgType = "danger";
+    } else {
+        // Get component from section
+        $stmtSec = $pdo->prepare("SELECT component FROM sections WHERE id = ?");
+        $stmtSec->execute([$section_id]);
+        $secRow = $stmtSec->fetch();
+        $component = $secRow ? $secRow['component'] : null;
+
+        $file = $_FILES['csv_file']['tmp_name'];
+        $handle = fopen($file, 'r');
+        $imported = 0;
+        $skipped  = 0;
+        $rowNum   = 0;
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $rowNum++;
+            if ($rowNum === 1) continue; // Skip header row
+
+            // Map columns: student_id, full_name, course, year_level, contact_number, email
+            if (count($row) < 2) { $skipped++; continue; }
+            $sid      = trim($row[0]);
+            $fullName = trim($row[1]);
+            $course   = trim($row[2] ?? '');
+            $year     = trim($row[3] ?? '1');
+            $contact  = trim($row[4] ?? '');
+            $email    = trim($row[5] ?? '');
+
+            if (empty($sid) || empty($fullName)) { $skipped++; continue; }
+
+            $parts = explode(' ', $fullName, 2);
+            $fname = $parts[0];
+            $lname = $parts[1] ?? '';
+
+            try {
+                $stmtIns = $pdo->prepare("INSERT INTO students (student_id, first_name, last_name, course, year_level, contact_number, email, component) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmtIns->execute([$sid, $fname, $lname, $course, $year, $contact, $email, $component]);
+
+                $stmtE = $pdo->prepare("INSERT INTO enrollments (student_id, section_id, status) VALUES (?, ?, 'Pending')");
+                $stmtE->execute([$sid, $section_id]);
+                $imported++;
+            } catch (PDOException $e) {
+                $skipped++; // Duplicate or DB error — skip row
+            }
+        }
+        fclose($handle);
+
+        $message = "Bulk import complete: $imported student(s) imported" . ($skipped ? ", $skipped skipped (duplicates/errors)." : ".");
+        $msgType = $imported > 0 ? "success" : "warning";
+        logAction($pdo, 'Bulk Import', "Imported $imported students into section ID $section_id");
     }
 }
 

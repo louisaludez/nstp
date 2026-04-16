@@ -41,10 +41,10 @@ include '../includes/admin_sidebar.php';
         
         <ul class="nav nav-tabs nav-tabs-custom" id="submissionTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="plans-tab" data-bs-target="#plans" type="button" role="tab">Activity Plans (<?= $total_plans ?>)</button>
+                <button class="nav-link active" id="plans-tab" data-bs-toggle="tab" data-bs-target="#plans" type="button" role="tab" aria-controls="plans" aria-selected="true">Activity Plans (<?= $total_plans ?>)</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="reports-tab" data-bs-target="#reports" type="button" role="tab">Accomplishment Reports (<?= $total_reports ?>)</button>
+                <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab" aria-controls="reports" aria-selected="false">Accomplishment Reports (<?= $total_reports ?>)</button>
             </li>
         </ul>
 

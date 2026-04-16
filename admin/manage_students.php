@@ -127,54 +127,176 @@ ob_start();
     </div>
 </div>
 
+<!-- Add Student: Choice Modal -->
 <div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4 mt-1">
+                <h4 class="modal-title fw-bold" style="color: #111827;">Add Student</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small mb-4">Choose how you'd like to add student(s) to the system.</p>
+                <div class="row g-3">
+                    <!-- Individual -->
+                    <div class="col-md-6">
+                        <button type="button" class="add-choice-card w-100 text-start p-4 border rounded-4 bg-white"
+                            data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#addIndividualModal" id="chooseIndividualBtn">
+                            <div class="choice-icon mb-3" style="background: linear-gradient(135deg,#EEF2FF,#C7D2FE); border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center;">
+                                <i class="bi bi-person-plus-fill" style="font-size:1.3rem; color:#4A46D6;"></i>
+                            </div>
+                            <div class="fw-semibold text-dark mb-1">Add Individually</div>
+                            <div class="text-muted" style="font-size:0.8rem;">Enter one student's details manually and assign to a section.</div>
+                        </button>
+                    </div>
+                    <!-- Bulk -->
+                    <div class="col-md-6">
+                        <button type="button" class="add-choice-card w-100 text-start p-4 border rounded-4 bg-white"
+                            data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#bulkImportModal" id="chooseBulkBtn">
+                            <div class="choice-icon mb-3" style="background: linear-gradient(135deg,#ECFDF5,#A7F3D0); border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center;">
+                                <i class="bi bi-file-earmark-spreadsheet-fill" style="font-size:1.3rem; color:#059669;"></i>
+                            </div>
+                            <div class="fw-semibold text-dark mb-1">Bulk via CSV</div>
+                            <div class="text-muted" style="font-size:0.8rem;">Upload a CSV file to import multiple students at once.</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Individual Student Modal -->
+<div class="modal fade" id="addIndividualModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow" style="border-radius: 16px;">
             <div class="modal-header border-bottom-0 pb-0 pt-4 px-4 mt-1">
-                <h4 class="modal-title fw-bold" style="color: #111827;">Add New Student</h4>
+                <h4 class="modal-title fw-bold" style="color: #111827;">Add Individual Student</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="">
                 <div class="modal-body p-4">
                     <div class="row g-4 mb-3">
                         <div class="col-md-6">
                             <label class="form-label text-dark fw-medium small mb-1">Full Name</label>
-                            <input type="text" name="full_name" class="form-control modal-form-control" required>
+                            <input type="text" name="full_name" class="form-control modal-form-control" placeholder="e.g. Juan Dela Cruz" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-dark fw-medium small mb-1">Student ID</label>
-                            <input type="text" name="student_id" class="form-control modal-form-control" required>
+                            <input type="text" name="student_id" class="form-control modal-form-control" placeholder="e.g. 2024-0001" required>
                         </div>
                     </div>
                     <div class="row g-4 mb-3">
                         <div class="col-md-6">
                             <label class="form-label text-dark fw-medium small mb-1">Course</label>
-                            <input type="text" name="course" class="form-control modal-form-control" required>
+                            <input type="text" name="course" class="form-control modal-form-control" placeholder="e.g. BSIT" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-dark fw-medium small mb-1">Year Level</label>
                             <select name="year_level" class="form-select modal-form-control" required>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                                <option value="5">5th Year</option>
                             </select>
                         </div>
                     </div>
-                    <div class="row g-4 mb-2">
+                    <div class="row g-4 mb-3">
                         <div class="col-md-6">
                             <label class="form-label text-dark fw-medium small mb-1">Contact Number</label>
-                            <input type="text" name="contact_number" class="form-control modal-form-control">
+                            <input type="text" name="contact_number" class="form-control modal-form-control" placeholder="e.g. 09XXXXXXXXX">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-dark fw-medium small mb-1">Email</label>
-                            <input type="email" name="email" class="form-control modal-form-control">
+                            <input type="email" name="email" class="form-control modal-form-control" placeholder="e.g. student@email.com">
                         </div>
+                    </div>
+                    <hr class="my-2" style="border-color:#E5E7EB;">
+                    <div class="mt-3">
+                        <label class="form-label text-dark fw-medium small mb-1">Assign to Section <span class="text-muted fw-normal">(Optional)</span></label>
+                        <select name="section_id" id="individual_section_id" class="form-select modal-form-control">
+                            <option value="">— No section assignment —</option>
+                            <?php foreach ($allSections as $sec): ?>
+                                <option value="<?= htmlspecialchars($sec['id']) ?>" data-component="<?= htmlspecialchars($sec['component']) ?>">
+                                    [<?= htmlspecialchars($sec['component']) ?>] <?= htmlspecialchars($sec['section_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="small text-muted mt-1"><i class="bi bi-info-circle me-1"></i>Component is automatically determined by the section selected.</div>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 pt-0 pe-4 pb-4">
                     <button type="button" class="btn btn-outline-cancel rounded-3 px-4 py-2" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" name="add_student" class="btn btn-brand rounded-3 px-4 py-2">Add Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Import Modal -->
+<div class="modal fade" id="bulkImportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4 mt-1">
+                <h4 class="modal-title fw-bold" style="color: #111827;">Bulk Import via CSV</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="" enctype="multipart/form-data" id="bulkImportForm">
+                <div class="modal-body p-4">
+
+                    <!-- Section Selector -->
+                    <div class="mb-4">
+                        <label class="form-label text-dark fw-medium small mb-1">Assign All Students to Section <span class="text-danger">*</span></label>
+                        <select name="bulk_section_id" id="bulk_section_id" class="form-select modal-form-control" required>
+                            <option value="">— Select a section —</option>
+                            <?php foreach ($allSections as $sec): ?>
+                                <option value="<?= htmlspecialchars($sec['id']) ?>">
+                                    [<?= htmlspecialchars($sec['component']) ?>] <?= htmlspecialchars($sec['section_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- CSV Upload -->
+                    <div class="mb-3">
+                        <label class="form-label text-dark fw-medium small mb-1">Upload CSV File <span class="text-danger">*</span></label>
+                        <input type="file" name="csv_file" id="csv_file_input" class="form-control modal-form-control" accept=".csv" required>
+                        <div class="mt-2 p-3 rounded-3" style="background:#F9FAFB; border:1px dashed #D1D5DB;">
+                            <div class="small text-muted fw-medium mb-1"><i class="bi bi-file-text me-1"></i>Expected CSV format (with header row):</div>
+                            <code class="small text-muted">student_id, full_name, course, year_level, contact_number, email</code>
+                        </div>
+                    </div>
+
+                    <!-- CSV Preview -->
+                    <div id="csv_preview_wrapper" class="d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-semibold text-dark">Preview <span id="csv_row_count" class="text-muted fw-normal"></span></span>
+                            <span id="csv_parse_error" class="small text-danger d-none"></span>
+                        </div>
+                        <div class="table-responsive rounded-3" style="max-height:220px; border:1px solid #E5E7EB; overflow-y:auto;">
+                            <table class="table table-borderless table-sm mb-0" style="font-size:0.82rem;">
+                                <thead style="background:#F3F4F6; position:sticky; top:0;">
+                                    <tr>
+                                        <th class="px-3 py-2 text-muted">Student ID</th>
+                                        <th class="px-3 py-2 text-muted">Full Name</th>
+                                        <th class="px-3 py-2 text-muted">Course</th>
+                                        <th class="px-3 py-2 text-muted">Year</th>
+                                        <th class="px-3 py-2 text-muted">Contact</th>
+                                        <th class="px-3 py-2 text-muted">Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="csv_preview_body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0 pe-4 pb-4">
+                    <button type="button" class="btn btn-outline-cancel rounded-3 px-4 py-2" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="bulk_import" id="bulkImportBtn" class="btn rounded-3 px-4 py-2" style="background:#059669; color:#fff; border:0;" disabled>
+                        <i class="bi bi-upload me-1"></i>Import Students
+                    </button>
                 </div>
             </form>
         </div>

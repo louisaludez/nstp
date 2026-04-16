@@ -87,3 +87,24 @@
     box-shadow: 0 0 0 3px rgba(74, 70, 214, 0.1);
     outline: none;
 }
+
+/* Add Student Choice Cards */
+.add-choice-card {
+    cursor: pointer;
+    border-color: #E5E7EB !important;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    height: 100%;
+    background: none;
+    font-family: inherit;
+}
+
+.add-choice-card:hover {
+    border-color: #A5B4FC !important;
+    box-shadow: 0 4px 16px rgba(74, 70, 214, 0.1);
+    transform: translateY(-2px);
+}
+
+.add-choice-card:active {
+    transform: translateY(0);
+    box-shadow: none;
+}

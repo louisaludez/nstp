@@ -1,11 +1,65 @@
 /* assets/css/pages/instructor-dashboard.css */
-.panel-container { background-color: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-.stat-card { background-color: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-.icon-box { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; }
-.bg-blue-brand { background-color: #3B82F6; }
-.bg-green-brand { background-color: #10B981; }
-.bg-purple-brand { background-color: #A855F7; }
-.bg-orange-brand { background-color: #F97316; }
-.text-teal-brand { color: #00695C; }
-.quick-action-btn { border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #3B82F6; padding: 6px 16px; font-weight: 500; text-decoration: none; font-size: 0.9rem; margin-right: 10px; }
-.quick-action-btn:hover { background-color: #F9FAFB; }
+.panel-container {
+    background-color: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background-color: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.icon-box {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.bg-blue-brand {
+    background-color: #3B82F6;
+}
+
+.bg-green-brand {
+    background-color: #10B981;
+}
+
+.bg-purple-brand {
+    background-color: #A855F7;
+}
+
+.bg-orange-brand {
+    background-color: #F97316;
+}
+
+.text-teal-brand {
+    color: #00695C;
+}
+
+.quick-action-btn {
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    background: white;
+    color: #3B82F6;
+    padding: 6px 16px;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-right: 10px;
+}
+
+.quick-action-btn:hover {
+    background-color: #F9FAFB;
+}
