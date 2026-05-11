@@ -24,9 +24,9 @@ include '../includes/admin_sidebar.php';
             <h3 class="fw-bold mb-1" style="color: #111827;">Reports &amp; Analytics</h3>
             <p class="text-muted mb-0">Comprehensive NSTP program statistics</p>
         </div>
-        <button type="button" class="btn btn-brand border-0">
+        <a href="export_reports.php" class="btn btn-brand border-0">
             <i class="bi bi-download me-2"></i> Export Report
-        </button>
+        </a>
     </div>
 
     <div class="row g-4 mb-4">
@@ -119,12 +119,13 @@ include '../includes/admin_sidebar.php';
 window.chartData = {
     cwts_p: <?= $cwts_p ?>, lts_p: <?= $lts_p ?>, rotc_p: <?= $rotc_p ?>,
     cwts_f: <?= $cwts_f ?>, lts_f: <?= $lts_f ?>, rotc_f: <?= $rotc_f ?>,
+    cwts_total: <?= $cwts_total ?>, lts_total: <?= $lts_total ?>, rotc_total: <?= $rotc_total ?>,
     total_passed: <?= $total_passed ?>, total_failed: <?= $total_failed ?>,
     pass_rate: <?= $pass_rate ?>, fail_rate: <?= $total_graded > 0 ? round(($total_failed/$total_graded)*100,1) : 0 ?>
 };
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="../assets/js/pages/reports.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="../assets/js/pages/admin/reports.js"></script>
 </body>
 </html>

@@ -110,24 +110,24 @@ $user_name_first = explode(' ', $_SESSION['full_name'] ?? 'Admin')[0];
                 <div class="col-12">
                     <div class="dash-panel">
                         <div class="panel-title">📊 Component Distribution</div>
-                        <?php
-                            $components = [
-                                ['name'=>'CWTS','count'=>$cwts_count,'pct'=>$cwts_percent,'cls'=>'cwts'],
-                                ['name'=>'LTS', 'count'=>$lts_count, 'pct'=>$lts_percent, 'cls'=>'lts'],
-                                ['name'=>'ROTC','count'=>$rotc_count,'pct'=>$rotc_percent,'cls'=>'rotc'],
-                            ];
-                        ?>
-                        <?php foreach($components as $comp): ?>
-                        <div class="dist-item">
-                            <div class="dist-label">
-                                <span><?= $comp['name'] ?></span>
-                                <span><?= number_format($comp['count']) ?> students &nbsp;·&nbsp; <?= $comp['pct'] ?>%</span>
+                        <div class="chart-wrapper" style="height: 220px; display: flex; justify-content: center;">
+                            <canvas id="componentPieChart"></canvas>
+                        </div>
+                        
+                        <div class="d-flex justify-content-center gap-4 mt-3 mb-3">
+                            <div class="text-center">
+                                <span style="display:inline-block;width:10px;height:10px;background:#6366F1;border-radius:50%;margin-right:4px;"></span>CWTS<br>
+                                <small class="text-muted fw-bold"><?= $cwts_percent ?>%</small>
                             </div>
-                            <div class="dist-track">
-                                <div class="dist-fill <?= $comp['cls'] ?>" style="width: <?= $comp['pct'] ?>%"></div>
+                            <div class="text-center">
+                                <span style="display:inline-block;width:10px;height:10px;background:#10B981;border-radius:50%;margin-right:4px;"></span>LTS<br>
+                                <small class="text-muted fw-bold"><?= $lts_percent ?>%</small>
+                            </div>
+                            <div class="text-center">
+                                <span style="display:inline-block;width:10px;height:10px;background:#F97316;border-radius:50%;margin-right:4px;"></span>ROTC<br>
+                                <small class="text-muted fw-bold"><?= $rotc_percent ?>%</small>
                             </div>
                         </div>
-                        <?php endforeach; ?>
 
                         <!-- Quick summary pills -->
                         <div class="quick-stat-row">
@@ -330,6 +330,41 @@ $user_name_first = explode(' ', $_SESSION['full_name'] ?? 'Admin')[0];
                     ticks: { font: { family: 'Inter', size: 11 }, color: '#9CA3AF' },
                     beginAtZero: true
                 }
+            }
+        }
+    });
+})();
+
+// ─── Pie Chart (Component Distribution) ──────────────────────
+(function() {
+    const ctxPie = document.getElementById('componentPieChart').getContext('2d');
+    const dataPie   = [<?= $cwts_count ?>, <?= $lts_count ?>, <?= $rotc_count ?>];
+    const colorsPie = ['#6366F1', '#10B981', '#F97316'];
+
+    new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+            labels: ['CWTS', 'LTS', 'ROTC'],
+            datasets: [{
+                data: dataPie,
+                backgroundColor: colorsPie,
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' ' + ctx.parsed.y.toLocaleString() + ' students'
+                    }
+                }
+            },
+            layout: {
+                padding: 10
             }
         }
     });

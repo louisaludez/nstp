@@ -52,3 +52,18 @@ $lts_p  = $comp_data['LTS']['passed_count'] ?? 0;
 $lts_f  = $comp_data['LTS']['failed_count'] ?? 0;
 $rotc_p = $comp_data['ROTC']['passed_count'] ?? 0;
 $rotc_f = $comp_data['ROTC']['failed_count'] ?? 0;
+
+// Total enrolled per component (all statuses)
+$stmtCompTotal = $pdo->query("
+    SELECT sec.component, COUNT(e.student_id) as total
+    FROM enrollments e
+    JOIN sections sec ON e.section_id = sec.id
+    GROUP BY sec.component
+");
+$comp_totals = [];
+while ($row = $stmtCompTotal->fetch(PDO::FETCH_ASSOC)) {
+    if ($row['component']) $comp_totals[$row['component']] = $row['total'];
+}
+$cwts_total = $comp_totals['CWTS'] ?? 0;
+$lts_total  = $comp_totals['LTS'] ?? 0;
+$rotc_total = $comp_totals['ROTC'] ?? 0;

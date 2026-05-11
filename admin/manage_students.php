@@ -189,7 +189,22 @@ ob_start();
                     <div class="row g-4 mb-3">
                         <div class="col-md-6">
                             <label class="form-label text-dark fw-medium small mb-1">Course</label>
-                            <input type="text" name="course" class="form-control modal-form-control" placeholder="e.g. BSIT" required>
+                            <select name="course" class="form-select modal-form-control" required>
+                                <option value="" disabled selected>Select Course</option>
+                                <option value="BSIT">BSIT - Bachelor of Science in Information Technology</option>
+                                <option value="BSCS">BSCS - Bachelor of Science in Computer Science</option>
+                                <option value="BSIS">BSIS - Bachelor of Science in Information Systems</option>
+                                <option value="BSBA">BSBA - Bachelor of Science in Business Administration</option>
+                                <option value="BSA">BSA - Bachelor of Science in Accountancy</option>
+                                <option value="BSED">BSED - Bachelor of Secondary Education</option>
+                                <option value="BEED">BEED - Bachelor of Elementary Education</option>
+                                <option value="BSCE">BSCE - Bachelor of Science in Civil Engineering</option>
+                                <option value="BSME">BSME - Bachelor of Science in Mechanical Engineering</option>
+                                <option value="BSEE">BSEE - Bachelor of Science in Electrical Engineering</option>
+                                <option value="BSN">BSN - Bachelor of Science in Nursing</option>
+                                <option value="BSTM">BSTM - Bachelor of Science in Tourism Management</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-dark fw-medium small mb-1">Year Level</label>
@@ -349,7 +364,22 @@ ob_start();
                     <div class="row g-4 mb-3">
                         <div class="col-md-6">
                             <label class="form-label text-dark fw-medium small mb-1">Course</label>
-                            <input type="text" name="course" id="edit_course" class="form-control modal-form-control" required>
+                            <select name="course" id="edit_course" class="form-select modal-form-control" required>
+                                <option value="" disabled>Select Course</option>
+                                <option value="BSIT">BSIT - Bachelor of Science in Information Technology</option>
+                                <option value="BSCS">BSCS - Bachelor of Science in Computer Science</option>
+                                <option value="BSIS">BSIS - Bachelor of Science in Information Systems</option>
+                                <option value="BSBA">BSBA - Bachelor of Science in Business Administration</option>
+                                <option value="BSA">BSA - Bachelor of Science in Accountancy</option>
+                                <option value="BSED">BSED - Bachelor of Secondary Education</option>
+                                <option value="BEED">BEED - Bachelor of Elementary Education</option>
+                                <option value="BSCE">BSCE - Bachelor of Science in Civil Engineering</option>
+                                <option value="BSME">BSME - Bachelor of Science in Mechanical Engineering</option>
+                                <option value="BSEE">BSEE - Bachelor of Science in Electrical Engineering</option>
+                                <option value="BSN">BSN - Bachelor of Science in Nursing</option>
+                                <option value="BSTM">BSTM - Bachelor of Science in Tourism Management</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-dark fw-medium small mb-1">Year Level</label>

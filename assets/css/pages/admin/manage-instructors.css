@@ -40,10 +40,12 @@
     padding: 20px;
     margin-bottom: 16px;
     transition: 0.2s;
+    cursor: pointer;
 }
 
 .card-instructor:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: var(--primary-active, #4A46D6);
 }
 
 .card-unassigned-CWTS {

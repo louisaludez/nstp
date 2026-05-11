@@ -2,10 +2,10 @@
 
 :root {
     /* New Figma Color Palette */
-    --primary-bg: #2B2866;
-    /* Deep indigo sidebar */
-    --primary-active: #4A46D6;
-    /* Vibrant blue/purple for active menu */
+    --primary-bg: #2b5f56;
+    /* Dark green sidebar */
+    --primary-active: #c8f5d0;
+    /* Light green pill for active menu */
     --text-sidebar: #D1D5DB;
     /* Light gray for unselected menu items */
     --bg-light: #F4F6F9;
@@ -28,7 +28,7 @@ body {
 
 /* Sidebar Styling */
 .sidebar {
-    background-color: var(--primary-bg);
+    background-color: var(--primary-bg) !important;
     min-height: 100vh;
 }
 
@@ -40,7 +40,7 @@ body {
 
 .sidebar .nav-link {
     color: var(--text-sidebar);
-    border-radius: 8px;
+    border-radius: 50px;
     padding: 12px 20px;
     margin-bottom: 5px;
     font-weight: 500;
@@ -54,7 +54,8 @@ body {
 
 .sidebar .nav-link.active {
     background-color: var(--primary-active);
-    color: #fff;
+    color: var(--primary-bg);
+    font-weight: 600;
 }
 
 /* Card Styling */

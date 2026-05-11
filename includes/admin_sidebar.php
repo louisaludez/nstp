@@ -3,7 +3,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 $page_slug = str_replace('.php', '', $current_page);
 ?>
 
-<div class="d-lg-none d-flex justify-content-between align-items-center p-3 fixed-top shadow-sm" style="background-color: #2B2866 !important;">
+<div class="d-lg-none d-flex justify-content-between align-items-center p-3 fixed-top shadow-sm" style="background-color: var(--primary-bg) !important;">
     <div>
         <h5 class="text-white mb-0 fw-bold">NSTP System</h5>
         <small class="text-white-50" style="font-size: 0.75rem;">Coordinator Portal</small>
@@ -13,7 +13,7 @@ $page_slug = str_replace('.php', '', $current_page);
     </button>
 </div>
 
-<div class="offcanvas-lg offcanvas-start sidebar p-3 d-flex flex-column" tabindex="-1" id="responsiveSidebar" style="background-color: #2B2866 !important;">
+<div class="offcanvas-lg offcanvas-start sidebar p-3 d-flex flex-column" tabindex="-1" id="responsiveSidebar" style="background-color: var(--primary-bg) !important;">
 
     <div class="offcanvas-header d-lg-none border-bottom border-light border-opacity-10 mb-3 pb-3">
         <h5 class="offcanvas-title text-white fw-bold">Menu</h5>
@@ -73,7 +73,10 @@ $page_slug = str_replace('.php', '', $current_page);
         </li>
     </ul>
 
-    <div class="mt-auto mb-2 text-center pt-4">
-        <a href="../logout" class="btn btn-sm btn-light w-100 text-muted fw-medium">Sign Out</a>
+    <div class="mt-auto mb-2 px-2 pt-4">
+        <a href="../logout" class="btn btn-outline-light border-0 w-100 d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-white-50" style="background-color: rgba(255, 255, 255, 0.05); transition: all 0.2s ease;">
+            <i class="bi bi-box-arrow-right fs-5"></i>
+            <span class="fw-medium">Sign Out</span>
+        </a>
     </div>
 </div>

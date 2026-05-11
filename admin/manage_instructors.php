@@ -42,7 +42,7 @@ include '../includes/admin_sidebar.php';
                 <h5 class="fw-bold mb-4" style="color: #111827;">Active Instructors</h5>
                 <?php if (count($instructors) > 0): ?>
                     <?php foreach ($instructors as $inst): ?>
-                        <div class="card-instructor d-flex justify-content-between">
+                        <div class="card-instructor d-flex justify-content-between" onclick="viewInstructorDetails(<?= $inst['id'] ?>, '<?= htmlspecialchars(addslashes($inst['full_name'])) ?>')">
                             <div>
                                 <h6 class="fw-bold mb-1" style="color: #111827;">Prof. <?= htmlspecialchars($inst['full_name']) ?></h6>
                                 <?php if ($inst['primary_component'] === 'CWTS'): ?>
@@ -141,6 +141,24 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
+<div class="modal fade" id="instructorDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4 mt-1">
+                <h5 class="modal-title fw-bold" style="color: #111827;">Prof. <span id="modalInstName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="modalInstBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="addInstructorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow" style="border-radius: 16px; max-width: 500px; margin: auto;">
@@ -194,5 +212,73 @@ include '../includes/admin_sidebar.php';
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function viewInstructorDetails(instructorId, instructorName) {
+    document.getElementById('modalInstName').innerText = instructorName;
+    document.getElementById('modalInstBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted small">Loading details...</p></div>';
+    
+    var modal = new bootstrap.Modal(document.getElementById('instructorDetailsModal'));
+    modal.show();
+
+    fetch('ajax_get_instructor_students.php?instructor_id=' + instructorId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                let html = '';
+                if (data.sections.length === 0) {
+                    html = '<div class="text-muted text-center py-4">No sections assigned to this instructor.</div>';
+                } else {
+                    data.sections.forEach(sec => {
+                        let badgeClass = 'bg-secondary';
+                        if (sec.component === 'CWTS') badgeClass = 'badge-cwts';
+                        else if (sec.component === 'LTS') badgeClass = 'badge-lts';
+                        else if (sec.component === 'ROTC') badgeClass = 'badge-rotc';
+                        
+                        html += `
+                            <div class="mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h6 class="fw-bold mb-0 me-2" style="color: #111827;">${sec.section_name}</h6>
+                                    <span class="badge rounded-pill ${badgeClass} fw-medium">${sec.component}</span>
+                                </div>
+                                <div class="table-responsive border rounded-3">
+                                    <table class="table table-hover mb-0" style="font-size: 0.9rem;">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th class="border-bottom-0 text-muted fw-medium py-2 px-3">Student ID</th>
+                                                <th class="border-bottom-0 text-muted fw-medium py-2 px-3">Name</th>
+                                                <th class="border-bottom-0 text-muted fw-medium py-2 px-3">Course</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+                        if (sec.students.length === 0) {
+                            html += `<tr><td colspan="3" class="text-center text-muted py-3">No students enrolled</td></tr>`;
+                        } else {
+                            sec.students.forEach(st => {
+                                html += `
+                                    <tr>
+                                        <td class="text-secondary px-3 py-2">${st.student_id}</td>
+                                        <td class="fw-medium text-dark px-3 py-2">${st.first_name} ${st.last_name}</td>
+                                        <td class="text-secondary px-3 py-2">${st.course}</td>
+                                    </tr>`;
+                            });
+                        }
+                        html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>`;
+                    });
+                }
+                document.getElementById('modalInstBody').innerHTML = html;
+            } else {
+                document.getElementById('modalInstBody').innerHTML = '<div class="alert alert-danger text-center">Failed to load details.</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('modalInstBody').innerHTML = '<div class="alert alert-danger text-center">An error occurred while loading details.</div>';
+        });
+}
+</script>
 </body>
 </html>
