@@ -1,10 +1,22 @@
 <?php
 // config/db.php
 
-$host = 'localhost';
-$dbname = 'nstp_db';
-$username = 'root'; // Adjust if your local XAMPP/WAMP uses a different default
-$password = '';     // Leave blank for default XAMPP/WAMP, or enter your MySQL password
+$is_local = (isset($_SERVER['SERVER_NAME']) && in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1'])) || 
+            (isset($_SERVER['HTTP_HOST']) && in_array($_SERVER['HTTP_HOST'], ['localhost', '127.0.0.1']));
+
+if ($is_local) {
+    // Localhost XAMPP settings
+    $host = 'localhost';
+    $dbname = 'nstp_db';
+    $username = 'root';
+    $password = '';
+} else {
+    // InfinityFree settings
+    $host = 'sql204.infinityfree.com';
+    $dbname = 'if0_41606598_nstp';
+    $username = 'if0_41606598';
+    $password = 'J2M1oBFVMUOobn';
+}
 
 // utf8mb4 is the modern standard to prevent character encoding errors
 $charset = 'utf8mb4';

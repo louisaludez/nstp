@@ -71,9 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-card {
             display: flex;
             width: 100%;
-            max-width: 880px;
-            min-height: 520px;
-            border-radius: 20px;
+            max-width: 960px;
+            min-height: 460px;
+            border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 20px 60px rgba(0,0,0,0.12);
         }
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         /* ── Left Panel ── */
         .login-left {
             flex: 1;
-            background: linear-gradient(160deg, #1a1840 0%, #2d2b6e 50%, #1a1840 100%);
+            background: #1E293B; /* Slate 800 */
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -93,18 +93,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-left::before {
             content: '';
             position: absolute;
-            width: 360px; height: 360px;
+            width: 400px; height: 400px;
             border-radius: 50%;
-            background: rgba(99,102,241,0.12);
+            background: rgba(255,255,255,0.03);
             top: -80px; right: -80px;
         }
         .login-left::after {
             content: '';
             position: absolute;
-            width: 240px; height: 240px;
+            width: 300px; height: 300px;
             border-radius: 50%;
-            background: rgba(99,102,241,0.07);
-            bottom: -40px; left: -40px;
+            background: rgba(255,255,255,0.02);
+            bottom: -50px; left: -50px;
         }
         .login-left .brand-icon {
             width: 44px; height: 44px;
@@ -168,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: 700;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: #6366F1;
+            color: #94A3B8;
             margin-bottom: 8px;
         }
         .login-right h2 {
@@ -191,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .input-wrap {
             display: flex; align-items: center; gap: 10px;
             border: 1px solid #E5E7EB;
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 10px 14px;
             transition: border-color 0.15s;
         }
@@ -210,9 +210,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-signin {
             width: 100%;
             padding: 11px;
-            border-radius: 8px;
+            border-radius: 6px;
             border: none;
-            background: #111827;
+            background: #0F172A;
             color: #fff;
             font-size: 0.875rem;
             font-weight: 500;
@@ -242,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         /* ── Responsive ── */
 
         /* Tablet: hide left panel, shrink card */
-        @media (max-width: 820px) {
+        @media (max-width: 768px) {
             body { padding: 24px 16px; align-items: flex-start; }
             .login-card {
                 flex-direction: column;
@@ -288,23 +288,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div style="position:relative;z-index:1;">
                 <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:10px;">Accounts</div>
                 <div style="display:flex;flex-direction:column;gap:8px;">
-                    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
-                        <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#6366F1,#3B82F6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
+                        <div style="width:28px;height:28px;border-radius:6px;background:#6366F1;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="bi bi-mortarboard-fill" style="font-size:0.75rem;color:#fff;"></i>
                         </div>
-                        <span style="font-size:0.78rem;color:rgba(255,255,255,0.65);">NSTP Coordinator</span>
+                        <span style="font-size:0.78rem;color:rgba(255,255,255,0.8);">NSTP Coordinator</span>
                     </div>
-                    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
-                        <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#10B981,#14B8A6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
+                        <div style="width:28px;height:28px;border-radius:6px;background:#10B981;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="bi bi-book-half" style="font-size:0.75rem;color:#fff;"></i>
                         </div>
-                        <span style="font-size:0.78rem;color:rgba(255,255,255,0.65);">CWTS/LTS Instructor</span>
+                        <span style="font-size:0.78rem;color:rgba(255,255,255,0.8);">CWTS/LTS Instructor</span>
                     </div>
-                    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
-                        <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#1E293B,#334155);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
+                        <div style="width:28px;height:28px;border-radius:6px;background:#0F172A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="bi bi-shield-fill" style="font-size:0.75rem;color:#fff;"></i>
                         </div>
-                        <span style="font-size:0.78rem;color:rgba(255,255,255,0.65);">ROTC 1st Class Officer</span>
+                        <span style="font-size:0.78rem;color:rgba(255,255,255,0.8);">ROTC 1st Class Officer</span>
                     </div>
                 </div>
             </div>
@@ -314,7 +314,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="login-right">
             <div class="sign-in-label">SIGN IN</div>
             <h2>Welcome back</h2>
-            <p class="subtitle">Enter your university credentials to continue.</p>
+            <p class="subtitle">Enter your credentials to continue.</p>
 
             <?php if ($error): ?>
                 <div class="alert-error"><?= htmlspecialchars($error) ?></div>
@@ -322,21 +322,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="POST" action="">
                 <div class="form-group">
-                    <label>University Email</label>
+                    <label>Email</label>
                     <div class="input-wrap">
                         <i class="bi bi-envelope"></i>
-                        <input type="email" name="email" placeholder="your.email@dnsc.edu.ph" required autofocus>
+                        <input type="email" name="email" placeholder="e.g. coordinator@dnsc.edu.ph" required autofocus>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
                     <div class="input-wrap">
                         <i class="bi bi-lock"></i>
-                        <input type="password" name="password" placeholder="••••••••" required>
+                        <input type="password" name="password" placeholder="Enter your password" required>
                     </div>
                 </div>
                 <button type="submit" class="btn-signin">
-                    Sign In <i class="bi bi-arrow-right"></i>
+                    <i class="bi bi-arrow-right"></i> Sign In
                 </button>
             </form>
 
