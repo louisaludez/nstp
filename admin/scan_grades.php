@@ -3,114 +3,280 @@ session_start();
 require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
-    header("Location: ../login");
+    header("Location: ../login.php");
     exit;
 }
 
-require 'controllers/ScanGradesController.php';
-
-$extra_css = ['../assets/css/pages/admin/scan-grades.css'];
+$extra_css = ['../assets/css/style.css'];
 include '../includes/header.php';
 include '../includes/admin_sidebar.php';
 ?>
 
-<div class="flex-grow-1 p-5 w-100">
+<div class="flex-grow-1 p-4 p-lg-5 w-100">
     
     <?php include '../includes/topbar.php'; ?>
-    <div class="mb-4">
-        <h3 class="fw-bold mb-1" style="color: #111827;">OCR Grade Sheet Upload</h3>
-        <p class="text-muted">Upload scanned grade sheets for automatic processing</p>
+    
+    <div class="mb-4 pb-1">
+        <h4 class="fw-bold mb-1" style="color: #111827;">OCR Grade Upload</h4>
+        <p class="text-muted" style="font-size: 0.9rem;">Scan grade sheets and import directly into student records</p>
     </div>
 
-    <?php if ($message): ?>
-        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3">
-            <?= htmlspecialchars($message) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
+    <div class="row g-4 align-items-start">
 
-    <div class="row g-4">
-        
-        <div class="col-xl-6">
-            <div class="panel-container">
-                <h5 class="fw-bold mb-4" style="color: #111827;">Upload Grade Sheet</h5>
+        <!-- Left Panel: Upload & Stats -->
+        <div class="col-lg-7 col-xl-8">
+            <div class="dash-panel d-flex flex-column gap-3" style="padding: 24px;">
+
+                <!-- Dropzone -->
                 <form action="" method="POST" enctype="multipart/form-data" id="uploadForm">
-                    <input type="file" name="grade_sheet" id="fileInput" class="d-none" accept=".pdf, .png, .jpg, .jpeg" onchange="document.getElementById('uploadForm').submit();">
-                    <div class="upload-area" onclick="document.getElementById('fileInput').click();">
-                        <i class="bi bi-upload upload-icon"></i>
-                        <h6 class="fw-bold" style="color: #111827;">Click to upload grade sheet</h6>
-                        <small class="text-muted">Support for PDF, PNG, JPG formats</small>
+                    <input type="file" name="grade_sheet" id="fileInput" class="d-none"
+                           accept=".pdf,.png,.jpg,.jpeg"
+                           onchange="document.getElementById('uploadForm').submit();">
+
+                    <div id="dropzone"
+                         class="ocr-dropzone d-flex flex-column align-items-center justify-content-center text-center"
+                         onclick="document.getElementById('fileInput').click();"
+                         ondragover="handleDragOver(event)"
+                         ondragleave="handleDragLeave(event)"
+                         ondrop="handleDrop(event)">
+
+                        <div class="ocr-upload-icon mb-4">
+                            <i class="bi bi-upload"></i>
+                        </div>
+
+                        <h6 class="fw-bold mb-2" style="color: var(--text-dark); font-size: 1.05rem; letter-spacing: -0.01em;">
+                            Drop grade sheets here or click to upload
+                        </h6>
+                        <p class="mb-4" style="font-size: 0.82rem; color: var(--text-muted); max-width: 320px; line-height: 1.5;">
+                            PDF, PNG, JPG up to 25 MB. Supports multi-page scans.
+                        </p>
+                        <div class="ocr-engine-badge">
+                            <i class="bi bi-upc-scan"></i>
+                            OCR engine v3.2
+                        </div>
                     </div>
                 </form>
-                <div class="mt-4 pt-2">
-                    <h6 class="fw-bold fs-6" style="color: #111827;">OCR Processing Steps:</h6>
-                    <ul class="ocr-steps">
-                        <li><i class="bi bi-check-circle"></i> 1. Upload scanned grade sheet</li>
-                        <li><i class="bi bi-check-circle"></i> 2. System extracts student data</li>
-                        <li><i class="bi bi-check-circle"></i> 3. Review and verify information</li>
-                        <li><i class="bi bi-check-circle"></i> 4. Auto-generate certificates for passed students</li>
-                    </ul>
+
+                <!-- Stats Row -->
+                <div class="ocr-stats-row">
+                    <div class="ocr-stat-cell">
+                        <div class="ocr-stat-label">Confidence</div>
+                        <div class="ocr-stat-value">98.4%</div>
+                    </div>
+                    <div class="ocr-stat-divider"></div>
+                    <div class="ocr-stat-cell">
+                        <div class="ocr-stat-label">Queue</div>
+                        <div class="ocr-stat-value">2 files</div>
+                    </div>
+                    <div class="ocr-stat-divider"></div>
+                    <div class="ocr-stat-cell">
+                        <div class="ocr-stat-label">Avg time</div>
+                        <div class="ocr-stat-value">~12s / page</div>
+                    </div>
                 </div>
+
             </div>
         </div>
 
-        <div class="col-xl-6">
-            <div class="panel-container d-flex flex-column">
-                <h5 class="fw-bold mb-4" style="color: #111827;">Extracted Data</h5>
-                <?php if (!$file_uploaded): ?>
-                    <div class="empty-state flex-grow-1">
-                        <i class="bi bi-eye empty-state-icon"></i>
-                        <p class="mb-0 text-muted">Upload a grade sheet to see extracted data</p>
+        <!-- Right Panel: Recent Uploads -->
+        <div class="col-lg-5 col-xl-4">
+            <div class="dash-panel p-0" style="overflow: hidden; border-radius: 12px; border: 1px solid #E2E8F0;">
+
+                <div class="px-4 py-3 border-bottom" style="border-color: #E2E8F0 !important;">
+                    <h6 class="fw-bold mb-0" style="font-size: 0.95rem; color: #111827;">Recent Uploads</h6>
+                </div>
+
+                <div class="ocr-upload-list">
+                    <!-- Item 1 -->
+                    <div class="ocr-upload-item">
+                        <div class="ocr-file-icon">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                        </div>
+                        <div class="ocr-file-info">
+                            <div class="ocr-file-name" style="color: #1E293B; font-weight: 600; font-size: 0.85rem;">BSCS-2A_Midterm.pdf</div>
+                            <div class="ocr-file-meta" style="color: #64748B; font-size: 0.75rem;">BSCS-2A · 42 students · Today 10:14 AM</div>
+                        </div>
+                        <span class="badge-status-new processed">Processed</span>
                     </div>
-                <?php else: ?>
-                    <div class="table-responsive flex-grow-1">
-                        <table class="table table-borderless align-middle">
-                            <thead style="background-color: #F9FAFB; border-bottom: 1px solid #E5E7EB;">
-                                <tr>
-                                    <th class="py-3 text-muted small fw-semibold">Student ID</th>
-                                    <th class="py-3 text-muted small fw-semibold">Name</th>
-                                    <th class="py-3 text-muted small fw-semibold">Grade</th>
-                                    <th class="py-3 text-muted small fw-semibold">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($mock_extracted_data as $data): ?>
-                                    <tr style="border-bottom: 1px solid #F3F4F6;">
-                                        <td class="py-3 text-muted"><?= htmlspecialchars($data['student_id']) ?></td>
-                                        <td class="py-3 fw-medium text-dark"><?= htmlspecialchars($data['name']) ?></td>
-                                        <td class="py-3 text-dark"><?= htmlspecialchars($data['grade']) ?></td>
-                                        <td class="py-3">
-                                            <?php if ($data['status'] === 'Passed'): ?>
-                                                <span class="badge bg-success bg-opacity-10 text-success px-2 py-1">Passed</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1">Failed</span>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+
+                    <!-- Item 2 -->
+                    <div class="ocr-upload-item" style="border-bottom: none;">
+                        <div class="ocr-file-icon">
+                            <i class="bi bi-file-earmark-image"></i>
+                        </div>
+                        <div class="ocr-file-info">
+                            <div class="ocr-file-name" style="color: #1E293B; font-weight: 600; font-size: 0.85rem;">BSIT-3B_Finals.jpg</div>
+                            <div class="ocr-file-meta" style="color: #64748B; font-size: 0.75rem;">BSIT-3B · 41 students · Today 9:02 AM</div>
+                        </div>
+                        <span class="badge-status-new reviewing">Reviewing</span>
                     </div>
-                    <div class="text-end mt-3 border-top pt-3">
-                        <form method="POST" action="">
-                            <input type="hidden" name="save_grades" value="1">
-                            <?php foreach ($mock_extracted_data as $i => $data): ?>
-                                <input type="hidden" name="students[<?= $i ?>][student_id]" value="<?= htmlspecialchars($data['student_id']) ?>">
-                                <input type="hidden" name="students[<?= $i ?>][grade]" value="<?= htmlspecialchars($data['grade']) ?>">
-                                <input type="hidden" name="students[<?= $i ?>][status]" value="<?= htmlspecialchars($data['status']) ?>">
-                            <?php endforeach; ?>
-                            <button type="submit" class="btn btn-brand px-4"><i class="bi bi-save me-2"></i>Save to Database</button>
-                        </form>
-                    </div>
-                <?php endif; ?>
+                </div>
             </div>
         </div>
 
     </div>
 </div>
 
-</div> 
-</div> 
+</div>
+
+<style>
+/* ── OCR Grade Upload Page Styles ── */
+
+/* Dropzone */
+.ocr-dropzone {
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 56px 32px;
+    background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23C7D2FE' stroke-width='2' stroke-dasharray='10%2c 8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+    background-color: white;
+}
+.ocr-dropzone:hover,
+.ocr-dropzone.drag-over {
+    background-color: #F8FAFC;
+    background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23818CF8' stroke-width='2' stroke-dasharray='10%2c 8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+}
+
+/* Upload icon */
+.ocr-upload-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: #6366F1;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    flex-shrink: 0;
+}
+
+/* OCR engine badge */
+.ocr-engine-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6366F1;
+    background: #EEF2FF;
+    border-radius: 20px;
+    padding: 6px 14px;
+}
+
+/* Stats Row */
+.ocr-stats-row {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #F8FAFC;
+}
+.ocr-stat-cell {
+    flex: 1;
+    padding: 16px 24px;
+}
+.ocr-stat-divider {
+    width: 1px;
+    background: #E2E8F0;
+    flex-shrink: 0;
+}
+.ocr-stat-label {
+    font-size: 0.75rem;
+    color: #64748B;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.ocr-stat-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0F172A;
+    letter-spacing: -0.01em;
+}
+
+/* Recent Uploads Items */
+.ocr-upload-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #F3F4F6;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+.ocr-upload-item:hover {
+    background-color: #F9FAFB;
+}
+.ocr-file-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #F3F4F6;
+    color: #9CA3AF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.ocr-file-info {
+    flex: 1;
+    min-width: 0;
+}
+.ocr-file-name {
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+.ocr-file-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.badge-status-new {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+.badge-status-new.processed {
+    background: #ECFDF5;
+    color: #10B981;
+}
+.badge-status-new.reviewing {
+    background: #F5F3FF;
+    color: #8B5CF6;
+}
+</style>
+
+<script>
+function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('dropzone').classList.add('drag-over');
+}
+function handleDragLeave(e) {
+    document.getElementById('dropzone').classList.remove('drag-over');
+}
+function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropzone').classList.remove('drag-over');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        document.getElementById('fileInput').files = files;
+        document.getElementById('uploadForm').submit();
+    }
+}
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

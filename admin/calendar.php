@@ -3,150 +3,412 @@ session_start();
 require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
-    header("Location: ../login");
+    header("Location: ../login.php");
     exit;
 }
 
 require 'controllers/CalendarController.php';
 
-$extra_css = ['../assets/css/pages/admin/calendar.css'];
+$extra_css = ['../assets/css/style.css'];
 include '../includes/header.php';
 include '../includes/admin_sidebar.php';
 ?>
 
-<div class="flex-grow-1 p-5 w-100">
-    
+<div class="flex-grow-1 p-4 p-lg-5 w-100">
+
     <?php include '../includes/topbar.php'; ?>
 
-    <div class="d-flex justify-content-between align-items-center mb-1">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
         <div>
-            <h3 class="fw-bold mb-0" style="color: #111827;">Calendar &amp; Activities</h3>
-            <p class="text-muted mb-4">Schedule and manage NSTP activities</p>
+            <h4 class="fw-bold mb-1" style="color: #111827;">Activity Overview</h4>
+            <p class="text-muted mb-0" style="font-size: 0.85rem;">Plan, draft, and publish program-wide activities</p>
         </div>
-        <button type="button" class="btn btn-brand border-0" data-bs-toggle="modal" data-bs-target="#addActivityModal">
-            <i class="bi bi-plus-lg me-1"></i> Add Activity
+        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #1E293B; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px 16px; font-weight: 500;" data-bs-toggle="collapse" data-bs-target="#addActivityPanel" aria-expanded="false" aria-controls="addActivityPanel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Create Activity
         </button>
     </div>
 
-    <?php if ($message): ?>
-        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3">
-            <?= htmlspecialchars($message) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
-    <div class="row g-4">
-        <div class="col-xl-7 col-lg-7">
-            <div class="panel-container">
-                <h5 class="fw-bold mb-4" style="color: #111827;">
-                    <i class="bi bi-calendar4 text-primary me-2"></i> Calendar View
-                </h5>
-                <div class="calendar-grid">
-                    <div class="calendar-header-day">Sun</div>
-                    <div class="calendar-header-day">Mon</div>
-                    <div class="calendar-header-day">Tue</div>
-                    <div class="calendar-header-day">Wed</div>
-                    <div class="calendar-header-day">Thu</div>
-                    <div class="calendar-header-day">Fri</div>
-                    <div class="calendar-header-day">Sat</div>
-                    <?php
-                    for ($i = 0; $i < $first_day_of_month; $i++) {
-                        echo '<div class="calendar-day empty"></div>';
-                    }
-                    for ($day = 1; $day <= $days_in_month; $day++) {
-                        $is_active = in_array($day, $active_days) ? 'active-day' : '';
-                        echo "<div class='calendar-day $is_active'>$day</div>";
-                    }
-                    ?>
-                </div>
+    <!-- ══════════════════════════════════════════════════
+         ADD ACTIVITY INLINE PANEL
+    ══════════════════════════════════════════════════ -->
+    <div class="collapse mb-4" id="addActivityPanel">
+        <div class="dash-panel p-4" style="border-radius: 12px; position: relative;">
+            <button type="button" class="btn-close position-absolute" data-bs-toggle="collapse" data-bs-target="#addActivityPanel" style="top: 24px; right: 24px; font-size: 0.75rem;"></button>
+            
+            <div class="mb-4 border-bottom pb-3" style="border-color: #E2E8F0 !important;">
+                <h5 class="fw-bold mb-1" style="color: #111827; font-size: 1.1rem;">New Activity</h5>
+                <p class="text-muted small mb-0">Fill in the details and submit for publication</p>
             </div>
-        </div>
 
-        <div class="col-xl-5 col-lg-5">
-            <div class="panel-container" style="background-color: #F9FAFB;">
-                <h5 class="fw-bold mb-4" style="color: #111827;">Upcoming Activities</h5>
-                <?php if (count($upcoming_activities) > 0): ?>
-                    <?php foreach ($upcoming_activities as $act): ?>
-                        <div class="card-activity bg-white">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="fw-bold mb-0" style="color: #111827;"><?= htmlspecialchars($act['title']) ?></h6>
-                                <?php if ($act['component'] === 'CWTS'): ?>
-                                    <span class="badge badge-cwts fw-medium">CWTS</span>
-                                <?php elseif ($act['component'] === 'LTS'): ?>
-                                    <span class="badge badge-lts fw-medium">LTS</span>
-                                <?php elseif ($act['component'] === 'ROTC'): ?>
-                                    <span class="badge badge-rotc fw-medium">ROTC</span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="text-muted small mt-3">
-                                <div class="mb-1"><i class="bi bi-calendar3 me-2"></i> <?= date('m/d/Y', strtotime($act['activity_date'])) ?></div>
-                                <div class="mb-1"><i class="bi bi-clock me-2"></i> <?= date('h:i A', strtotime($act['activity_time'])) ?></div>
-                                <div class="mb-2"><i class="bi bi-geo-alt me-2"></i> <?= htmlspecialchars($act['location']) ?></div>
-                                <div><i class="bi bi-people me-2"></i> <?= rand(40, 120) ?> participants</div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="text-center py-5 bg-white rounded-3 border" style="border-color: #E5E7EB;">
-                        <i class="bi bi-calendar-x text-muted fs-1 mb-2"></i>
-                        <p class="text-muted small mb-0">No upcoming activities scheduled.</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="addActivityModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow" style="border-radius: 16px; max-width: 450px; margin: auto;">
-            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4 mt-1">
-                <h4 class="modal-title fw-bold" style="color: #111827;">Add Activity</h4>
-            </div>
             <form method="POST" action="">
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label text-dark fw-medium small mb-1">Activity Title</label>
-                        <input type="text" name="title" class="form-control modal-form-control" required>
+                <div class="mb-3">
+                    <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Title</label>
+                    <input type="text" name="title" class="form-control figma-input p-2" placeholder="e.g. Commencement Rehearsal" required>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Date</label>
+                        <input type="date" name="activity_date" class="form-control figma-input p-2" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label text-dark fw-medium small mb-1">Component</label>
-                        <select name="component" class="form-select modal-form-control" required>
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Time</label>
+                        <input type="time" name="activity_time" class="form-control figma-input p-2" required>
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Venue</label>
+                        <input type="text" name="location" class="form-control figma-input p-2" placeholder="e.g. Main Auditorium" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Audience</label>
+                        <select name="component" class="form-select figma-input p-2" required>
+                            <option value="All Programs">All Programs</option>
                             <option value="CWTS">CWTS</option>
                             <option value="LTS">LTS</option>
                             <option value="ROTC">ROTC</option>
                         </select>
                     </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label text-dark fw-medium small mb-1">Date</label>
-                            <input type="date" name="activity_date" class="form-control modal-form-control" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label text-dark fw-medium small mb-1">Time</label>
-                            <input type="time" name="activity_time" class="form-control modal-form-control" required>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label text-dark fw-medium small mb-1">Location</label>
-                        <input type="text" name="location" class="form-control modal-form-control" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label text-dark fw-medium small mb-1">Description</label>
-                        <textarea name="description" class="form-control modal-form-control" rows="3"></textarea>
-                    </div>
                 </div>
-                <div class="modal-footer border-top-0 pt-0 pe-4 pb-4">
-                    <button type="button" class="btn btn-outline-cancel rounded-3 px-4 py-2" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" name="add_activity" class="btn btn-brand rounded-3 px-4 py-2">Add Activity</button>
+                <div class="mb-4">
+                    <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Description</label>
+                    <textarea name="description" class="form-control figma-input p-2" rows="3" placeholder="Briefly describe the activity, objectives, and requirements."></textarea>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm" data-bs-toggle="collapse" data-bs-target="#addActivityPanel" style="background: white; color: #475569; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px 16px; font-weight: 500;">Cancel</button>
+                    <button type="submit" name="add_activity" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #4F46E5; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 500;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Create Activity
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-</div>
+
+    <?php if ($message): ?>
+        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3 mb-4">
+            <?= htmlspecialchars($message) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <!-- ══════════════════════════════════════════════════
+         WEEK STRIP VIEW
+    ══════════════════════════════════════════════════ -->
+    <div class="dash-panel mb-4" style="padding: 24px; border-radius: 12px;">
+
+        <!-- Week Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <span class="fw-medium" style="font-size: 0.95rem; color: #4B5563;">
+                Week of <?= $weekStart->format('M j') ?> – <?= $weekEnd->format('M j, Y') ?>
+            </span>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm" id="prevWeekBtn" style="background: white; border: 1px solid #E2E8F0; border-radius: 6px; padding: 4px 8px; color: #64748B;">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="btn btn-sm" id="nextWeekBtn" style="background: white; border: 1px solid #E2E8F0; border-radius: 6px; padding: 4px 8px; color: #64748B;">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 7-Day Grid -->
+        <div class="week-strip">
+            <?php foreach ($week_days as $wd): ?>
+                <div class="week-col <?= $wd['is_today'] ? 'is-today' : '' ?>">
+                    <div class="week-col-header">
+                        <div class="week-day-abbr"><?= $wd['day_abbr'] ?></div>
+                        <div class="week-day-num <?= $wd['is_today'] ? 'today-badge' : '' ?>">
+                            <?= $wd['day_num'] ?>
+                        </div>
+                    </div>
+                    <div class="week-col-body">
+                        <?php foreach ($wd['activities'] as $act):
+                            $c = componentColor($act['component']);
+                        ?>
+                            <div class="week-event-pill" style="background:<?= $c['bg'] ?>; color:<?= $c['text'] ?>;"
+                                 title="<?= htmlspecialchars($act['title']) ?> — <?= date('h:i A', strtotime($act['activity_time'])) ?>">
+                                <?= htmlspecialchars($act['title']) ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         ALL ACTIVITIES LIST
+    ══════════════════════════════════════════════════ -->
+    <div class="dash-panel" style="padding: 0; overflow: hidden; border-radius: 12px;">
+
+        <!-- List Header -->
+        <div class="px-4 py-3 border-bottom" style="border-color: #E2E8F0 !important;">
+            <h6 class="fw-bold mb-1" style="font-size: 0.95rem; color: #1E293B;">All Activities</h6>
+            <p class="mb-0" style="font-size: 0.8rem; color: #64748B;">
+                <?= count($upcoming_activities) ?> scheduled
+            </p>
+        </div>
+
+        <!-- Activity Rows -->
+        <?php if (count($upcoming_activities) > 0): ?>
+            <?php foreach ($upcoming_activities as $idx => $act):
+                $c = componentColor($act['component']);
+                $isLast = ($idx === count($upcoming_activities) - 1);
+                $isPast = (strtotime($act['activity_date']) < strtotime(date('Y-m-d')));
+            ?>
+            <div class="act-row <?= !$isLast ? 'border-bottom' : '' ?>"
+                 style="border-color: var(--border-color) !important;">
+
+                <!-- Colour Bar -->
+                <div class="act-color-bar" style="background: <?= $c['bar'] ?>;"></div>
+
+                <!-- Calendar Icon -->
+                <div class="act-icon-wrap">
+                    <i class="bi bi-calendar-event" style="color: var(--text-muted); font-size: 1rem;"></i>
+                </div>
+
+                <!-- Content -->
+                <div class="act-content">
+                    <div class="act-title" style="color: #1E293B; font-weight: 500; font-size: 0.9rem; margin-bottom: 2px;"><?= htmlspecialchars($act['title']) ?></div>
+                    <div class="act-meta" style="color: #64748B; font-size: 0.75rem;">
+                        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; margin-right: 4px; margin-bottom: 2px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span style="margin-right: 4px;"><?= date('M d, Y', strtotime($act['activity_date'])) ?></span></span>
+                        <span class="act-meta-dot" style="margin: 0 4px;">·</span>
+                        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; margin-right: 4px; margin-bottom: 2px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span style="margin-right: 4px;">
+                            <?php
+                                $t = strtotime($act['activity_time']);
+                                echo ($t !== false && $act['activity_time'] !== '00:00:00')
+                                    ? date('h:i A', $t)
+                                    : 'All day';
+                            ?>
+                        </span></span>
+                        <span class="act-meta-dot" style="margin: 0 4px;">·</span>
+                        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; margin-right: 4px; margin-bottom: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span style="margin-right: 4px;"><?= htmlspecialchars($act['location']) ?></span></span>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="act-tags">
+                    <span style="font-size: 0.75rem; color: #6366F1; font-weight: 500; margin-right: 12px;">
+                        <?= htmlspecialchars($act['component']) ?>
+                    </span>
+                    <?php if ($isPast): ?>
+                        <span style="font-size: 0.7rem; padding: 4px 10px; border-radius: 4px; background: #F1F5F9; color: #475569; font-weight: 500;">Draft</span>
+                    <?php else: ?>
+                        <span style="font-size: 0.7rem; padding: 4px 10px; border-radius: 4px; background: #ECFDF5; color: #10B981; font-weight: 500;">Submitted</span>
+                    <?php endif; ?>
+                </div>
+
+            </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="text-center py-5 px-4">
+                <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--bg-light);
+                            display: flex; align-items: center; justify-content: center;
+                            margin: 0 auto 12px; color: var(--text-muted); font-size: 1.3rem;">
+                    <i class="bi bi-calendar-x"></i>
+                </div>
+                <p class="fw-semibold mb-1" style="color: var(--text-dark); font-size: 0.9rem;">No activities yet</p>
+                <p class="text-muted small mb-3">Schedule your first program-wide activity.</p>
+                <button type="button" class="btn-figma primary" data-bs-toggle="modal" data-bs-target="#addActivityModal">
+                    <i class="bi bi-plus-lg"></i> Create Activity
+                </button>
+            </div>
+        <?php endif; ?>
+    </div>
 
 </div>
+
+
+
+</div>
+
+<style>
+/* ══════════════════════════════════════════
+   CALENDAR PAGE — Figma-match styles
+══════════════════════════════════════════ */
+
+/* Nav buttons */
+.cal-nav-btn {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 0.85rem;
+}
+.cal-nav-btn:hover {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    border-color: var(--primary-accent);
+}
+
+/* ── Week Strip ── */
+.week-strip {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+}
+.week-col {
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    min-height: 120px;
+    transition: border-color 0.15s;
+    display: flex;
+    flex-direction: column;
+}
+.week-col:hover { border-color: rgba(99,102,241,0.4); }
+
+.week-col-header {
+    padding: 12px 12px 4px;
+    text-align: left;
+    background: white;
+}
+
+.week-day-abbr {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: #64748B;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.week-day-num {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: #1E293B;
+    line-height: 1;
+}
+
+.week-col-body {
+    padding: 4px 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-grow: 1;
+}
+
+.week-event-pill {
+    font-size: 0.7rem;
+    font-weight: 400;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    width: 100%;
+}
+.week-event-pill:hover { opacity: 0.8; }
+
+/* ── Activity List Rows ── */
+.act-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    transition: background-color 0.15s;
+    cursor: pointer;
+}
+.act-row:hover { background-color: #F8FAFC; }
+
+.act-color-bar {
+    width: 4px;
+    height: 32px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.act-icon-wrap {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: #F8FAFC;
+    border: 1px solid #F1F5F9;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+.act-content {
+    flex: 1;
+    min-width: 0;
+}
+.act-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-accent);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.act-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.act-meta i { font-size: 0.7rem; }
+.act-meta-dot { color: var(--border-color); font-weight: 700; }
+
+.act-tags {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.act-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+}
+
+/* Modal inputs */
+.figma-input {
+    border-radius: 8px !important;
+    border-color: var(--border-color) !important;
+    font-size: 0.875rem;
+}
+.figma-input:focus {
+    border-color: var(--primary-accent) !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
+}
+
+/* Responsive: collapse week strip on small screens */
+@media (max-width: 768px) {
+    .week-strip { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 480px) {
+    .week-strip { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Simple week navigation via URL params (page reload)
+document.getElementById('prevWeekBtn').addEventListener('click', () => {
+    const url = new URL(window.location.href);
+    const offset = parseInt(url.searchParams.get('weekOffset') || '0') - 1;
+    url.searchParams.set('weekOffset', offset);
+    window.location.href = url.toString();
+});
+document.getElementById('nextWeekBtn').addEventListener('click', () => {
+    const url = new URL(window.location.href);
+    const offset = parseInt(url.searchParams.get('weekOffset') || '0') + 1;
+    url.searchParams.set('weekOffset', offset);
+    window.location.href = url.toString();
+});
+</script>
 </body>
 </html>

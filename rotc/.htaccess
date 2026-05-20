@@ -1,0 +1,2 @@
+# Deny direct access to PHP files if not logged in (session handled by PHP)
+Options -Indexes

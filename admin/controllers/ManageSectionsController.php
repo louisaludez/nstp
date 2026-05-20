@@ -24,9 +24,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_section'])) {
     $school_year = trim($_POST['school_year']);
     $semester = $_POST['semester'];
     try {
-        $stmt = $pdo->prepare("INSERT INTO sections (component, section_name, school_year, semester) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$component, $section_name, $school_year, $semester]);
+        $stmt = $pdo->prepare("INSERT INTO sections (component, section_name, school_year, semester, instructor_id) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$component, $section_name, $school_year, $semester, $_POST['instructor_id'] ?? null]);
         $message = "Section $section_name ($component) successfully created!";
+        $msgType = "success";
+    } catch (PDOException $e) {
+        $message = "Database Error: " . $e->getMessage();
+        $msgType = "danger";
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_instructor'])) {
+    $section_id = $_POST['section_id'];
+    $instructor_id = $_POST['instructor_id'];
+    try {
+        $stmt = $pdo->prepare("UPDATE sections SET instructor_id = ? WHERE id = ?");
+        $stmt->execute([$instructor_id, $section_id]);
+        $message = "Instructor successfully assigned to section.";
         $msgType = "success";
     } catch (PDOException $e) {
         $message = "Database Error: " . $e->getMessage();

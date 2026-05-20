@@ -3,160 +3,174 @@ session_start();
 require '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
-    header("Location: ../login");
+    header("Location: ../login.php");
     exit;
 }
 
 require 'controllers/SubmissionsController.php';
 
-$extra_css = ['../assets/css/pages/admin/submissions.css'];
-$extra_js = ['../assets/js/pages/admin/submissions.js'];
+$extra_css = ['../assets/css/style.css'];
 include '../includes/header.php';
 include '../includes/admin_sidebar.php';
 ?>
 
-<div class="flex-grow-1 p-5 w-100" style="background-color: #F9FAFB;">
+<div class="flex-grow-1 p-4 p-lg-5 w-100">
 
     <?php include '../includes/topbar.php'; ?>
-    <div class="mb-4">
-        <h3 class="fw-bold mb-1" style="color: #111827;">Instructor Submissions</h3>
-        <p class="text-muted">Monitor and review activity plans and accomplishment reports from instructors</p>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div>
+            <h4 class="fw-bold mb-1" style="color: #111827;">Approval Overview</h4>
+            <p class="text-muted mb-0" style="font-size: 0.85rem;">Review and approve activity & accomplishment reports</p>
+        </div>
+        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #1E293B; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px 16px; font-weight: 500;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Queue
+        </button>
     </div>
 
     <?php if ($message): ?>
-        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3">
+        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3 mb-4">
             <?= htmlspecialchars($message) ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-3"><div class="stat-card stat-blue d-flex flex-column justify-content-between"><i class="bi bi-file-earmark-text fs-4 mb-2"></i><div><h3 class="fw-bold mb-0"><?= $total_plans ?></h3><span class="small fw-medium">Total Activity Plans</span></div></div></div>
-        <div class="col-md-3"><div class="stat-card stat-yellow d-flex flex-column justify-content-between"><i class="bi bi-clock-history fs-4 mb-2"></i><div><h3 class="fw-bold mb-0"><?= $pending_plans ?></h3><span class="small fw-medium">Pending Review</span></div></div></div>
-        <div class="col-md-3"><div class="stat-card stat-green d-flex flex-column justify-content-between"><i class="bi bi-check-circle fs-4 mb-2"></i><div><h3 class="fw-bold mb-0"><?= $approved_plans ?></h3><span class="small fw-medium">Approved Plans</span></div></div></div>
-        <div class="col-md-3"><div class="stat-card stat-purple d-flex flex-column justify-content-between"><i class="bi bi-journal-text fs-4 mb-2"></i><div><h3 class="fw-bold mb-0"><?= $total_reports ?></h3><span class="small fw-medium">Accomplishment Reports</span></div></div></div>
-    </div>
+    <div class="row g-4">
+        <!-- Left Panel: Pending Queue -->
+        <div class="col-lg-5 col-xl-4">
+            <div class="dash-panel p-0" style="border-radius: 12px; overflow: hidden;">
+                <div class="p-4 border-bottom">
+                    <h6 class="fw-bold mb-1" style="color: var(--text-dark);">Pending Queue</h6>
+                    <p class="text-muted small mb-0">4 awaiting review</p>
+                </div>
+                
+                <div class="queue-list d-flex flex-column">
+                    <!-- Active Item -->
+                    <a href="#" class="p-3 border-bottom text-decoration-none d-flex gap-3 align-items-start" style="background: rgba(99,102,241,0.05); border-left: 3px solid var(--primary-accent);">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: #FFF7ED; color: #F97316; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div style="min-width: 0; flex: 1;">
+                            <h6 class="mb-1 text-truncate" style="font-size: 0.9rem; color: var(--text-dark); font-weight: 600; margin-top: 2px;">Tree-Planting Drive Report</h6>
+                            <p class="mb-0 text-truncate" style="font-size: 0.75rem; color: var(--text-muted);">Prof. Tan · CWTS 1-A</p>
+                        </div>
+                        <div class="text-end flex-shrink-0" style="min-width: 50px;">
+                            <span style="font-size: 0.7rem; color: #EF4444; font-weight: 500; background: #FEE2E2; padding: 2px 6px; border-radius: 4px;">2h ago</span>
+                            <div class="mt-1"><i class="bi bi-chevron-right text-muted" style="font-size: 0.75rem;"></i></div>
+                        </div>
+                    </a>
 
-    <div class="bg-white border rounded-4 p-4 shadow-sm">
-        
-        <ul class="nav nav-tabs nav-tabs-custom" id="submissionTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="plans-tab" data-bs-toggle="tab" data-bs-target="#plans" type="button" role="tab" aria-controls="plans" aria-selected="true">Activity Plans (<?= $total_plans ?>)</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab" aria-controls="reports" aria-selected="false">Accomplishment Reports (<?= $total_reports ?>)</button>
-            </li>
-        </ul>
+                    <!-- Queue Item 2 -->
+                    <a href="#" class="p-3 border-bottom text-decoration-none bg-white transition-all hover-bg-light d-flex gap-3 align-items-start">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: #FFF7ED; color: #F97316; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div style="min-width: 0; flex: 1;">
+                            <h6 class="mb-1 text-truncate" style="font-size: 0.9rem; color: var(--text-dark); font-weight: 500; margin-top: 2px;">Adult Literacy Session #4</h6>
+                            <p class="mb-0 text-truncate" style="font-size: 0.75rem; color: var(--text-muted);">Prof. Santos · LTS 2-A</p>
+                        </div>
+                        <div class="text-end flex-shrink-0" style="min-width: 50px;">
+                            <span class="text-muted" style="font-size: 0.7rem;">Yesterday</span>
+                            <div class="mt-1"><i class="bi bi-chevron-right text-muted" style="font-size: 0.75rem;"></i></div>
+                        </div>
+                    </a>
 
-        <div class="tab-content" id="submissionTabsContent">
-            
-            <div class="tab-pane fade show active" id="plans" role="tabpanel">
-                <div class="search-filter-bar">
-                    <div class="search-wrapper"><i class="bi bi-search"></i><input type="text" placeholder="Search by title, instructor, or section..."></div>
-                    <button class="filter-btn"><i class="bi bi-funnel me-2"></i> All Status</button>
+                    <!-- Queue Item 3 -->
+                    <a href="#" class="p-3 border-bottom text-decoration-none bg-white transition-all hover-bg-light d-flex gap-3 align-items-start">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: #FFF7ED; color: #F97316; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div style="min-width: 0; flex: 1;">
+                            <h6 class="mb-1 text-truncate" style="font-size: 0.9rem; color: var(--text-dark); font-weight: 500; margin-top: 2px;">Barangay Clean-Up Plan</h6>
+                            <p class="mb-0 text-truncate" style="font-size: 0.75rem; color: var(--text-muted);">Prof. Cruz · CWTS 1-C</p>
+                        </div>
+                        <div class="text-end flex-shrink-0" style="min-width: 50px;">
+                            <span class="text-muted" style="font-size: 0.7rem;">May 9</span>
+                            <div class="mt-1"><i class="bi bi-chevron-right text-muted" style="font-size: 0.75rem;"></i></div>
+                        </div>
+                    </a>
+
+                    <!-- Queue Item 4 -->
+                    <a href="#" class="p-3 border-bottom text-decoration-none bg-white transition-all hover-bg-light d-flex gap-3 align-items-start">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: #FFF7ED; color: #F97316; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div style="min-width: 0; flex: 1;">
+                            <h6 class="mb-1 text-truncate" style="font-size: 0.9rem; color: var(--text-dark); font-weight: 500; margin-top: 2px;">Reading Buddies Kick-off</h6>
+                            <p class="mb-0 text-truncate" style="font-size: 0.75rem; color: var(--text-muted);">Prof. Garcia · LTS 2-B</p>
+                        </div>
+                        <div class="text-end flex-shrink-0" style="min-width: 50px;">
+                            <span class="text-muted" style="font-size: 0.7rem;">May 8</span>
+                            <div class="mt-1"><i class="bi bi-chevron-right text-muted" style="font-size: 0.75rem;"></i></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Detail View -->
+        <div class="col-lg-7 col-xl-8">
+            <div class="dash-panel p-4 p-xl-5" style="border-radius: 12px;">
+                
+                <div class="mb-4">
+                    <h4 class="fw-bold mb-1" style="color: var(--text-dark);">Tree-Planting Drive Report</h4>
+                    <p class="text-muted" style="font-size: 0.9rem;">Prof. Tan · CWTS 1-A</p>
                 </div>
 
-                <?php foreach ($activity_plans as $plan): ?>
-                    <div class="submission-card">
-                        <div class="d-flex align-items-center mb-1">
-                            <h5 class="fw-bold mb-0 me-2 text-dark"><?= htmlspecialchars($plan['title']) ?></h5>
-                            <?php if ($plan['status'] === 'Approved'): ?>
-                                <span class="badge-status bg-approved">Approved</span>
-                            <?php else: ?>
-                                <span class="badge-status bg-pending">Pending</span>
-                            <?php endif; ?>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3" style="background: var(--bg-light); border: 1px solid var(--border-color);">
+                            <div class="text-muted mb-1" style="font-size: 0.75rem;">Submitted</div>
+                            <div class="fw-medium" style="font-size: 0.9rem; color: var(--text-dark);">2h ago</div>
                         </div>
-                        <p class="text-muted small mb-2"><?= htmlspecialchars($plan['description'] ?? '') ?></p>
-                        <div class="d-flex align-items-center gap-3 text-dark small fw-medium mb-3">
-                            <span><?= htmlspecialchars($plan['instructor']) ?></span>
-                            <span class="text-muted">•</span>
-                            <span class="text-muted"><?= htmlspecialchars($plan['section_name'] ?? 'N/A') ?></span>
-                            <span class="text-muted">•</span>
-                            <span class="text-muted"><?= $plan['files_attached'] ?> files attached</span>
-                        </div>
-                        <div class="row text-muted small mb-1">
-                            <div class="col-md-4"><i class="bi bi-calendar3 me-1"></i> Scheduled: <?= $plan['scheduled_date'] ?></div>
-                            <div class="col-md-4"><i class="bi bi-geo-alt me-1"></i> <?= htmlspecialchars($plan['location'] ?? 'TBA') ?></div>
-                            <div class="col-md-4 text-end">Submitted: <?= $plan['submitted_date'] ?></div>
-                        </div>
-                        <a class="obj-toggle" data-bs-toggle="collapse" href="#objCollapse<?= $plan['id'] ?>" role="button">
-                            <i class="bi bi-caret-right-fill" style="font-size: 0.7rem;"></i> View Objectives
-                        </a>
-                        <div class="collapse mb-3" id="objCollapse<?= $plan['id'] ?>">
-                            <div class="border-start border-primary border-2 ps-3 py-1 small text-muted">
-                                <?= htmlspecialchars($plan['objectives'] ?? '') ?>
-                            </div>
-                        </div>
-                        <?php if ($plan['status'] === 'Pending'): ?>
-                            <div class="d-flex gap-2 mt-2">
-                                <form method="POST" action="" class="d-inline">
-                                    <input type="hidden" name="plan_id" value="<?= $plan['id'] ?>">
-                                    <button type="submit" name="approve_plan" class="btn-approve"><i class="bi bi-check-circle me-1"></i> Approve</button>
-                                </form>
-                                <form method="POST" action="" class="d-inline">
-                                    <input type="hidden" name="plan_id" value="<?= $plan['id'] ?>">
-                                    <button type="submit" name="reject_plan" class="btn-reject"><i class="bi bi-x-circle me-1"></i> Reject</button>
-                                </form>
-                                <button type="button" class="btn-details"><i class="bi bi-eye me-1"></i> View Details</button>
-                            </div>
-                        <?php endif; ?>
                     </div>
-                <?php endforeach; ?>
-            </div>
-
-            <div class="tab-pane fade" id="reports" role="tabpanel">
-                <div class="search-filter-bar">
-                    <div class="search-wrapper"><i class="bi bi-search"></i><input type="text" placeholder="Search by title, instructor, or section..."></div>
-                    <button class="filter-btn"><i class="bi bi-funnel me-2"></i> All Status</button>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3" style="background: var(--bg-light); border: 1px solid var(--border-color);">
+                            <div class="text-muted mb-1" style="font-size: 0.75rem;">Beneficiaries</div>
+                            <div class="fw-medium" style="font-size: 0.9rem; color: var(--text-dark);">42 community members</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3" style="background: #F8FAFC; border: 1px solid #E2E8F0;">
+                            <div class="text-muted mb-1" style="font-size: 0.75rem;">Attachments</div>
+                            <div class="fw-medium d-flex align-items-center gap-1" style="font-size: 0.9rem; color: #4F46E5;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                6 photos · 1 PDF
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <?php foreach ($accomplishment_reports as $report): ?>
-                    <div class="submission-card">
-                        <div class="d-flex align-items-center mb-1">
-                            <h5 class="fw-bold mb-0 me-2 text-dark"><?= htmlspecialchars($report['title']) ?></h5>
-                            <?php if ($report['status'] === 'Reviewed'): ?>
-                                <span class="badge-status bg-reviewed">Reviewed</span>
-                            <?php else: ?>
-                                <span class="badge-status bg-pending">Pending</span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="d-flex align-items-center gap-3 text-dark small fw-medium mb-3">
-                            <span><?= htmlspecialchars($report['instructor']) ?></span>
-                            <span class="text-muted">•</span>
-                            <span class="text-muted"><?= htmlspecialchars($report['section_name'] ?? 'N/A') ?></span>
-                            <span class="text-muted">•</span>
-                            <span class="text-muted"><?= $report['files_attached'] ?> files attached</span>
-                        </div>
-                        <div class="row text-muted small mb-3">
-                            <div class="col-md-4"><i class="bi bi-calendar3 me-1"></i> Completed: <?= $report['completed_date'] ?></div>
-                            <div class="col-md-4"><i class="bi bi-geo-alt me-1"></i> <?= htmlspecialchars($report['location'] ?? 'TBA') ?></div>
-                            <div class="col-md-4"><i class="bi bi-people me-1"></i> <?= $report['participants_count'] ?> participants</div>
-                        </div>
-                        <h6 class="fw-bold mb-0" style="font-size: 0.9rem; color: #374151;">Accomplishments:</h6>
-                        <div class="accomplishment-block mb-3"><?= htmlspecialchars($report['accomplishments'] ?? '') ?></div>
-                        <div class="text-muted small mb-3">Submitted: <?= $report['submitted_date'] ?></div>
-                        <?php if ($report['status'] === 'Pending'): ?>
-                            <div class="d-flex gap-2">
-                                <form method="POST" action="" class="d-inline">
-                                    <input type="hidden" name="report_id" value="<?= $report['id'] ?>">
-                                    <button type="submit" name="review_report" class="btn-approve"><i class="bi bi-check2-circle me-1"></i> Mark as Reviewed</button>
-                                </form>
-                                <button type="button" class="btn-details"><i class="bi bi-eye me-1"></i> View Details</button>
-                                <button type="button" class="btn-download"><i class="bi bi-download me-1"></i> Download Files</button>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+                <div class="mb-5">
+                    <p style="font-size: 0.95rem; color: #4B5563; line-height: 1.6;">
+                        Activity executed on schedule at Barangay San Roque, with 28 cadets and 14 community volunteers participating. Total of 120 saplings planted across the riverside zone. All required documentation, attendance sheet, and beneficiary feedback forms attached.
+                    </p>
+                </div>
 
+                <div class="d-flex gap-3 pt-4 border-top" style="border-color: var(--border-color) !important;">
+                    <button class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #059669; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 500;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Approve
+                    </button>
+                    <button class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #64748B; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 16px; font-weight: 500;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Request Revisions
+                    </button>
+                    <button class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #EF4444; border: 1px solid #FEE2E2; border-radius: 6px; padding: 8px 16px; font-weight: 500;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Reject
+                    </button>
+                </div>
+
+            </div>
         </div>
     </div>
 
 </div>
 
-</div>
+<style>
+.hover-bg-light:hover { background-color: #F9FAFB !important; cursor: pointer; }
+.transition-all { transition: all 0.2s ease; }
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/js/pages/submissions.js"></script>
 </body>
 </html>

@@ -1,124 +1,501 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* New Figma Color Palette */
-    --primary-bg: #2b5f56;
-    /* Dark green sidebar */
-    --primary-active: #c8f5d0;
-    /* Light green pill for active menu */
-    --text-sidebar: #D1D5DB;
-    /* Light gray for unselected menu items */
-    --bg-light: #F4F6F9;
-    /* Main content off-white background */
+    /* ── Figma Coordinator Palette ── */
+    --primary-bg: #f2f5fe;
+    --primary-accent: #4f39f6;
+    --primary-accent-light: rgba(79, 57, 246, 0.08);
+    --primary-active: #4f39f6;
+    --text-sidebar: #6B7280;
+    --text-sidebar-active: #FFFFFF;
+    --bg-light: #F8F9FB;
+    --border-color: #E5E7EB;
+    --text-dark: #111827;
+    --text-muted: #6B7280;
+    --text-secondary: #9CA3AF;
 
-    /* Icon Colors */
-    --icon-blue: #3B82F6;
+    /* ── Instructor Palette ── */
+    --instructor-accent: #0D9488;
+    --instructor-active: #0D9488;
+
+    /* ── ROTC Palette ── */
+    --rotc-sidebar-bg: #1F2937;
+    --rotc-accent: #F59E0B;
+    --rotc-active: #F59E0B;
+
+    /* ── Stat Icon Colors ── */
+    --icon-coral: #F87171;
     --icon-green: #10B981;
     --icon-red: #EF4444;
-    --icon-purple: #8B5CF6;
+    --icon-indigo: #6366F1;
     --icon-orange: #F97316;
+    --icon-purple: #8B5CF6;
+    --icon-blue: #3B82F6;
+    --icon-teal: #14B8A6;
 }
+
+* { box-sizing: border-box; }
 
 body {
     background-color: var(--bg-light);
-    font-family: 'Inter', sans-serif;
-    /* Modern sans-serif from the mockup */
-    color: #333;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-dark);
+    margin: 0;
 }
 
-/* Sidebar Styling */
+/* ═══════════════════════════════════════
+   SIDEBAR — White style (Coordinator/Instructor)
+═══════════════════════════════════════ */
 .sidebar {
     background-color: var(--primary-bg) !important;
     min-height: 100vh;
+    border-right: 1px solid var(--border-color);
 }
 
-.sidebar-brand {
-    color: #fff;
+.sidebar-brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 20px 16px;
+}
+.sidebar-brand-wrap .brand-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; color: #fff;
+}
+.sidebar-brand-wrap .brand-text h5 {
+    margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-dark);
+}
+.sidebar-brand-wrap .brand-text small {
+    font-size: 0.75rem; color: var(--text-muted);
+}
+
+.sidebar-section-label {
+    font-size: 0.65rem;
     font-weight: 600;
-    font-size: 1.25rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    padding: 16px 20px 8px;
+    margin: 0;
 }
 
 .sidebar .nav-link {
     color: var(--text-sidebar);
-    border-radius: 50px;
-    padding: 12px 20px;
-    margin-bottom: 5px;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin: 2px 12px;
     font-weight: 500;
-    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
-
+.sidebar .nav-link i {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
 .sidebar .nav-link:hover {
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-dark);
+    background-color: var(--primary-accent-light);
 }
-
 .sidebar .nav-link.active {
     background-color: var(--primary-active);
-    color: var(--primary-bg);
+    color: var(--text-sidebar-active);
     font-weight: 600;
 }
+.sidebar .nav-link .badge-count {
+    margin-left: auto;
+    background: var(--bg-light);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+.sidebar .nav-link.active .badge-count {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+}
 
-/* Card Styling */
-.card {
-    border: 1px solid rgba(0, 0, 0, 0.05);
+/* ═══════════════════════════════════════
+   ROTC SIDEBAR — Dark navy + gold
+═══════════════════════════════════════ */
+.sidebar.sidebar-rotc {
+    background-color: var(--rotc-sidebar-bg) !important;
+    border-right: none;
+}
+.sidebar.sidebar-rotc .sidebar-brand-wrap .brand-text h5 { color: #fff; }
+.sidebar.sidebar-rotc .sidebar-brand-wrap .brand-text small { color: #9CA3AF; }
+.sidebar.sidebar-rotc .sidebar-section-label { color: #6B7280; }
+.sidebar.sidebar-rotc .nav-link { color: #D1D5DB; }
+.sidebar.sidebar-rotc .nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.sidebar.sidebar-rotc .nav-link.active {
+    background-color: var(--rotc-active);
+    color: #1F2937;
+}
+
+/* ═══════════════════════════════════════
+   CARDS
+═══════════════════════════════════════ */
+.card, .dash-panel {
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     background-color: #fff;
+    padding: 24px;
 }
+.card { padding: 0; }
 
-/* Circular Icons for Stat Cards */
-.icon-circle {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+/* ── Stat Cards (Figma style) ── */
+.stat-card-figma {
+    background: #fff;
+    border: 1px solid #F1F5F9;
+    border-radius: 20px;
+    padding: 16px 20px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.25rem;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    transition: box-shadow 0.2s, transform 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+}
+.stat-card-figma:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.stat-card-figma .stat-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; color: #fff; flex-shrink: 0;
+    margin-bottom: 12px;
+}
+.stat-card-figma .stat-icon.coral { background: #4e6fff; color: #ffffff; }
+.stat-card-figma .stat-icon.green { background: #00bc8d; color: #ffffff; }
+.stat-card-figma .stat-icon.red   { background: #a84cff; color: #ffffff; }
+.stat-card-figma .stat-icon.indigo{ background: #ff8900; color: #ffffff; }
+.stat-card-figma .stat-icon.teal  { background: #CCFBF1; color: #14B8A6; }
+.stat-card-figma .stat-icon.purple{ background: #EDE9FE; color: #8B5CF6; }
+.stat-card-figma .stat-icon.orange{ background: #FFF7ED; color: #F97316; }
+.stat-card-figma .stat-icon.blue  { background: #DBEAFE; color: #3B82F6; }
+
+.stat-card-figma .stat-body { flex: 1; display: flex; flex-direction: column; }
+.stat-card-figma .stat-value {
+    font-size: 2.1rem; font-weight: 500; color: #0F172A; line-height: 1.1; margin-bottom: 4px;
+}
+.stat-card-figma .stat-label {
+    font-size: 0.9rem; color: #64748B; font-weight: 400; margin: 0;
+}
+.stat-card-figma .stat-delta {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 0.75rem; font-weight: 500;
+    padding: 4px 8px; border-radius: 20px;
+}
+.stat-delta.up { color: #059669; background: #ECFDF5; }
+.stat-delta.down { color: #DC2626; background: #FEF2F2; }
+
+/* ═══════════════════════════════════════
+   TABLES (Figma clean style)
+═══════════════════════════════════════ */
+.table-figma {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table-figma thead th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: transparent;
+}
+.table-figma tbody td {
+    padding: 14px 16px;
+    font-size: 0.875rem;
+    color: var(--text-dark);
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: middle;
+}
+.table-figma tbody tr:hover {
+    background-color: #F9FAFB;
 }
 
-/* Custom Progress Bars */
+/* ── Status badges ── */
+.badge-status {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-block;
+}
+.badge-status.active   { color: #059669; background: #D1FAE5; }
+.badge-status.closed   { color: #6B7280; background: #F3F4F6; }
+.badge-status.pending  { color: #D97706; background: #FEF3C7; }
+.badge-status.approved { color: #059669; background: #D1FAE5; }
+.badge-status.draft    { color: #6B7280; background: #F3F4F6; }
+.badge-status.failed   { color: #DC2626; background: #FEE2E2; }
+.badge-status.reviewing{ color: #7C3AED; background: #EDE9FE; }
+.badge-status.on-leave { color: #D97706; background: #FEF3C7; }
+.badge-status.ready    { color: #059669; background: #D1FAE5; }
+
+/* ═══════════════════════════════════════
+   BUTTONS (Figma style)
+═══════════════════════════════════════ */
+.btn-figma {
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+}
+.btn-figma.primary {
+    background: var(--primary-accent);
+    color: #fff;
+}
+.btn-figma.primary:hover { background: #4F46E5; }
+.btn-figma.teal { background: var(--instructor-accent); color: #fff; }
+.btn-figma.teal:hover { background: #0F766E; }
+.btn-figma.gold { background: var(--rotc-accent); color: #1F2937; }
+.btn-figma.gold:hover { background: #D97706; }
+.btn-figma.outline {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+}
+.btn-figma.outline:hover { background: #F9FAFB; }
+.btn-figma.danger { background: transparent; color: #DC2626; border: 1px solid #FCA5A5; }
+.btn-figma.success { background: #059669; color: #fff; }
+.btn-figma.success:hover { background: #047857; }
+
+/* ═══════════════════════════════════════
+   PAGE HEADER
+═══════════════════════════════════════ */
+.page-header-figma {
+    margin-bottom: 24px;
+}
+.page-header-figma .semester-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.page-header-figma h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 4px 0 0;
+}
+
+/* ═══════════════════════════════════════
+   PROGRESS BARS
+═══════════════════════════════════════ */
 .progress {
-    height: 8px;
+    height: 6px;
     border-radius: 10px;
     background-color: #E5E7EB;
 }
+.progress-bar { border-radius: 10px; }
 
-.progress-bar {
-    background-color: var(--primary-active);
-    border-radius: 10px;
-}
-
-
-/* Card Styling */
-.card {
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-    background-color: #fff;
-}
-
-/* Circular Icons for Stat Cards */
+/* ═══════════════════════════════════════
+   ICON CIRCLES
+═══════════════════════════════════════ */
 .icon-circle {
-    width: 48px;
-    height: 48px;
+    width: 48px; height: 48px;
     border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.25rem;
+}
+
+/* ═══════════════════════════════════════
+   SEARCH INPUT (Figma)
+═══════════════════════════════════════ */
+.search-input-figma {
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 16px 8px 36px;
+    font-size: 0.85rem;
+    color: var(--text-dark);
+    width: 240px;
+    transition: border-color 0.15s;
+}
+.search-input-figma:focus {
+    outline: none;
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+/* ═══════════════════════════════════════
+   INSTRUCTOR CARD (Figma grid)
+═══════════════════════════════════════ */
+.instructor-card-figma {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    transition: box-shadow 0.2s;
+}
+.instructor-card-figma:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.instructor-card-figma .avatar-circle {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 600; font-size: 0.9rem; flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   SECTION CARDS (Instructor My Classes)
+═══════════════════════════════════════ */
+.section-card-figma {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    transition: box-shadow 0.2s;
+}
+.section-card-figma:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.section-card-figma .card-header-colored {
+    padding: 20px 24px;
+    color: #fff;
+}
+.section-card-figma .card-header-colored.cwts { background: linear-gradient(135deg, #6366F1, #818CF8); }
+.section-card-figma .card-header-colored.lts  { background: linear-gradient(135deg, #F97316, #FB923C); }
+.section-card-figma .card-header-colored.rotc { background: linear-gradient(135deg, #1F2937, #374151); }
+.section-card-figma .card-body-section { padding: 20px 24px; }
+
+/* ═══════════════════════════════════════
+   UPLOAD ZONE (OCR)
+═══════════════════════════════════════ */
+.upload-zone-figma {
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 48px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.upload-zone-figma:hover {
+    border-color: var(--primary-accent);
+    background: rgba(99,102,241,0.02);
+}
+.upload-zone-figma .upload-icon {
+    width: 64px; height: 64px;
+    border-radius: 16px;
+    background: #EDE9FE;
+    color: #7C3AED;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+}
+
+/* ═══════════════════════════════════════
+   LEGACY COMPAT — keep old dash-stat-card working
+═══════════════════════════════════════ */
+.dash-stat-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px 24px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.25rem;
+}
+.dash-stat-card .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+.dash-stat-card .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); }
+.dash-stat-card .stat-sub { font-size: 0.75rem; color: var(--text-secondary); }
+.dash-stat-card .stat-sub.neg { color: #DC2626; }
+.dash-stat-card .stat-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+}
+.dash-stat-card .stat-icon.blue   { background: #DBEAFE; color: #3B82F6; }
+.dash-stat-card .stat-icon.green  { background: #00bc8d; color: #ffffff; }
+.dash-stat-card .stat-icon.purple { background: #EDE9FE; color: #8B5CF6; }
+.dash-stat-card .stat-icon.indigo { background: #ff8900; color: #ffffff; }
+.dash-stat-card .stat-icon.red    { background: #a84cff; color: #ffffff; }
+.dash-stat-card .stat-icon.orange { background: #FFF7ED; color: #F97316; }
+
+/* ── Panel title ── */
+.panel-title {
+    font-size: 0.95rem; font-weight: 600; color: var(--text-dark); margin-bottom: 16px;
 }
 
-/* Custom Progress Bars */
-.progress {
-    height: 8px;
-    border-radius: 10px;
-    background-color: #E5E7EB;
+/* ── Quick stat row ── */
+.quick-stat-row {
+    display: flex; gap: 12px; flex-wrap: wrap;
 }
+.quick-stat-pill {
+    flex: 1; min-width: 80px;
+    background: var(--bg-light); border-radius: 8px; padding: 12px; text-align: center;
+}
+.quick-stat-pill .qsp-val { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); }
+.quick-stat-pill .qsp-lbl { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
 
-.progress-bar {
-    background-color: var(--primary-active);
-    border-radius: 10px;
+/* ── Badge chips ── */
+.badge-chip {
+    font-size: 0.65rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+    display: inline-flex; align-items: center; gap: 4px;
 }
+.badge-chip.default { background: #E0E7FF; color: #4338CA; }
+.badge-chip.create  { background: #D1FAE5; color: #065F46; }
+.badge-chip.update  { background: #FFF7ED; color: #9A3412; }
+.badge-chip.delete  { background: #FEE2E2; color: #991B1B; }
+
+/* ── Activity feed ── */
+.activity-feed { list-style: none; padding: 0; margin: 0; }
+.activity-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid #F3F4F6;
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+    width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;
+}
+.activity-dot.c  { background: #10B981; }
+.activity-dot.u  { background: #F97316; }
+.activity-dot.d  { background: #EF4444; }
+.activity-dot.ok { background: #6366F1; }
+.activity-text { flex: 1; }
+.activity-text p { margin: 0; font-size: 0.85rem; font-weight: 500; color: var(--text-dark); }
+.activity-text small { display: block; font-size: 0.75rem; color: var(--text-muted); }
+.activity-time { font-size: 0.7rem; color: var(--text-secondary); white-space: nowrap; }
+
+/* ── Mini Calendar ── */
+.mini-calendar .cal-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.mini-calendar .cal-header h6 { margin: 0; font-weight: 600; font-size: 0.9rem; }
+.mini-calendar .cal-nav {
+    background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; padding: 4px;
+}
+.mini-calendar table { width: 100%; text-align: center; font-size: 0.8rem; }
+.mini-calendar th { color: var(--text-secondary); font-weight: 500; padding: 6px 0; font-size: 0.65rem; }
+.mini-calendar td { padding: 6px 0; color: var(--text-dark); cursor: pointer; border-radius: 6px; }
+.mini-calendar td:hover { background: var(--bg-light); }
+.mini-calendar td.today { background: var(--primary-accent); color: #fff; font-weight: 600; }
+.mini-calendar td.other-month { color: #D1D5DB; }
+
+/* ── Chart wrapper ── */
+.chart-wrapper { position: relative; height: 240px; }
+
+/* ═══════════════════════════════════════
+   UTILITY
+═══════════════════════════════════════ */
+.text-figma-muted { color: var(--text-muted) !important; }
+.fw-600 { font-weight: 600 !important; }

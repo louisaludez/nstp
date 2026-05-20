@@ -11,7 +11,7 @@ $public_pages = ['login.php', 'register.php'];
 
 // If the user is NOT logged in and is trying to access a private page
 if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
-    header("Location: /nstp/login"); // Redirect to clean login URL
+    header("Location: ../login.php"); // Redirect to login page
     exit();
 }
 ?>
@@ -26,7 +26,7 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NSTP System Console</title>
+    <title>NSTP & Cadet Portal — Davao del Norte State College</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="../assets/css/style.css" rel="stylesheet">
@@ -38,14 +38,14 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
         }
         
         @media (max-width: 991.98px) {
-            .flex-grow-1 { 
-                padding-top: 160px !important; /* Clear both stacked mobile headers */
+            .wrapper > .flex-grow-1 { 
+                padding-top: 160px !important;
                 padding-left: 15px !important; 
                 padding-right: 15px !important; 
             }
             .topbar-fixed {
                 left: 0 !important;
-                top: 74px !important; /* Slide under the mobile brand roof */
+                top: 74px !important;
                 padding: 0 1.5rem !important;
                 z-index: 1020 !important;
             }
@@ -57,10 +57,10 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
             top: 0;
             right: 0;
             left: 260px;
-            height: 75px;
+            height: 84px;
             z-index: 1030;
             background-color: #fff;
-            padding: 0 3rem;
+            padding: 0 2rem;
             border-bottom: 1px solid #E5E7EB;
             transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -69,7 +69,7 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
             left: 80px;
         }
         
-        /* Desktop View Adjustments (Screens 992px and larger) */
+        /* Desktop View Adjustments */
         @media (min-width: 992px) {
             .sidebar { 
                 width: 260px !important; 
@@ -93,37 +93,46 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
             }
 
             /* Hide Text when collapsed */
-            html.sidebar-collapsed .sidebar h4,
-            html.sidebar-collapsed .sidebar .text-white-50,
-            html.sidebar-collapsed .sidebar .btn-light {
+            html.sidebar-collapsed .sidebar .sidebar-brand-wrap .brand-text,
+            html.sidebar-collapsed .sidebar .sidebar-section-label {
                 display: none !important;
             }
             
-            /* Text-Hiding Hack for Nav Links */
+            /* Shrink logo in collapsed mode */
+            html.sidebar-collapsed .sidebar .sidebar-brand-wrap .brand-logo {
+                width: 32px !important;
+                height: 32px !important;
+            }
+            
+            /* Nav links in collapsed mode */
             html.sidebar-collapsed .sidebar .nav-link {
                 font-size: 0;
                 justify-content: center;
-                padding: 0.8rem 0;
+                padding: 12px 0;
                 text-align: center;
                 display: flex;
+                margin: 2px 8px;
             }
             html.sidebar-collapsed .sidebar .nav-link i {
-                font-size: 1.4rem;
-                margin-right: 0 !important;
+                font-size: 1.3rem;
+                margin: 0 !important;
+                width: auto;
             }
-            html.sidebar-collapsed .sidebar-brand-icon {
-                font-size: 2rem !important;
-                margin-bottom: 0 !important;
-                display: block !important;
+            html.sidebar-collapsed .sidebar .nav-link .badge-count {
+                display: none;
+            }
+            html.sidebar-collapsed .sidebar .sidebar-brand-wrap {
+                justify-content: center;
+                padding: 20px 8px 16px;
             }
 
             /* Ensure the main content area has its own scrolling space */
-            .flex-grow-1 {
+            .wrapper > .flex-grow-1 {
                 min-height: 100vh;
                 overflow-x: hidden;
                 flex-grow: 1;
                 min-width: 0; 
-                padding-top: 100px !important; /* Push beneath 75px topbar */
+                padding-top: 108px !important;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
         }
@@ -140,5 +149,5 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
         <?php endforeach; ?>
     <?php endif; ?>
 </head>
-<body style="background-color: var(--bg-light, #F4F6F9);">
+<body style="background-color: var(--bg-light, #F8F9FB);">
     <div class="d-flex flex-column flex-lg-row wrapper">

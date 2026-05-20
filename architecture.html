@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSTP Management System - Architecture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg-color: #0F172A;
+            --surface: #1E293B;
+            --surface-hover: #334155;
+            --primary: #6366F1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --secondary: #10B981;
+            --accent: #F43F5E;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.08), transparent 25%);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(to right, #818CF8, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .architecture-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            width: 100%;
+            max-width: 1100px;
+            position: relative;
+        }
+
+        .layer {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .layer:nth-child(1) { animation-delay: 0.1s; border-top: 2px solid var(--primary); }
+        .layer:nth-child(2) { animation-delay: 0.3s; border-top: 2px solid #3B82F6; }
+        .layer:nth-child(3) { animation-delay: 0.5s; border-top: 2px solid var(--secondary); }
+
+        .layer-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .layer-title i {
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .node-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .node-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 30px -10px var(--primary-glow);
+            background: var(--surface-hover);
+        }
+
+        .node-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .node-card:hover::before {
+            opacity: 1;
+        }
+
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .node-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.1);
+            color: #818CF8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .node-card.db .node-icon { background: rgba(16, 185, 129, 0.1); color: #34D399; }
+        .node-card.api .node-icon { background: rgba(59, 130, 246, 0.1); color: #60A5FA; }
+
+        .node-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .node-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tech-pill {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+        }
+
+        /* Data Flow Arrows */
+        .flow-arrow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 40px;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 1s forwards;
+        }
+
+        .flow-arrow i {
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            animation: bounceY 2s infinite ease-in-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes bounceY {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+
+        @media (max-width: 768px) {
+            .layer { padding: 24px; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>System Architecture</h1>
+        <p>NSTP Management & Grade Automation Platform</p>
+    </header>
+
+    <div class="architecture-wrapper">
+
+        <!-- Layer 1: Presentation (Client) -->
+        <div class="layer">
+            <div class="layer-title"><i class="bi bi-display"></i> Presentation Layer (Client)</div>
+            <div class="nodes-grid">
+                <div class="node-card">
+                    <div class="node-header">
+                        <div class="node-icon"><i class="bi bi-shield-lock"></i></div>
+                        <div class="node-title">Coordinator Admin Portal</div>
+                    </div>
+                    <div class="node-desc">Unified dashboard for managing sections, tracking instructor workload, approving reports, and overseeing the entire NSTP program.</div>
+                    <div class="tech-stack">
+                        <span class="tech-pill">HTML5</span>
+                        <span class="tech-pill">Bootstrap 5</span>
+                        <span class="tech-pill">Vanilla JS</span>
+                    </div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <div class="node-icon"><i class="bi bi-person-video3"></i></div>
+                        <div class="node-title">Instructor Workspace</div>
+                    </div>
+                    <div class="node-desc">Dedicated interface for instructors to manage their assigned CWTS/LTS/ROTC sections, submit grades, and upload activity logs.</div>
+                    <div class="tech-stack">
+                        <span class="tech-pill">Responsive UI</span>
+                        <span class="tech-pill">Chart.js</span>
+                        <span class="tech-pill">AJAX</span>
+                    </div>
+                </div>
+
+                <div class="node-card">
+                    <div class="node-header">
+                        <div class="node-icon"><i class="bi bi-mortarboard"></i></div>
+                        <div class="node-title">Student View</div>
+                    </div>
+                    <div class="node-desc">Read-only access portal allowing students to view their NSTP status, retrieve digital certificates, and verify compliance.</div>
+                    <div class="tech-stack">
+                        <span class="tech-pill">Mobile First</span>
+                        <span class="tech-pill">CSS Flexbox</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-arrow"><i class="bi bi-arrow-down"></i></div>
+
+        <!-- Layer 2: Application (Server) -->
+        <div class="layer">
+            <div class="layer-title" style="color: #60A5FA;"><i class="bi bi-cpu" style="color: #60A5FA;"></i> Application Layer (Server)</div>
+            <div class="nodes-grid">
+                <div class="node-card api">
+                    <div class="node-header">
+                        <div class="node-icon"><i class="bi bi-gear-wide-connected"></i></div>
+                        <div class="node-title">Core Routing & Controllers</div>
+                    </div>
+                    <div class="node-desc">Processes HTTP requests, enforces role-based access control (RBAC), handles session management, and orchestrates business logic.</div>
+                    <div class="tech-stack">
+                        <span class="tech-pill">PHP 8</span>
+                        <span class="tech-pill">MVC Pattern</span>
+                        <span class="tech-pill">Sessions</span>
+                    </div>
+                </div>
+
+                <div class="node-card api">
+                    <div class="node-header">
+                        <div class="node-icon"><i class="bi bi-upc-scan"></i></div>
+                        <div class="node-title">OCR Grade Engine (v3.2)</div>
+                    </div>
+                    <div class="node-desc">Automated processing module that parses uploaded physical grade sheets (PDF/JPG), extracts student scores, and digitizes records.</div>
+                    <div class="tech-stack">
+                        <span class="tech-pill">File Parsing</span>
+                        <span class="tech-pill">Data Extraction</span>
+                        <span class="tech-pill">Validation</span>
+                    </div>
+                </div>
+
+                <div class="node-card api">
+                    <div class="node-header">
+                        <div class="node-icon"><i class="bi bi-patch-check"></i></div>
+                        <div class="node-title">Certificate Generator</div>
+                    </div>
+                    <div class="node-desc">Automated batch processor that evaluates passing criteria and generates official PDF completion certificates with unique serials.</div>
+                    <div class="tech-stack">
+                        <span class="tech-pill">Batch Processing</span>
+                        <span class="tech-pill">Dynamic Generation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-arrow"><i class="bi bi-arrow-down"></i></div>
+
+        <!-- Layer 3: Data (Storage) -->
+        <div class="layer">
+            <div class="layer-title" style="color: #34D399;"><i class="bi bi-database" style="color: #34D399;"></i> Data Layer (Storage)</div>
+            <div class="nodes-grid">
+                <div class="node-card db">
+                    <div class="node-header">
+                        <div class="node-icon"><i class="bi bi-hdd-stack"></i></div>
+                        <div class="node-title">Relational Database</div>
+                    </div>
+                    <div class="node-desc">Centralized storage enforcing schema integrity. Stores users, encrypted passwords, student rosters, hierarchies, grades, and audit logs.</div>
+                    <div class="tech-stack">
+                        <span class="tech-pill">MySQL</span>
+                        <span class="tech-pill">PDO (PHP Data Objects)</span>
+                        <span class="tech-pill">Relational Integrity</span>
+                    </div>
+                </div>
+                
+                <div class="node-card db">
+                    <div class="node-header">
+                        <div class="node-icon"><i class="bi bi-folder-symlink"></i></div>
+                        <div class="node-title">File Storage System</div>
+                    </div>
+                    <div class="node-desc">Local directory-based secure storage handling raw grade sheet scans, submission evidence attachments, and generated PDF certificates.</div>
+                    <div class="tech-stack">
+                        <span class="tech-pill">Local Filesystem</span>
+                        <span class="tech-pill">Access Control</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

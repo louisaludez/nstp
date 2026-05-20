@@ -9,22 +9,24 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Instructor') {
 
 require 'controllers/ActivityPlansController.php';
 
-$extra_css = ['../assets/css/pages/instructor/activity-plans.css'];
-$extra_js = ['../assets/js/pages/instructor/activity-plans.js'];
+// Fetch sections for the dropdown
+$stmtAllSections = $pdo->prepare("SELECT id, component, section_name FROM sections WHERE instructor_id = ? ORDER BY component, section_name");
+$stmtAllSections->execute([$instructor_id]);
+$all_assigned_sections = $stmtAllSections->fetchAll();
+
+$extra_css = ['../assets/css/style.css'];
 include '../includes/header.php';
 include '../includes/instructor_sidebar.php';
 ?>
 
-<div class="flex-grow-1 p-5 w-100" style="background-color: #F9FAFB;">
+<div class="flex-grow-1 p-4 p-lg-5 w-100" style="background-color: #F9FAFB; min-height: 100vh;">
     
     <?php include '../includes/topbar.php'; ?>
     
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h3 class="fw-bold mb-1" style="color: #111827;">Activity Plan Submission</h3>
-            <p class="text-muted mb-0">Submit and manage planned NSTP activities for your section</p>
-        </div>
-        <button type="button" class="btn btn-brand" id="toggleFormBtn">+ New Activity Plan</button>
+    <!-- Header -->
+    <div class="mb-4 mt-2">
+        <h5 class="fw-bold mb-1" style="color: #111827; font-size: 1.15rem;">Activity Plans</h5>
+        <div class="text-muted" style="font-size: 0.85rem;">Plan, schedule, and submit activities for coordinator approval</div>
     </div>
 
     <?php if ($message): ?>
@@ -34,84 +36,136 @@ include '../includes/instructor_sidebar.php';
         </div>
     <?php endif; ?>
 
-    <div class="panel-container" id="activityFormContainer" style="display: none;">
-        <h5 class="fw-bold mb-4">Create New Activity Plan</h5>
-        <form method="POST" action="" enctype="multipart/form-data">
-            <div class="mb-4"><label class="form-label">Activity Title *</label><input type="text" name="title" class="form-control" placeholder="e.g., Community Clean-up Drive" required></div>
-            <div class="mb-4"><label class="form-label">Description *</label><textarea name="description" class="form-control" rows="3" placeholder="Describe the activity in detail..." required></textarea></div>
-            <div class="mb-4"><label class="form-label">Objectives *</label><textarea name="objectives" class="form-control" rows="2" placeholder="List the objectives and expected outcomes..." required></textarea></div>
-            <div class="row g-4 mb-4">
-                <div class="col-md-6"><label class="form-label">Scheduled Date *</label><input type="date" name="scheduled_date" class="form-control" required></div>
-                <div class="col-md-6"><label class="form-label">Scheduled Time *</label><input type="time" name="scheduled_time" class="form-control" required></div>
-            </div>
-            <div class="mb-4"><label class="form-label">Location *</label><input type="text" name="location" class="form-control" placeholder="e.g., Sunset Bay Beach" required></div>
-            <div class="mb-4">
-                <label class="form-label">Supporting Files</label>
-                <div class="upload-zone" onclick="document.getElementById('fileUpload').click()">
-                    <i class="bi bi-upload upload-icon d-block"></i>
-                    <small class="text-muted d-block mb-2">Upload PDF, Word documents, or images</small>
-                    <span class="btn btn-sm btn-light border fw-medium">Choose Files</span>
-                    <input type="file" name="supporting_files[]" id="fileUpload" class="d-none" multiple>
-                    <div id="fileList" class="mt-2 small text-primary fw-medium"></div>
+    <div class="row g-4">
+        <!-- Left Panel: Upcoming & Drafts -->
+        <div class="col-lg-8">
+            <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: 100%;">
+                <div style="padding: 20px 24px; border-bottom: 1px solid #F3F4F6;">
+                    <h6 class="fw-bold mb-0" style="color: #374151;">Upcoming & Drafts</h6>
                 </div>
-            </div>
-            <div class="d-flex gap-2 mt-4">
-                <button type="submit" name="submit_plan" class="btn btn-brand">Submit Plan</button>
-                <button type="button" class="btn btn-cancel-light" id="cancelFormBtnBottom">Cancel</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="panel-container">
-        <h5 class="fw-bold mb-4">Submitted Activity Plans</h5>
-        <?php if (count($plans) > 0): ?>
-            <?php foreach ($plans as $plan): ?>
-                <div class="plan-card">
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                        <div class="d-flex align-items-center gap-2">
-                            <h6 class="fw-bold mb-0" style="font-size: 1.05rem;"><?= htmlspecialchars($plan['title']) ?></h6>
-                            <?php 
-                                $badgeClass = 'badge-soft-primary';
-                                if ($plan['status'] === 'Approved') $badgeClass = 'badge-soft-success';
-                                if ($plan['status'] === 'Rejected') $badgeClass = 'badge-soft-danger';
-                            ?>
-                            <span class="badge <?= $badgeClass ?> rounded-pill"><?= htmlspecialchars($plan['status']) ?></span>
-                        </div>
-                        <div class="d-flex gap-3">
-                            <?php if ($plan['status'] === 'Pending'): ?>
-                                <i class="bi bi-pencil action-icon edit" title="Edit"></i>
-                                <a href="?delete=<?= $plan['id'] ?>" onclick="return confirm('Are you sure you want to delete this activity plan?');"><i class="bi bi-trash action-icon delete" title="Delete"></i></a>
+                
+                <div class="table-responsive">
+                    <table class="table table-borderless mb-0" style="font-size: 0.85rem; color: #4B5563;">
+                        <thead style="border-bottom: 1px solid #F3F4F6;">
+                            <tr>
+                                <th class="text-muted fw-semibold" style="padding: 16px 24px; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;">Activity</th>
+                                <th class="text-muted fw-semibold" style="padding: 16px 24px; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;">Section</th>
+                                <th class="text-muted fw-semibold" style="padding: 16px 24px; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;">Date</th>
+                                <th class="text-muted fw-semibold" style="padding: 16px 24px; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;">Venue</th>
+                                <th class="text-muted fw-semibold" style="padding: 16px 24px; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (count($plans) > 0): ?>
+                                <?php foreach ($plans as $plan): 
+                                    // Fetch section name for the row
+                                    $secName = '';
+                                    foreach ($all_assigned_sections as $sec) {
+                                        if ($sec['id'] == $plan['section_id']) {
+                                            $secName = $sec['component'] . ' ' . $sec['section_name'];
+                                            break;
+                                        }
+                                    }
+                                    
+                                    // Style badges
+                                    $badgeStyle = 'background: #F3F4F6; color: #4B5563;'; // Default Draft
+                                    $icon = '';
+                                    if ($plan['status'] === 'Approved') {
+                                        $badgeStyle = 'background: #ECFDF5; color: #10B981;';
+                                    } elseif ($plan['status'] === 'Pending') {
+                                        $badgeStyle = 'background: #F3E8FF; color: #8B5CF6;';
+                                    } elseif ($plan['status'] === 'Rejected' || $plan['status'] === 'Revision') {
+                                        $badgeStyle = 'background: #FFFBEB; color: #F59E0B;';
+                                        $icon = '<i class="bi bi-exclamation-circle" style="margin-right: 4px;"></i>';
+                                    }
+                                ?>
+                                <tr style="border-bottom: 1px solid #F3F4F6;">
+                                    <td style="padding: 16px 24px; font-weight: 500; color: #111827;"><?= htmlspecialchars($plan['title']) ?></td>
+                                    <td style="padding: 16px 24px;"><?= htmlspecialchars($secName ?: 'N/A') ?></td>
+                                    <td style="padding: 16px 24px;"><?= date('M j, Y', strtotime($plan['scheduled_date'])) ?></td>
+                                    <td style="padding: 16px 24px;"><?= htmlspecialchars($plan['location']) ?></td>
+                                    <td style="padding: 16px 24px;">
+                                        <span style="padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; display: inline-flex; align-items: center; <?= $badgeStyle ?>">
+                                            <?= $icon ?><?= htmlspecialchars($plan['status']) ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">No upcoming activity plans found.</td>
+                                </tr>
                             <?php endif; ?>
-                        </div>
-                    </div>
-                    <p class="text-muted small mb-3"><?= htmlspecialchars($plan['description']) ?></p>
-                    <div class="row text-muted small mb-1">
-                        <div class="col-md-4 d-flex align-items-center"><i class="bi bi-calendar3 me-2"></i> <?= date('n/j/Y', strtotime($plan['scheduled_date'])) ?> <?= $plan['scheduled_time'] ? 'at ' . date('H:i', strtotime($plan['scheduled_time'])) : '' ?></div>
-                        <div class="col-md-4 d-flex align-items-center"><i class="bi bi-geo-alt me-2"></i> <?= htmlspecialchars($plan['location'] ?? 'TBA') ?></div>
-                        <div class="col-md-4 text-end">Submitted: <?= date('n/j/Y', strtotime($plan['submitted_date'])) ?></div>
-                    </div>
-                    <?php if ($plan['files_attached'] > 0): ?>
-                    <div><span class="file-pill"><i class="bi bi-file-earmark-pdf"></i> <?= $plan['files_attached'] ?> document(s)</span></div>
-                    <?php endif; ?>
-                    <div>
-                        <a class="obj-toggle" data-bs-toggle="collapse" href="#collapseObj<?= $plan['id'] ?>" role="button" aria-expanded="false">
-                            <i class="bi bi-caret-right-fill" style="font-size: 0.7rem;"></i> View Objectives
-                        </a>
-                        <div class="collapse" id="collapseObj<?= $plan['id'] ?>">
-                            <div class="obj-content"><?= nl2br(htmlspecialchars($plan['objectives'])) ?></div>
-                        </div>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p class="text-muted">No activity plans submitted yet.</p>
-        <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Right Panel: Plan Template Form -->
+        <div class="col-lg-4">
+            <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
+                <div style="padding: 20px 24px; border-bottom: 1px solid #F3F4F6;">
+                    <h6 class="fw-bold mb-0" style="color: #374151;">Plan Template</h6>
+                </div>
+                
+                <form method="POST" action="" style="padding: 24px;">
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Tree-Planting Drive" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;" required>
+                    </div>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Date</label>
+                            <input type="date" name="scheduled_date" class="form-control" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Duration (hrs)</label>
+                            <input type="number" name="duration" class="form-control" value="3" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Section</label>
+                        <select name="section_id" class="form-select" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;" required>
+                            <?php foreach ($all_assigned_sections as $sec): ?>
+                                <option value="<?= $sec['id'] ?>">
+                                    <?= htmlspecialchars($sec['component'] . ' 1 - Section ' . substr($sec['section_name'], -1)) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <!-- Hidden fields to support existing controller logic -->
+                    <input type="hidden" name="description" value="Created via Quick Template">
+                    <input type="hidden" name="location" value="TBA">
+                    
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Objectives</label>
+                        <textarea name="objectives" class="form-control" rows="3" placeholder="State 2-3 measurable objectives..." style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;" required></textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Attachments</label>
+                        <div style="border: 1px dashed #A7F3D0; background-color: #F0FDF4; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                            <i class="bi bi-upload" style="color: #10B981; margin-right: 6px;"></i>
+                            <span style="color: #10B981; font-size: 0.8rem; font-weight: 500;">Add File</span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-light" style="padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; color: #374151; border: 1px solid #E5E7EB; background: white;">Save Draft</button>
+                        <button type="submit" name="submit_plan" class="btn btn-success" style="padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; background: #059669; border: none;">Submit for Approval</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
 </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/js/pages/instructor-activity-plans.js"></script>
 </body>
 </html>
