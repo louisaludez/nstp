@@ -52,7 +52,28 @@ try {
       `status` enum('Present','Absent','Late') NOT NULL,
       PRIMARY KEY (`id`)
     );
+
+    CREATE TABLE IF NOT EXISTS `announcements` (
+      `id` int NOT NULL AUTO_INCREMENT,
+      `title` varchar(255) NOT NULL,
+      `content` text NOT NULL,
+      `source` varchar(100) NOT NULL DEFAULT 'NSTP Office',
+      `is_pinned` tinyint(1) DEFAULT 0,
+      `target_role` varchar(50) DEFAULT 'All',
+      `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`)
+    );
     ");
+
+    // Expand status enums to support Draft and Revision workflows
+    try {
+        $pdo->exec("ALTER TABLE `activity_plans` MODIFY `status` enum('Draft','Pending','Approved','Rejected') DEFAULT 'Pending'");
+    } catch (Exception $e) { /* column may already be updated */ }
+
+    try {
+        $pdo->exec("ALTER TABLE `accomplishment_reports` MODIFY `status` enum('Draft','Pending','Reviewed','Revision') DEFAULT 'Pending'");
+    } catch (Exception $e) { /* column may already be updated */ }
+
     echo "Done";
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();

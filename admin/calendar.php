@@ -202,6 +202,82 @@ include '../includes/admin_sidebar.php';
                     <?php endif; ?>
                 </div>
 
+                <!-- Actions Dropdown -->
+                <div class="dropdown ms-3">
+                    <button class="btn btn-sm text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: white; border: 1px solid transparent; border-radius: 6px; padding: 4px 8px;">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius: 8px; font-size: 0.85rem; border: 1px solid #E2E8F0;">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-bs-toggle="modal" data-bs-target="#editActivityModal<?= $act['id'] ?>" style="color: #475569;">
+                                <i class="bi bi-pencil" style="font-size: 0.9rem;"></i> Edit Activity
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this activity?');" class="m-0 p-0">
+                                <input type="hidden" name="activity_id" value="<?= $act['id'] ?>">
+                                <button type="submit" name="delete_activity" class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                    <i class="bi bi-trash" style="font-size: 0.9rem;"></i> Delete Activity
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Edit Activity Modal -->
+            <div class="modal fade" id="editActivityModal<?= $act['id'] ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius: 12px; border: none;">
+                        <div class="modal-header border-bottom" style="border-color: #E2E8F0 !important;">
+                            <h5 class="modal-title fw-bold" style="color: #111827; font-size: 1.1rem;">Edit Activity</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.75rem;"></button>
+                        </div>
+                        <form method="POST" action="">
+                            <div class="modal-body p-4">
+                                <input type="hidden" name="activity_id" value="<?= $act['id'] ?>">
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Title</label>
+                                    <input type="text" name="title" class="form-control figma-input p-2" value="<?= htmlspecialchars($act['title']) ?>" required>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Date</label>
+                                        <input type="date" name="activity_date" class="form-control figma-input p-2" value="<?= $act['activity_date'] ?>" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Time</label>
+                                        <input type="time" name="activity_time" class="form-control figma-input p-2" value="<?= $act['activity_time'] ?>" required>
+                                    </div>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Venue</label>
+                                        <input type="text" name="location" class="form-control figma-input p-2" value="<?= htmlspecialchars($act['location']) ?>" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Audience</label>
+                                        <select name="component" class="form-select figma-input p-2" required>
+                                            <option value="All Programs" <?= $act['component'] == 'All Programs' ? 'selected' : '' ?>>All Programs</option>
+                                            <option value="CWTS" <?= $act['component'] == 'CWTS' ? 'selected' : '' ?>>CWTS</option>
+                                            <option value="LTS" <?= $act['component'] == 'LTS' ? 'selected' : '' ?>>LTS</option>
+                                            <option value="ROTC" <?= $act['component'] == 'ROTC' ? 'selected' : '' ?>>ROTC</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label fw-medium text-muted" style="font-size: 0.8rem; margin-bottom: 4px;">Description</label>
+                                    <textarea name="description" class="form-control figma-input p-2" rows="3"><?= htmlspecialchars($act['description'] ?? '') ?></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-top p-3" style="border-color: #E2E8F0 !important;">
+                                <button type="button" class="btn btn-sm" data-bs-dismiss="modal" style="background: white; color: #475569; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px 16px; font-weight: 500;">Cancel</button>
+                                <button type="submit" name="edit_activity" class="btn btn-sm" style="background: #4F46E5; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 500;">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
             <?php endforeach; ?>
         <?php else: ?>
@@ -213,8 +289,9 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <p class="fw-semibold mb-1" style="color: var(--text-dark); font-size: 0.9rem;">No activities yet</p>
                 <p class="text-muted small mb-3">Schedule your first program-wide activity.</p>
-                <button type="button" class="btn-figma primary" data-bs-toggle="modal" data-bs-target="#addActivityModal">
-                    <i class="bi bi-plus-lg"></i> Create Activity
+                <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #4F46E5; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 500;" data-bs-toggle="collapse" data-bs-target="#addActivityPanel" aria-expanded="false" aria-controls="addActivityPanel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Create Activity
                 </button>
             </div>
         <?php endif; ?>

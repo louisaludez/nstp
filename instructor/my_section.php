@@ -52,17 +52,17 @@ include '../includes/instructor_sidebar.php';
                 
                 $full_name = ($sec['component'] == 'CWTS') ? 'Community Welfare Training Service' : (($sec['component'] == 'LTS') ? 'Literacy Training Service' : 'Reserve Officers\' Training Corps');
                 
-                $room = 'Bldg. ' . chr(rand(65, 68)) . ' - Rm ' . rand(100, 300);
+                // Generate stable (non-random) room/schedule from section ID as seed
+                $seed = $sec['id'];
+                $room = 'Bldg. ' . chr(65 + ($seed % 4)) . ' - Rm ' . (100 + (($seed * 37) % 200));
                 $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-                $day = $days[array_rand($days)];
-                $time = rand(8, 1) . ':00-' . rand(10, 4) . ':00 PM';
+                $day = $days[$seed % 5];
+                $start_hour = 8 + ($seed % 4);
+                $end_hour = $start_hour + 2;
+                $time = $start_hour . ':00-' . $end_hour . ':00 ' . ($end_hour >= 12 ? 'PM' : 'AM');
                 
-                // Determine semester badge based on index to mimic the image
-                if ($idx == 3) {
-                    $semester_text = "2nd Semester";
-                } else {
-                    $semester_text = "1st Semester";
-                }
+                // Use actual semester from database
+                $semester_text = ($sec['semester'] ?? '1st') === '2nd' ? '2nd Semester' : (($sec['semester'] ?? '1st') === 'Summer' ? 'Summer' : '1st Semester');
             ?>
             <div class="col-md-6">
                 <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column;">

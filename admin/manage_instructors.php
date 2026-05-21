@@ -48,16 +48,12 @@ include '../includes/admin_sidebar.php';
                     $initials .= strtoupper(substr(end($name_parts), 0, 1));
                 }
 
-                // Mocking department and sections to match UI design context if no exact db match
-                $dept = 'Faculty Member';
-                if ($inst['primary_component'] == 'CWTS') $dept = 'Medic';
-                elseif ($inst['primary_component'] == 'LTS') $dept = 'Mathematics';
-                elseif ($inst['primary_component'] == 'ROTC') $dept = 'Marching Band';
-
-                $main_section = ($inst['primary_component'] ?? 'NSTP') . '-1A';
+                $dept = $inst['primary_component'] ?? 'NSTP';
+                $main_section = !empty($inst['assigned_sections']) ? $inst['assigned_sections'] : 'Unassigned';
+                $status = $inst['status'] ?? 'Active';
             ?>
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100" style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#94A3B8'" onmouseout="this.style.borderColor='#E2E8F0'" onclick="viewInstructorDetails(<?= $inst['id'] ?>, '<?= htmlspecialchars(addslashes($inst['full_name'])) ?>', '<?= addslashes($dept) ?>', '<?= addslashes($main_section) ?>', <?= $inst['student_count'] ?? 0 ?>, '<?= htmlspecialchars(addslashes($inst['email'])) ?>', '<?= $initials ?>', '<?= $bg_color ?>')">
+                    <div class="card h-100" style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#94A3B8'" onmouseout="this.style.borderColor='#E2E8F0'" onclick="viewInstructorDetails(<?= $inst['id'] ?>, '<?= htmlspecialchars(addslashes($inst['full_name'])) ?>', '<?= addslashes($dept) ?>', '<?= addslashes($main_section) ?>', <?= $inst['student_count'] ?? 0 ?>, '<?= htmlspecialchars(addslashes($inst['email'])) ?>', '<?= $initials ?>', '<?= $bg_color ?>', '<?= $status ?>')">
                         <div class="d-flex align-items-center gap-3 mb-4">
                             <div style="width: 42px; height: 42px; border-radius: 50%; background: <?= $bg_color ?>; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; flex-shrink: 0;">
                                 <?= $initials ?>
@@ -118,7 +114,7 @@ include '../includes/admin_sidebar.php';
                     <div>
                         <div id="detailName" style="font-weight: 700; color: #111827; font-size: 1.1rem; margin-bottom: 2px;">Name</div>
                         <div id="detailDept" style="font-size: 0.85rem; color: #64748B; margin-bottom: 6px;">Dept</div>
-                        <span style="font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; background: #ECFDF5; color: #10B981; font-weight: 500;">Active</span>
+                        <span id="detailStatus" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; background: #ECFDF5; color: #10B981; font-weight: 500;">Active</span>
                     </div>
                 </div>
 
@@ -153,10 +149,13 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
             <div class="modal-footer border-top bg-light p-3 d-flex justify-content-between align-items-center" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
-                <button type="button" class="btn btn-sm d-flex align-items-center gap-2" style="background: #FFF1F2; color: #E11D48; border: 1px solid #FFE4E6; border-radius: 6px; padding: 6px 12px; font-weight: 500;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                    Delete
-                </button>
+                <form method="POST" action="" class="mb-0">
+                    <input type="hidden" name="instructor_id" id="deleteInstId">
+                    <button type="submit" name="delete_instructor" class="btn btn-sm d-flex align-items-center gap-2" style="background: #FFF1F2; color: #E11D48; border: 1px solid #FFE4E6; border-radius: 6px; padding: 6px 12px; font-weight: 500;" onclick="return confirm('Are you sure you want to delete this instructor? This action cannot be undone.');">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        Delete
+                    </button>
+                </form>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-sm" style="background: white; color: #1E293B; border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 16px; font-weight: 500;" onclick="openEditModal()">Edit</button>
                     <button type="button" class="btn btn-sm" style="background: #0F172A; color: white; border: none; border-radius: 6px; padding: 6px 16px; font-weight: 500;" data-bs-dismiss="modal">Close</button>
@@ -182,8 +181,12 @@ include '../includes/admin_sidebar.php';
                         <input type="text" name="full_name" id="editFullName" class="form-control" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 500;" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label text-muted fw-bold small" style="font-size: 0.7rem; letter-spacing: 0.05em;">DEPARTMENT / ROLE</label>
-                        <input type="text" name="department" id="editDept" class="form-control" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 500;" required>
+                        <label class="form-label text-muted fw-bold small" style="font-size: 0.7rem; letter-spacing: 0.05em;">COMPONENT</label>
+                        <select name="component" id="editDept" class="form-select" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 500;" required>
+                            <option value="CWTS">CWTS</option>
+                            <option value="LTS">LTS</option>
+                            <option value="ROTC">ROTC</option>
+                        </select>
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-6">
@@ -239,8 +242,12 @@ include '../includes/admin_sidebar.php';
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label" style="color: #64748B; font-size: 0.85rem; font-weight: 400;">Department</label>
-                            <input type="text" name="component" class="form-control" placeholder="e.g. Computer Science" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 400; padding: 10px 14px;" required>
+                            <label class="form-label" style="color: #64748B; font-size: 0.85rem; font-weight: 400;">Component</label>
+                            <select name="component" class="form-select" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 400; padding: 10px 14px;" required>
+                                <option value="CWTS">CWTS</option>
+                                <option value="LTS">LTS</option>
+                                <option value="ROTC">ROTC</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="color: #64748B; font-size: 0.85rem; font-weight: 400;">University Email</label>
@@ -270,9 +277,9 @@ include '../includes/admin_sidebar.php';
 <script>
 let currentInstructor = {};
 
-function viewInstructorDetails(id, name, dept, section, students, email, initials, bgColor) {
+function viewInstructorDetails(id, name, dept, section, students, email, initials, bgColor, status) {
     // Save for edit modal
-    currentInstructor = { id, name, dept, section, students, email };
+    currentInstructor = { id, name, dept, section, students, email, status };
 
     // Populate Details Modal
     document.getElementById('detailInitials').innerText = initials;
@@ -282,6 +289,19 @@ function viewInstructorDetails(id, name, dept, section, students, email, initial
     document.getElementById('detailSections').innerText = section || 'None';
     document.getElementById('detailStudents').innerText = `${students} Cadets / Students`;
     document.getElementById('detailEmail').innerText = email;
+    
+    let statusEl = document.getElementById('detailStatus');
+    statusEl.innerText = status;
+    if (status === 'Active') {
+        statusEl.style.background = '#ECFDF5';
+        statusEl.style.color = '#10B981';
+    } else {
+        statusEl.style.background = '#FEF2F2';
+        statusEl.style.color = '#EF4444';
+    }
+
+    // Set delete form ID
+    document.getElementById('deleteInstId').value = id;
 
     // Show Details Modal
     var detailsModal = new bootstrap.Modal(document.getElementById('instructorDetailsModal'));
@@ -301,6 +321,7 @@ function openEditModal() {
     document.getElementById('editSections').value = currentInstructor.section || 'None';
     document.getElementById('editStudents').value = currentInstructor.students;
     document.getElementById('editEmail').value = currentInstructor.email;
+    document.getElementById('editStatus').value = currentInstructor.status || 'Active';
 
     // Show Edit Modal
     setTimeout(() => {

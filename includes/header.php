@@ -94,7 +94,9 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
 
             /* Hide Text when collapsed */
             html.sidebar-collapsed .sidebar .sidebar-brand-wrap .brand-text,
-            html.sidebar-collapsed .sidebar .sidebar-section-label {
+            html.sidebar-collapsed .sidebar .sidebar-section-label,
+            html.sidebar-collapsed .sidebar .user-info-text,
+            html.sidebar-collapsed .sidebar .logout-btn {
                 display: none !important;
             }
             

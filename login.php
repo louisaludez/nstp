@@ -8,6 +8,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['role'])) {
     if ($role === 'Admin')       $redirect = 'admin/dashboard.php';
     elseif ($role === 'Instructor') $redirect = 'instructor/dashboard.php';
     elseif ($role === 'ROTC')    $redirect = 'rotc/dashboard.php';
+    elseif ($role === 'System Admin') $redirect = 'sysadmin/accounts.php';
     else                         $redirect = 'login.php';
     header("Location: $redirect");
     exit;
@@ -37,6 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: instructor/dashboard.php");
         } elseif ($_SESSION['role'] === 'ROTC') {
             header("Location: rotc/dashboard.php");
+        } elseif ($_SESSION['role'] === 'System Admin') {
+            header("Location: sysadmin/accounts.php");
         } else {
             $error = "Unauthorized role. Please contact the administrator.";
         }
@@ -63,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #EEF2FF 0%, #F8F9FB 40%, #ECFDF5 100%);
+            background-color: #F8FAFC;
             padding: 40px 20px;
         }
 

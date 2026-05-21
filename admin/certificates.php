@@ -75,9 +75,19 @@ include '../includes/admin_sidebar.php';
                         <span style="font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; <?= $statusClass ?>">
                             <?= $statusLabel ?>
                         </span>
-                        <button class="btn btn-sm" style="background: #0F172A; color: white; border-radius: 8px; font-weight: 500; padding: 6px 16px; font-size: 0.8rem;" onclick="alert('Generating certificate for <?= htmlspecialchars($batch['section_name']) ?>…')">
+                        <?php if ($ready): ?>
+                        <form method="POST" class="m-0 p-0 d-inline" onsubmit="return confirm('Are you sure you want to generate certificates for <?= htmlspecialchars($batch['section_name']) ?>?');">
+                            <input type="hidden" name="action" value="generate_certificates">
+                            <input type="hidden" name="section_name" value="<?= htmlspecialchars($batch['section_name']) ?>">
+                            <button type="submit" class="btn btn-sm" style="background: #0F172A; color: white; border-radius: 8px; font-weight: 500; padding: 6px 16px; font-size: 0.8rem;">
+                                Generate
+                            </button>
+                        </form>
+                        <?php else: ?>
+                        <button class="btn btn-sm" style="background: #E2E8F0; color: #64748B; border-radius: 8px; font-weight: 500; padding: 6px 16px; font-size: 0.8rem;" disabled>
                             Generate
                         </button>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endforeach; else: ?>
@@ -113,7 +123,7 @@ include '../includes/admin_sidebar.php';
                     <?php if (count($recent_certs) > 0):
                         foreach ($recent_certs as $idx => $cert):
                             $c = certComponentColor($cert['component']);
-                            $relDate = relativeDate($cert['updated_at']);
+                            $relDate = relativeDate($cert['created_at']);
                     ?>
                     <div class="d-flex align-items-center gap-3 px-4 py-3" style="transition: background-color 0.15s; cursor: pointer;" onmouseover="this.style.backgroundColor='#F8FAFC'" onmouseout="this.style.backgroundColor='transparent'">
 

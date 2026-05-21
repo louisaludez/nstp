@@ -67,3 +67,27 @@ while ($row = $stmtCompTotal->fetch(PDO::FETCH_ASSOC)) {
 $cwts_total = $comp_totals['CWTS'] ?? 0;
 $lts_total  = $comp_totals['LTS'] ?? 0;
 $rotc_total = $comp_totals['ROTC'] ?? 0;
+
+$failure_rate = $total_graded > 0 ? round(($total_failed / $total_graded) * 100, 1) : 0;
+
+$stmtArchived = $pdo->query("
+    SELECT 
+        e.id as enrollment_id,
+        s.student_id,
+        CONCAT(s.last_name, ', ', s.first_name) as full_name,
+        s.sex as gender,
+        sec.section_name,
+        sec.component as program,
+        u.full_name as instructor_name,
+        e.final_grade,
+        e.status as remarks,
+        e.created_at as date_archived
+    FROM enrollments e
+    JOIN students s ON e.student_id = s.student_id
+    JOIN sections sec ON e.section_id = sec.id
+    LEFT JOIN users u ON sec.instructor_id = u.id
+    WHERE e.status IN ('Passed', 'Failed')
+    ORDER BY e.created_at DESC
+");
+$archived_records = $stmtArchived->fetchAll();
+$archived_count = count($archived_records);

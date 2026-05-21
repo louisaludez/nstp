@@ -18,6 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_activity'])) {
              VALUES (?, ?, ?, ?, ?, ?)"
         );
         $stmt->execute([$title, $component, $date, $time, $location, $description]);
+        if (function_exists('logAction')) {
+            logAction($pdo, 'Create Activity', "Created activity: $title");
+        }
         $message = "Activity successfully scheduled.";
         $msgType = "success";
     } catch (PDOException $e) {
@@ -25,6 +28,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_activity'])) {
         $msgType = "danger";
     }
 }
+
+// ── Handle edit activity POST ────────────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_activity'])) {
+    $id          = $_POST['activity_id'];
+    $title       = trim($_POST['title']);
+    $component   = $_POST['component'];
+    $date        = $_POST['activity_date'];
+    $time        = $_POST['activity_time'];
+    $location    = trim($_POST['location']);
+    $description = trim($_POST['description']);
+    try {
+        $stmt = $pdo->prepare(
+            "UPDATE activities 
+             SET title = ?, component = ?, activity_date = ?, activity_time = ?, location = ?, description = ?
+             WHERE id = ?"
+        );
+        $stmt->execute([$title, $component, $date, $time, $location, $description, $id]);
+        if (function_exists('logAction')) {
+            logAction($pdo, 'Edit Activity', "Updated activity ID: $id ($title)");
+        }
+        $message = "Activity successfully updated.";
+        $msgType = "success";
+    } catch (PDOException $e) {
+        $message = "Database Error: " . $e->getMessage();
+        $msgType = "danger";
+    }
+}
+
+// ── Handle delete activity POST ──────────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_activity'])) {
+    $id = $_POST['activity_id'];
+    try {
+        $stmt = $pdo->prepare("DELETE FROM activities WHERE id = ?");
+        $stmt->execute([$id]);
+        if (function_exists('logAction')) {
+            logAction($pdo, 'Delete Activity', "Deleted activity ID: $id");
+        }
+        $message = "Activity successfully deleted.";
+        $msgType = "success";
+    } catch (PDOException $e) {
+        $message = "Database Error: " . $e->getMessage();
+        $msgType = "danger";
+    }
+}
+
 
 // ── Week window (Mon → Sun, shifted by weekOffset) ───────────────────────────
 $today      = new DateTime();

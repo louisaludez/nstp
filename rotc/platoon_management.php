@@ -7,6 +7,89 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ROTC') {
     exit;
 }
 
+$officer_id = $_SESSION['user_id'];
+
+// Handle Form Submissions
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['action']) && $_POST['action'] === 'create_platoon') {
+        $platoon_name = trim($_POST['platoon_name']);
+        $semester = trim($_POST['semester']);
+        $school_year = date('Y') . '-' . (date('Y') + 1);
+
+        try {
+            // Insert Platoon
+            $stmt = $pdo->prepare("INSERT INTO sections (component, section_name, school_year, semester, instructor_id) VALUES ('ROTC', ?, ?, ?, ?)");
+            $stmt->execute([$platoon_name, $school_year, $semester, $officer_id]);
+            $section_id = $pdo->lastInsertId();
+
+            // Handle CSV Upload
+            if (isset($_FILES['cadets_csv']) && $_FILES['cadets_csv']['error'] == 0) {
+                $fileTemp = $_FILES['cadets_csv']['tmp_name'];
+                if (($handle = fopen($fileTemp, "r")) !== FALSE) {
+                    $header = fgetcsv($handle, 1000, ",");
+                    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                        // Expected CSV format: student_id, first_name, last_name, course, year_level, sex
+                        if (count($data) >= 3) {
+                            $student_id = trim($data[0]);
+                            $first_name = trim($data[1]);
+                            $last_name = trim($data[2]);
+                            $course = trim($data[3] ?? '');
+                            $year_level = intval($data[4] ?? 1);
+                            $sex = trim($data[5] ?? 'Male');
+
+                            // Insert or Ignore Student
+                            $check = $pdo->prepare("SELECT student_id FROM students WHERE student_id = ?");
+                            $check->execute([$student_id]);
+                            if ($check->rowCount() == 0) {
+                                $insStud = $pdo->prepare("INSERT INTO students (student_id, first_name, last_name, course, year_level, component, sex) VALUES (?, ?, ?, ?, ?, 'ROTC', ?)");
+                                $insStud->execute([$student_id, $first_name, $last_name, $course, $year_level, $sex]);
+                            }
+
+                            // Insert Enrollment
+                            $insEnr = $pdo->prepare("INSERT INTO enrollments (student_id, section_id) VALUES (?, ?)");
+                            $insEnr->execute([$student_id, $section_id]);
+                        }
+                    }
+                    fclose($handle);
+                }
+            }
+
+            $_SESSION['success'] = "Platoon created successfully.";
+            header("Location: platoon_management.php");
+            exit;
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Error: " . $e->getMessage();
+        }
+    } elseif (isset($_POST['action']) && $_POST['action'] === 'delete_platoon') {
+        $section_id = $_POST['section_id'];
+        $stmt = $pdo->prepare("DELETE FROM sections WHERE id = ?");
+        $stmt->execute([$section_id]);
+        $_SESSION['success'] = "Platoon deleted.";
+        header("Location: platoon_management.php");
+        exit;
+    }
+}
+
+// Fetch Data
+try {
+    // Total assigned officers (unique instructors in ROTC sections)
+    $s1 = $pdo->prepare("SELECT COUNT(DISTINCT instructor_id) FROM sections WHERE component='ROTC'");
+    $s1->execute(); $total_officers = $s1->fetchColumn() ?: 0;
+
+    // Active Platoons count
+    $s2 = $pdo->prepare("SELECT COUNT(*) FROM sections WHERE component='ROTC'");
+    $s2->execute(); $active_platoons = $s2->fetchColumn() ?: 0;
+
+    // Fetch Platoons list
+    $s3 = $pdo->prepare("SELECT s.*, (SELECT COUNT(*) FROM enrollments WHERE section_id=s.id) as cadet_count FROM sections s WHERE s.component='ROTC' ORDER BY s.id DESC");
+    $s3->execute(); $platoons = $s3->fetchAll();
+
+} catch (Exception $e) {
+    $total_officers = 0;
+    $active_platoons = 0;
+    $platoons = [];
+}
+
 $extra_css = ['../assets/css/style.css'];
 include '../includes/header.php';
 include '../includes/rotc_sidebar.php';
@@ -41,7 +124,7 @@ include '../includes/rotc_sidebar.php';
                     <i class="bi bi-people"></i>
                 </div>
                 <div>
-                    <div style="font-size: 1.75rem; font-weight: 700; color: #0F172A; line-height: 1.2;">6</div>
+                    <div style="font-size: 1.75rem; font-weight: 700; color: #0F172A; line-height: 1.2;"><?= $total_officers ?></div>
                     <div style="font-size: 0.8rem; color: #64748B;">Total Assigned Officers</div>
                 </div>
             </div>
@@ -54,7 +137,7 @@ include '../includes/rotc_sidebar.php';
                     <i class="bi bi-shield"></i>
                 </div>
                 <div>
-                    <div style="font-size: 1.75rem; font-weight: 700; color: #0F172A; line-height: 1.2;">3</div>
+                    <div style="font-size: 1.75rem; font-weight: 700; color: #0F172A; line-height: 1.2;"><?= $active_platoons ?></div>
                     <div style="font-size: 0.8rem; color: #64748B;">Active Platoons</div>
                 </div>
             </div>
@@ -81,29 +164,21 @@ include '../includes/rotc_sidebar.php';
                         <th style="padding: 16px 24px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Status</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr style="border-bottom: 1px solid #F8FAFC; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'" data-bs-toggle="modal" data-bs-target="#alphaPlatoonModal">
-                        <td style="padding: 20px 24px; font-weight: 600; color: #0F172A;">Alpha Platoon</td>
-                        <td style="padding: 20px 24px; color: #475569;">3 Cadets</td>
+                    <?php if(count($platoons) == 0): ?>
+                    <tr><td colspan="3" class="text-center py-4 text-muted">No platoons found.</td></tr>
+                    <?php else: foreach($platoons as $p): ?>
+                    <tr style="border-bottom: 1px solid #F8FAFC; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'" data-bs-toggle="modal" data-bs-target="#platoonModal<?= $p['id'] ?>">
+                        <td style="padding: 20px 24px; font-weight: 600; color: #0F172A;"><?= htmlspecialchars($p['section_name']) ?></td>
+                        <td style="padding: 20px 24px; color: #475569;"><?= $p['cadet_count'] ?> Cadets</td>
                         <td style="padding: 20px 24px;">
-                            <span style="background: #ECFDF5; color: #10B981; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">1st Semester</span>
+                            <?php if($p['semester'] === '1st'): ?>
+                                <span style="background: #ECFDF5; color: #10B981; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">1st Semester</span>
+                            <?php else: ?>
+                                <span style="background: #FFFBEB; color: #F59E0B; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">2nd Semester</span>
+                            <?php endif; ?>
                         </td>
                     </tr>
-                    <tr style="border-bottom: 1px solid #F8FAFC; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 20px 24px; font-weight: 600; color: #0F172A;">Bravo Platoon</td>
-                        <td style="padding: 20px 24px; color: #475569;">2 Cadets</td>
-                        <td style="padding: 20px 24px;">
-                            <span style="background: #FFFBEB; color: #F59E0B; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">2nd Semester</span>
-                        </td>
-                    </tr>
-                    <tr style="cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 20px 24px; font-weight: 600; color: #0F172A;">Charlie Platoon</td>
-                        <td style="padding: 20px 24px; color: #475569;">1 Cadets</td>
-                        <td style="padding: 20px 24px;">
-                            <span style="background: #FFFBEB; color: #F59E0B; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">2nd Semester</span>
-                        </td>
-                    </tr>
-                </tbody>
+                    <?php endforeach; endif; ?>
             </table>
         </div>
     </div>
@@ -113,7 +188,8 @@ include '../includes/rotc_sidebar.php';
 <!-- New Platoon Modal -->
 <div class="modal fade" id="newPlatoonModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
-        <div class="modal-content" style="border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+        <form method="POST" action="platoon_management.php" enctype="multipart/form-data" class="modal-content" style="border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            <input type="hidden" name="action" value="create_platoon">
             <div class="modal-header border-0" style="padding: 24px 24px 16px;">
                 <div>
                     <h5 class="modal-title fw-bold mb-1" style="color: #0F172A; font-size: 1.15rem;">New Platoon</h5>
@@ -125,50 +201,53 @@ include '../includes/rotc_sidebar.php';
                 <div class="row g-3 mb-4">
                     <div class="col-6">
                         <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Platoon Name</label>
-                        <input type="text" class="form-control" placeholder="e.g. Delta" style="border-radius: 8px; border-color: #E2E8F0; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;">
+                        <input type="text" name="platoon_name" class="form-control" placeholder="e.g. Delta" required style="border-radius: 8px; border-color: #E2E8F0; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;">
                     </div>
                     <div class="col-6">
                         <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Status</label>
-                        <select class="form-select" style="border-radius: 8px; border-color: #6366F1; font-size: 0.85rem; padding: 10px 12px; box-shadow: none; color: #0F172A; background-color: #F8FAFC;">
-                            <option>1st Semester</option>
-                            <option>2nd Semester</option>
+                        <select name="semester" class="form-select" required style="border-radius: 8px; border-color: #6366F1; font-size: 0.85rem; padding: 10px 12px; box-shadow: none; color: #0F172A; background-color: #F8FAFC;">
+                            <option value="1st">1st Semester</option>
+                            <option value="2nd">2nd Semester</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="mb-2">
-                    <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Import Cadets List XLSX File</label>
-                    <div style="border: 1px dashed #A7F3D0; background: #ECFDF5; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer;">
-                        <i class="bi bi-upload" style="color: #10B981; margin-right: 6px;"></i>
-                        <span style="color: #10B981; font-size: 0.85rem; font-weight: 500;">Upload XLSX List</span>
-                    </div>
+                    <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Import Cadets List CSV File (Optional)</label>
+                    <input type="file" name="cadets_csv" class="form-control" accept=".csv" style="border-radius: 8px; border: 1px solid #E2E8F0; font-size: 0.85rem; padding: 10px 12px;">
+                    <small class="text-muted d-block mt-2" style="font-size: 0.7rem;">Format: student_id, first_name, last_name, course, year_level, sex</small>
                 </div>
             </div>
             <div class="modal-footer border-0" style="padding: 16px 24px 24px;">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; color: #475569; border: 1px solid #E2E8F0; background: white;">Cancel</button>
-                <button type="button" class="btn btn-dark" style="padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; background: #0F172A; border: none; display: flex; align-items: center; gap: 8px;">
+                <button type="submit" class="btn btn-dark" style="padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; background: #0F172A; border: none; display: flex; align-items: center; gap: 8px;">
                     <i class="bi bi-shield"></i> Create Platoon
                 </button>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
-<!-- Alpha Platoon Modal -->
-<div class="modal fade" id="alphaPlatoonModal" tabindex="-1" aria-hidden="true">
+<?php foreach($platoons as $p): ?>
+<!-- Platoon Modal <?= $p['id'] ?> -->
+<div class="modal fade" id="platoonModal<?= $p['id'] ?>" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content" style="border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
             
             <!-- Dark Header -->
             <div class="modal-header border-0 d-flex justify-content-between align-items-start" style="background: #0F172A; padding: 24px; border-radius: 12px 12px 0 0;">
                 <div>
-                    <h4 class="modal-title fw-bold mb-1" style="color: white; font-size: 1.25rem;">Alpha Platoon — Assign Cadets Section</h4>
-                    <div style="color: #94A3B8; font-size: 0.85rem;">3 assigned · Click a row to select & remove</div>
+                    <h4 class="modal-title fw-bold mb-1" style="color: white; font-size: 1.25rem;"><?= htmlspecialchars($p['section_name']) ?> — Assign Cadets Section</h4>
+                    <div style="color: #94A3B8; font-size: 0.85rem;"><?= $p['cadet_count'] ?> assigned</div>
                 </div>
                 <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-outline-danger" style="border-radius: 8px; font-size: 0.8rem; font-weight: 500; padding: 6px 16px; border-color: rgba(239,68,68,0.3); color: #FCA5A5; display: flex; align-items: center; gap: 6px;">
-                        <i class="bi bi-trash3"></i> Delete Section
-                    </button>
+                    <form method="POST" action="platoon_management.php" onsubmit="return confirm('Are you sure you want to delete this platoon?');">
+                        <input type="hidden" name="action" value="delete_platoon">
+                        <input type="hidden" name="section_id" value="<?= $p['id'] ?>">
+                        <button type="submit" class="btn btn-outline-danger" style="border-radius: 8px; font-size: 0.8rem; font-weight: 500; padding: 6px 16px; border-color: rgba(239,68,68,0.3); color: #FCA5A5; display: flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-trash3"></i> Delete Platoon
+                        </button>
+                    </form>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
             </div>
@@ -178,121 +257,39 @@ include '../includes/rotc_sidebar.php';
                 <table class="table table-borderless mb-0" style="font-size: 0.85rem;">
                     <thead style="position: sticky; top: 0; background: white; border-bottom: 1px solid #F1F5F9; z-index: 1;">
                         <tr>
-                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">#</th>
-                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Officer Name</th>
-                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Rank</th>
-                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Specialty</th>
-                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Date of Birth</th>
+                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">ID</th>
+                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Name</th>
+                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Course</th>
+                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Year Level</th>
                             <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Gender</th>
-                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Residential Address</th>
                             <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Cell #</th>
-                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase;">Email Address</th>
-                            <th style="padding: 16px; font-size: 0.7rem; font-weight: 600; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase; text-align: center;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <?php
+                        $st = $pdo->prepare("SELECT s.* FROM students s JOIN enrollments e ON s.student_id=e.student_id WHERE e.section_id=?");
+                        $st->execute([$p['id']]);
+                        $cadets = $st->fetchAll();
+                        if (count($cadets) == 0):
+                        ?>
+                        <tr><td colspan="6" class="text-center py-4 text-muted">No cadets assigned to this platoon yet.</td></tr>
+                        <?php else: foreach($cadets as $c): ?>
                         <tr style="border-bottom: 1px solid #F8FAFC; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
-                            <td style="padding: 16px; color: #64748B;">1</td>
-                            <td style="padding: 16px; font-weight: 600; color: #0F172A;">C/Sgt. Cruz, L.</td>
-                            <td style="padding: 16px; color: #64748B;">Sgt</td>
-                            <td style="padding: 16px;">
-                                <span style="background: #EEF2FF; color: #6366F1; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">Rifle</span>
-                            </td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #94A3B8; text-align: center;"><i class="bi bi-chevron-right"></i></td>
+                            <td style="padding: 16px; color: #64748B;"><?= htmlspecialchars($c['student_id']) ?></td>
+                            <td style="padding: 16px; font-weight: 600; color: #0F172A;"><?= htmlspecialchars($c['last_name'].', '.$c['first_name']) ?></td>
+                            <td style="padding: 16px; color: #64748B;"><?= htmlspecialchars($c['course'] ?: '—') ?></td>
+                            <td style="padding: 16px; color: #64748B;"><?= htmlspecialchars($c['year_level'] ?: '—') ?></td>
+                            <td style="padding: 16px; color: #64748B;"><?= htmlspecialchars($c['sex'] ?: '—') ?></td>
+                            <td style="padding: 16px; color: #64748B;"><?= htmlspecialchars($c['contact_number'] ?: '—') ?></td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #F8FAFC; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
-                            <td style="padding: 16px; color: #64748B;">2</td>
-                            <td style="padding: 16px; font-weight: 600; color: #0F172A;">C/Pvt. Mendoza, F.</td>
-                            <td style="padding: 16px; color: #64748B;">Pvt</td>
-                            <td style="padding: 16px;">
-                                <span style="background: #EEF2FF; color: #6366F1; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">Rifle</span>
-                            </td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #94A3B8; text-align: center;"><i class="bi bi-chevron-right"></i></td>
-                        </tr>
-                        <tr style="cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
-                            <td style="padding: 16px; color: #64748B;">3</td>
-                            <td style="padding: 16px; font-weight: 600; color: #0F172A;">C/Pvt. Garcia, T.</td>
-                            <td style="padding: 16px; color: #64748B;">Pvt</td>
-                            <td style="padding: 16px;">
-                                <span style="background: #EEF2FF; color: #6366F1; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">Medical</span>
-                            </td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #64748B;">—</td>
-                            <td style="padding: 16px; color: #94A3B8; text-align: center;"><i class="bi bi-chevron-right"></i></td>
-                        </tr>
+                        <?php endforeach; endif; ?>
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Assign Form -->
-            <div class="modal-footer border-0" style="background: white; padding: 24px; border-top: 1px solid #F1F5F9; display: block;">
-                <div style="font-size: 0.75rem; font-weight: 700; color: #94A3B8; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 16px;">Assign Officer to Alpha Section</div>
-                
-                <div class="row g-3 mb-3">
-                    <div class="col-md-3">
-                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Officer Name</label>
-                        <input type="text" class="form-control" placeholder="Officer Name (Last, First M.)" style="border-radius: 8px; border-color: #E2E8F0; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Rank</label>
-                        <input type="text" class="form-control" placeholder="Rank" style="border-radius: 8px; border-color: #E2E8F0; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Specialty</label>
-                        <input type="text" class="form-control" placeholder="Specialty" style="border-radius: 8px; border-color: #E2E8F0; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Date of Birth</label>
-                        <input type="text" class="form-control" placeholder="Date of Birth" style="border-radius: 8px; border-color: #E2E8F0; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;">
-                    </div>
-                </div>
-                
-                <div class="row g-3 mb-3">
-                    <div class="col-md-3">
-                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Gender</label>
-                        <select class="form-select" style="border-radius: 8px; border-color: #E2E8F0; font-size: 0.85rem; padding: 10px 12px; box-shadow: none; color: #475569;">
-                            <option>Gender</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Residential Address</label>
-                        <input type="text" class="form-control" placeholder="Residential Address" style="border-radius: 8px; border-color: #E2E8F0; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Cell #</label>
-                        <input type="text" class="form-control" placeholder="Cell #" style="border-radius: 8px; border-color: #E2E8F0; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;">
-                    </div>
-                </div>
-                
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #64748B;">Email Address</label>
-                        <input type="text" class="form-control" placeholder="Email Address" style="border-radius: 8px; border-color: #E2E8F0; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-dark w-100" style="padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; background: #0F172A; border: none; display: flex; justify-content: center; align-items: center; gap: 6px;">
-                            <i class="bi bi-plus-lg"></i> Add Cadets
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
         </div>
     </div>
 </div>
+<?php endforeach; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

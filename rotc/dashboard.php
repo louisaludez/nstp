@@ -47,8 +47,8 @@ try {
 
 // ── Recent Accomplishment Reports ─────────────────────────────────────────────
 try {
-    $s = $pdo->prepare("SELECT ar.*, u.full_name AS instructor_name FROM accomplishment_reports ar LEFT JOIN users u ON ar.instructor_id=u.id ORDER BY ar.submitted_date DESC LIMIT 5");
-    $s->execute(); $reports = $s->fetchAll();
+    $s = $pdo->prepare("SELECT ar.*, u.full_name AS instructor_name FROM accomplishment_reports ar LEFT JOIN users u ON ar.instructor_id=u.id WHERE ar.instructor_id=? ORDER BY ar.submitted_date DESC LIMIT 5");
+    $s->execute([$officer_id]); $reports = $s->fetchAll();
 } catch (Exception $e) { $reports = []; }
 
 $extra_css = ['../assets/css/style.css'];
@@ -121,42 +121,27 @@ include '../includes/rotc_sidebar.php';
                     <!-- Report Items -->
                     <div style="padding:4px 0;">
                         <?php
-                        // Sample data if no DB records
-                        if (count($reports) === 0) {
-                            $reports = [
-                                ['title'=>'Q1 Tactical Drill Accomplishment','submitted_date'=>date('Y-m-d', strtotime('-3 days')),'status'=>'Pending','progress'=>60,'instructor_name'=>'Drill Sergeant'],
-                                ['title'=>'Civil-Military Operations Report','submitted_date'=>date('Y-m-d', strtotime('-5 days')),'status'=>'Under Review','progress'=>100,'instructor_name'=>'Lt. Santos'],
-                                ['title'=>'Community Outreach — Brgy. San Roque','submitted_date'=>date('Y-m-d', strtotime('-9 days')),'status'=>'Approved','progress'=>100,'instructor_name'=>'Lt. Reyes'],
-                                ['title'=>'Monthly Strength Report — May','submitted_date'=>date('Y-m-d', strtotime('-1 days')),'status'=>'Rejected','progress'=>75,'instructor_name'=>'Lt. Garcia'],
+                        if (count($reports) === 0): ?>
+                            <div style="padding:20px 24px; text-align:center; color:#94A3B8; font-size:0.85rem;">
+                                No recent accomplishment reports found.
+                            </div>
+                        <?php else:
+                            $statusConfig = [
+                                'Draft'        => ['label'=>'Draft',        'color'=>'#4B5563','bg'=>'transparent','barColor'=>'#94A3B8'],
+                                'Pending'      => ['label'=>'Under Review', 'color'=>'#6366F1','bg'=>'#EEF2FF',   'barColor'=>'#6366F1'],
+                                'Reviewed'     => ['label'=>'Approved',     'color'=>'#10B981','bg'=>'#ECFDF5',   'barColor'=>'#10B981'],
+                                'Revision'     => ['label'=>'Revisions',    'color'=>'#EF4444','bg'=>'#FEF2F2',   'barColor'=>'#EF4444'],
                             ];
-                        }
 
-                        $statusConfig = [
-                            'Pending'      => ['label'=>'Draft',        'color'=>'#4B5563','bg'=>'transparent','barColor'=>'#94A3B8'],
-                            'Under Review' => ['label'=>'Under Review', 'color'=>'#6366F1','bg'=>'#EEF2FF',   'barColor'=>'#6366F1'],
-                            'Approved'     => ['label'=>'Approved',     'color'=>'#10B981','bg'=>'#ECFDF5',   'barColor'=>'#10B981'],
-                            'Rejected'     => ['label'=>'Revisions',    'color'=>'#EF4444','bg'=>'#FEF2F2',   'barColor'=>'#EF4444'],
-                        ];
-
-                        foreach ($reports as $i => $rep):
-                            $status = $rep['status'];
-                            if ($i === 0) {
-                                $cfg = $statusConfig['Pending'];
-                                $dateLabel = 'Due May 18';
-                                $prog = 60;
-                            } elseif ($i === 1) {
-                                $cfg = $statusConfig['Under Review'];
-                                $dateLabel = 'Submitted May 8';
-                                $prog = 100;
-                            } elseif ($i === 2) {
-                                $cfg = $statusConfig['Approved'];
-                                $dateLabel = 'Approved May 4';
-                                $prog = 100;
-                            } else {
-                                $cfg = $statusConfig['Rejected'];
-                                $dateLabel = 'Revisions requested';
-                                $prog = 75;
-                            }
+                            foreach ($reports as $i => $rep):
+                                $status = $rep['status'];
+                                $cfg = $statusConfig[$status] ?? $statusConfig['Draft'];
+                                $dateLabel = 'Submitted ' . date('M j', strtotime($rep['submitted_date'] ?? $rep['completed_date']));
+                                
+                                if ($status === 'Reviewed') $prog = 100;
+                                elseif ($status === 'Pending') $prog = 75;
+                                elseif ($status === 'Revision') $prog = 50;
+                                else $prog = 25;
                         ?>
                         <div style="padding:16px 24px;border-bottom:1px solid #F8FAFC;">
                             <!-- Top row: Icon, text, badge -->
@@ -166,7 +151,7 @@ include '../includes/rotc_sidebar.php';
                                         <i class="bi bi-file-earmark-text"></i>
                                     </div>
                                     <div>
-                                        <a href="reports.php" style="font-size:0.9rem;font-weight:500;color:#1E293B;text-decoration:none;">
+                                        <a href="accomplishment_reports.php" style="font-size:0.9rem;font-weight:500;color:#1E293B;text-decoration:none;">
                                             <?= htmlspecialchars($rep['title']) ?>
                                         </a>
                                         <div style="font-size:0.75rem;color:#94A3B8;margin-top:2px;"><?= $dateLabel ?></div>
@@ -188,7 +173,7 @@ include '../includes/rotc_sidebar.php';
                                 <span style="font-size:0.7rem;font-weight:500;color:#64748B;width:24px;text-align:right;"><?= $prog ?>%</span>
                             </div>
                         </div>
-                        <?php endforeach; ?>
+                        <?php endforeach; endif; ?>
                     </div>
                 </div>
             </div>
@@ -199,7 +184,7 @@ include '../includes/rotc_sidebar.php';
                     <div class="d-flex justify-content-between align-items-start mb-4">
                         <div>
                             <h6 style="font-weight:700;color:#0F172A;margin-bottom:2px;">Calendar of Activities</h6>
-                            <div style="font-size:0.8rem;color:#64748B;">May 2026</div>
+                            <div style="font-size:0.8rem;color:#64748B;"><?= date('F Y') ?></div>
                         </div>
                         <div style="width: 32px; height: 32px; border-radius: 8px; background: #EEF2FF; color: #6366F1; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
                             <i class="bi bi-calendar"></i>
@@ -217,21 +202,48 @@ include '../includes/rotc_sidebar.php';
                     </div>
                     
                     <?php
-                    $days = [
-                        ['','','','','','1','2'],
-                        ['3','4','5','6','7','8','9'],
-                        ['10','11','12','13','14','15','16'],
-                        ['17','18','19','20','21','22','23'],
-                        ['24','25','26','27','28','29','30'],
-                        ['31','','','','','','']
-                    ];
+                    // Dynamic Calendar Logic
+                    $year = date('Y');
+                    $month = date('n');
+                    $daysInMonth = date('t', mktime(0, 0, 0, $month, 1, $year));
+                    $firstDayOfWeek = date('w', mktime(0, 0, 0, $month, 1, $year));
                     
-                    $activeDays = ['14', '16', '24'];
-                    $currentDay = '20';
+                    // Fetch activities for ROTC this month
+                    $activeDays = [];
+                    try {
+                        $st = $pdo->prepare("SELECT DAY(activity_date) as d FROM activities WHERE component='ROTC' AND MONTH(activity_date)=? AND YEAR(activity_date)=?");
+                        $st->execute([$month, $year]);
+                        $activeDays = $st->fetchAll(PDO::FETCH_COLUMN);
+                        
+                        $st = $pdo->prepare("SELECT DAY(scheduled_date) as d FROM activity_plans WHERE instructor_id=? AND MONTH(scheduled_date)=? AND YEAR(scheduled_date)=?");
+                        $st->execute([$officer_id, $month, $year]);
+                        $activeDays = array_merge($activeDays, $st->fetchAll(PDO::FETCH_COLUMN));
+                        $activeDays = array_unique($activeDays);
+                    } catch (Exception $e) {}
+
+                    $currentDay = date('j');
+                    $weeks = [];
+                    $dayCounter = 1;
+                    
+                    for ($row = 0; $row < 6; $row++) {
+                        $week = [];
+                        for ($col = 0; $col < 7; $col++) {
+                            if ($row === 0 && $col < $firstDayOfWeek) {
+                                $week[] = '';
+                            } elseif ($dayCounter <= $daysInMonth) {
+                                $week[] = (string)$dayCounter;
+                                $dayCounter++;
+                            } else {
+                                $week[] = '';
+                            }
+                        }
+                        $weeks[] = $week;
+                        if ($dayCounter > $daysInMonth) break;
+                    }
                     ?>
                     
                     <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; row-gap: 16px; text-align: center; margin-bottom: 24px;">
-                        <?php foreach($days as $week): ?>
+                        <?php foreach($weeks as $week): ?>
                             <?php foreach($week as $day): 
                                 $isCurrent = ($day === $currentDay);
                                 $isActive = in_array($day, $activeDays);

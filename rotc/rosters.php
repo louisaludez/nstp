@@ -11,13 +11,42 @@ $extra_css = ['../assets/css/style.css'];
 include '../includes/header.php';
 include '../includes/rotc_sidebar.php';
 
-// Mock data matching the new design
-$officers = [
-    ['id' => '2024-00422', 'name' => 'Officer Bautista, Anna R.', 'rank' => 'Pvt', 'platoon' => 'Charlie', 'specialty' => 'Support', 'status' => '2nd Semester'],
-    ['id' => '2024-00513', 'name' => 'Officer Cruz, Luis P.', 'rank' => 'Sgt', 'platoon' => 'Alpha', 'specialty' => 'Rifle', 'status' => '1st Semester'],
-    ['id' => '2024-00622', 'name' => 'Officer Tan, Vince N.', 'rank' => 'Sgt', 'platoon' => 'Bravo', 'specialty' => 'Signal', 'status' => '2nd Semester'],
-    ['id' => '2024-00714', 'name' => 'Officer Lim, Sophie U.', 'rank' => 'Pvt', 'platoon' => 'Bravo', 'specialty' => 'Signal', 'status' => '1st Semester'],
-];
+// Filter and Search logic
+$search = $_GET['search'] ?? '';
+$platoon_filter = $_GET['platoon'] ?? 'All Platoons';
+
+$query = "
+    SELECT s.*, sec.section_name AS platoon, sec.semester AS status
+    FROM students s
+    JOIN enrollments e ON s.student_id = e.student_id
+    JOIN sections sec ON e.section_id = sec.id
+    WHERE s.component = 'ROTC'
+";
+$params = [];
+
+if ($search !== '') {
+    $query .= " AND (s.student_id LIKE ? OR s.first_name LIKE ? OR s.last_name LIKE ?)";
+    $search_term = "%$search%";
+    $params[] = $search_term;
+    $params[] = $search_term;
+    $params[] = $search_term;
+}
+
+if ($platoon_filter !== 'All Platoons' && $platoon_filter !== '') {
+    $query .= " AND sec.section_name = ?";
+    $params[] = $platoon_filter;
+}
+
+$query .= " ORDER BY s.last_name ASC";
+
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$officers = $stmt->fetchAll();
+
+// Fetch all active platoons for the filter dropdown
+$pStmt = $pdo->prepare("SELECT section_name FROM sections WHERE component='ROTC' ORDER BY section_name");
+$pStmt->execute();
+$platoonList = $pStmt->fetchAll(PDO::FETCH_COLUMN);
 ?>
 
 <div class="flex-grow-1 p-4 p-lg-5 w-100" style="background-color: #F8FAFC; min-height: 100vh;">
@@ -43,21 +72,21 @@ $officers = [
     <!-- Main Panel -->
     <div style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
         <!-- Filters -->
-        <div style="padding: 16px 24px; border-bottom: 1px solid #F1F5F9; display: flex; gap: 12px; align-items: center;">
+        <form method="GET" action="rosters.php" style="padding: 16px 24px; border-bottom: 1px solid #F1F5F9; display: flex; gap: 12px; align-items: center;">
             <div class="position-relative" style="width: 300px;">
                 <i class="bi bi-search position-absolute text-muted" style="left: 14px; top: 50%; transform: translateY(-50%); font-size: 0.85rem;"></i>
-                <input type="text" class="form-control shadow-none" placeholder="Search officer ID or name..." style="padding-left: 36px; border-radius: 8px; border: 1px solid #E2E8F0; font-size: 0.85rem; height: 38px;">
+                <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" class="form-control shadow-none" placeholder="Search officer ID or name..." style="padding-left: 36px; border-radius: 8px; border: 1px solid #E2E8F0; font-size: 0.85rem; height: 38px;">
             </div>
             
-            <button class="btn" style="background: #0F172A; color: white; border-radius: 8px; padding: 0 20px; font-size: 0.85rem; font-weight: 600; border: none; height: 38px;">Search</button>
+            <button type="submit" class="btn" style="background: #0F172A; color: white; border-radius: 8px; padding: 0 20px; font-size: 0.85rem; font-weight: 600; border: none; height: 38px;">Search</button>
             
-            <select class="form-select shadow-none" style="width: 180px; border-radius: 8px; border: 1px solid #E2E8F0; font-size: 0.85rem; color: #475569; font-weight: 500; height: 38px; padding-top: 0; padding-bottom: 0;">
+            <select name="platoon" onchange="this.form.submit()" class="form-select shadow-none" style="width: 180px; border-radius: 8px; border: 1px solid #E2E8F0; font-size: 0.85rem; color: #475569; font-weight: 500; height: 38px; padding-top: 0; padding-bottom: 0;">
                 <option>All Platoons</option>
-                <option>Alpha</option>
-                <option>Bravo</option>
-                <option>Charlie</option>
+                <?php foreach($platoonList as $pName): ?>
+                <option value="<?= htmlspecialchars($pName) ?>" <?= $pName === $platoon_filter ? 'selected' : '' ?>><?= htmlspecialchars($pName) ?></option>
+                <?php endforeach; ?>
             </select>
-        </div>
+        </form>
         
         <!-- Table -->
         <div class="table-responsive">
@@ -73,26 +102,28 @@ $officers = [
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($officers as $officer): ?>
+                    <?php if(count($officers) == 0): ?>
+                    <tr><td colspan="6" class="text-center py-4 text-muted">No cadets found.</td></tr>
+                    <?php else: foreach ($officers as $officer): ?>
                     <tr style="border-bottom: 1px solid #F8FAFC; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 20px 24px; color: #475569;"><?= htmlspecialchars($officer['id']) ?></td>
-                        <td style="padding: 20px 24px; font-weight: 500; color: #0F172A;"><?= htmlspecialchars($officer['name']) ?></td>
-                        <td style="padding: 20px 24px; color: #475569;"><?= htmlspecialchars($officer['rank']) ?></td>
+                        <td style="padding: 20px 24px; color: #475569;"><?= htmlspecialchars($officer['student_id']) ?></td>
+                        <td style="padding: 20px 24px; font-weight: 500; color: #0F172A;"><?= htmlspecialchars($officer['last_name'].', '.$officer['first_name']) ?></td>
+                        <td style="padding: 20px 24px; color: #475569;">Pvt</td>
                         <td style="padding: 20px 24px;">
                             <span style="background: #EEF2FF; color: #6366F1; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">
                                 <?= htmlspecialchars($officer['platoon']) ?>
                             </span>
                         </td>
-                        <td style="padding: 20px 24px; color: #475569;"><?= htmlspecialchars($officer['specialty']) ?></td>
+                        <td style="padding: 20px 24px; color: #475569;">Rifle</td>
                         <td style="padding: 20px 24px;">
-                            <?php if ($officer['status'] === '1st Semester'): ?>
+                            <?php if ($officer['status'] === '1st'): ?>
                                 <span style="background: #ECFDF5; color: #10B981; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">1st Semester</span>
                             <?php else: ?>
                                 <span style="background: #FFFBEB; color: #F59E0B; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500;">2nd Semester</span>
                             <?php endif; ?>
                         </td>
                     </tr>
-                    <?php endforeach; ?>
+                    <?php endforeach; endif; ?>
                 </tbody>
             </table>
         </div>

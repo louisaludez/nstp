@@ -94,7 +94,7 @@ include '../includes/instructor_sidebar.php';
                         <div style="font-size: 1.5rem; font-weight: 700; color: #111827; line-height: 1.2;"><?= $pending_reports ?></div>
                     </div>
                 </div>
-                <div class="text-muted" style="font-size: 0.75rem;">2 due this week</div>
+                <div class="text-muted" style="font-size: 0.75rem;"><?= $due_this_week ?> due this week</div>
             </div>
         </div>
         
@@ -110,7 +110,7 @@ include '../includes/instructor_sidebar.php';
                         <div style="font-size: 1.5rem; font-weight: 700; color: #111827; line-height: 1.2;"><?= $approved_reports ?></div>
                     </div>
                 </div>
-                <div class="text-muted" style="font-size: 0.75rem;">+5 this month</div>
+                <div class="text-muted" style="font-size: 0.75rem;">+<?= $approved_this_month ?> this month</div>
             </div>
         </div>
     </div>
@@ -141,16 +141,25 @@ include '../includes/instructor_sidebar.php';
                         
                         $full_name = ($sec['component'] == 'CWTS') ? 'Community Welfare Training Service' : (($sec['component'] == 'LTS') ? 'Literacy Training Service' : 'Reserve Officers\' Training Corps');
                         
-                        $room = 'Bldg. ' . chr(rand(65, 68)) . ' - Rm ' . rand(100, 300);
+                        // Use a stable hash per section to generate consistent room/day/time
+                        $hash = crc32($sec['id'] . $sec['section_name']);
+                        $room = 'Bldg. ' . chr(65 + ($hash % 4)) . ' - Rm ' . (100 + ($hash % 200));
                         $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-                        $day = $days[array_rand($days)];
-                        $time = rand(8, 1) . ':00-' . rand(10, 4) . ':00 PM';
+                        $day = $days[$hash % 5];
+                        $startHr = 7 + ($hash % 5);  // 7-11
+                        $endHr = $startHr + 2;
+                        $time = $startHr . ':00-' . $endHr . ':00 ' . ($endHr >= 12 ? 'PM' : 'AM');
                         
-                        // Determine semester badge based on index to mimic the image
-                        if ($idx == 3) {
+                        // Determine semester badge from the section's actual semester field
+                        $sem = $sec['semester'] ?? '1st';
+                        if ($sem === '2nd') {
                             $semester_text = "2nd Semester";
                             $semester_bg = "#EFF6FF";
                             $semester_color = "#3B82F6";
+                        } elseif ($sem === 'Summer') {
+                            $semester_text = "Summer";
+                            $semester_bg = "#FFF7ED";
+                            $semester_color = "#F97316";
                         } else {
                             $semester_text = "1st Semester";
                             $semester_bg = "#ECFDF5";
@@ -211,29 +220,12 @@ include '../includes/instructor_sidebar.php';
                         <div class="text-muted" style="font-size: 0.8rem;">Two-week preview of official dates</div>
                     </div>
                     <div class="text-muted d-flex align-items-center gap-1" style="font-size: 0.8rem;">
-                        <i class="bi bi-calendar"></i> May 2026
+                        <i class="bi bi-calendar"></i> <?= $calendar_month_label ?>
                     </div>
                 </div>
                 
                 <div class="d-flex flex-wrap" style="gap: 8px;">
-                    <?php
-                    $calendar_days = [
-                        ['day' => 'TUE', 'date' => '14', 'dot' => '#3B82F6'],
-                        ['day' => 'WED', 'date' => '15', 'dot' => ''],
-                        ['day' => 'THU', 'date' => '16', 'dot' => '#EF4444'],
-                        ['day' => 'FRI', 'date' => '17', 'dot' => ''],
-                        ['day' => 'SAT', 'date' => '18', 'dot' => ''],
-                        ['day' => 'SUN', 'date' => '19', 'dot' => ''],
-                        ['day' => 'MON', 'date' => '20', 'dot' => '#10B981', 'active' => true],
-                        ['day' => 'TUE', 'date' => '21', 'dot' => ''],
-                        ['day' => 'WED', 'date' => '22', 'dot' => ''],
-                        ['day' => 'THU', 'date' => '23', 'dot' => ''],
-                        ['day' => 'FRI', 'date' => '24', 'dot' => '#F59E0B'],
-                        ['day' => 'SAT', 'date' => '25', 'dot' => ''],
-                        ['day' => 'SUN', 'date' => '26', 'dot' => ''],
-                        ['day' => 'MON', 'date' => '27', 'dot' => '']
-                    ];
-                    ?>
+                    <?php /* $calendar_days is built dynamically in DashboardController */ ?>
                     <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; width: 100%;">
                         <?php foreach ($calendar_days as $cday): ?>
                             <div class="d-flex flex-column align-items-center justify-content-center py-2" style="border: 1px solid <?= !empty($cday['active']) ? '#E5E7EB' : '#F9FAFB' ?>; border-radius: 10px; background: <?= !empty($cday['active']) ? '#F9FAFB' : 'white' ?>; min-height: 70px;">
@@ -256,66 +248,32 @@ include '../includes/instructor_sidebar.php';
                 
                 <!-- List -->
                 <div class="list-group list-group-flush" style="padding: 0 12px;">
-                    <!-- Item 1: Draft -->
-                    <div class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center" style="border-bottom: 1px solid #F3F4F6 !important;">
-                        <div>
-                            <div style="font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 2px;">Tree-Planting Drive Report</div>
-                            <div style="font-size: 0.75rem; color: #6B7280;">CWTS 1 · Sec A · Due May 15</div>
+                    <?php if (count($tracker_items) > 0): ?>
+                        <?php foreach ($tracker_items as $ti_idx => $ti): 
+                            $is_last = $ti_idx === count($tracker_items) - 1;
+                            $border_style = $is_last ? '' : 'border-bottom: 1px solid #F3F4F6 !important;';
+                        ?>
+                        <div class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center" style="<?= $border_style ?>">
+                            <div>
+                                <div style="font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 2px;"><?= $ti['title'] ?></div>
+                                <div style="font-size: 0.75rem; color: #6B7280;"><?= $ti['subtitle'] ?></div>
+                            </div>
+                            <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: transparent; border: 1px solid <?= $ti['badge_border'] ?>; color: <?= $ti['badge_color'] ?>; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                                <i class="bi <?= $ti['badge_icon'] ?>" style="font-size: 0.65rem;"></i> <?= $ti['badge_label'] ?>
+                            </span>
                         </div>
-                        <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: transparent; border: 1px solid #E5E7EB; color: #4B5563; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                            <i class="bi bi-pencil" style="font-size: 0.65rem;"></i> Draft
-                        </span>
-                    </div>
-
-                    <!-- Item 2: Submitted -->
-                    <div class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center" style="border-bottom: 1px solid #F3F4F6 !important;">
-                        <div>
-                            <div style="font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 2px;">Adult Literacy Session #4</div>
-                            <div style="font-size: 0.75rem; color: #6B7280;">LTS 2 · Sec A · Submitted May 9</div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="list-group-item border-0 py-4 text-center">
+                            <div class="text-muted" style="font-size: 0.85rem;">No submissions yet</div>
                         </div>
-                        <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: transparent; border: 1px solid #BFDBFE; color: #3B82F6; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                            <i class="bi bi-clock-history" style="font-size: 0.65rem;"></i> Submitted
-                        </span>
-                    </div>
-
-                    <!-- Item 3: Approved -->
-                    <div class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center" style="border-bottom: 1px solid #F3F4F6 !important;">
-                        <div>
-                            <div style="font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 2px;">Barangay Clean-Up Plan</div>
-                            <div style="font-size: 0.75rem; color: #6B7280;">CWTS 1 · Sec C · Approved May 6</div>
-                        </div>
-                        <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: transparent; border: 1px solid #A7F3D0; color: #10B981; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                            <i class="bi bi-check-circle" style="font-size: 0.65rem;"></i> Approved
-                        </span>
-                    </div>
-
-                    <!-- Item 4: Revisions -->
-                    <div class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center" style="border-bottom: 1px solid #F3F4F6 !important;">
-                        <div>
-                            <div style="font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 2px;">Reading Buddies Kick-off</div>
-                            <div style="font-size: 0.75rem; color: #6B7280;">LTS 2 · Sec B · Needs revisions</div>
-                        </div>
-                        <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: transparent; border: 1px solid #FECACA; color: #EF4444; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                            <i class="bi bi-exclamation-circle" style="font-size: 0.65rem;"></i> Revisions
-                        </span>
-                    </div>
-
-                    <!-- Item 5: Draft -->
-                    <div class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center">
-                        <div>
-                            <div style="font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 2px;">Mid-semester Accomplishment</div>
-                            <div style="font-size: 0.75rem; color: #6B7280;">All sections · Due May 22</div>
-                        </div>
-                        <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: transparent; border: 1px solid #E5E7EB; color: #4B5563; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                            <i class="bi bi-pencil" style="font-size: 0.65rem;"></i> Draft
-                        </span>
-                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Footer -->
                 <div class="mt-auto" style="padding: 20px 24px; border-top: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center;">
-                    <div class="text-muted" style="font-size: 0.8rem;">2 due this week</div>
-                    <button class="btn-figma primary" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 500; border-radius: 6px; box-shadow: 0 1px 2px rgba(16,185,129,0.2); background: #059669; color: white; border: none;">Submit Report</button>
+                    <div class="text-muted" style="font-size: 0.8rem;"><?= $due_this_week ?> due this week</div>
+                    <a href="activity_plans" class="btn-figma primary" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 500; border-radius: 6px; box-shadow: 0 1px 2px rgba(16,185,129,0.2); background: #059669; color: white; border: none; text-decoration: none;">Submit Report</a>
                 </div>
             </div>
         </div>

@@ -1,6 +1,42 @@
 <?php
 // admin/controllers/CertificatesController.php
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'generate_certificates') {
+    $section_name = $_POST['section_name'] ?? '';
+    
+    // Find the section id
+    $stmt = $pdo->prepare("SELECT id, component FROM sections WHERE section_name = ?");
+    $stmt->execute([$section_name]);
+    $section = $stmt->fetch();
+    
+    if ($section) {
+        $section_id = $section['id'];
+        $component = $section['component'];
+        
+        // Find passed students without serial numbers in this section
+        $stmtStudents = $pdo->prepare("SELECT id FROM enrollments WHERE section_id = ? AND status = 'Passed' AND serial_number IS NULL");
+        $stmtStudents->execute([$section_id]);
+        $enrollmentsToGenerate = $stmtStudents->fetchAll();
+        
+        $year = date('Y');
+        $generated = 0;
+        
+        foreach ($enrollmentsToGenerate as $enrollment) {
+            $serial = sprintf("%s-%s-%04d-%03d", $component, $year, $enrollment['id'], rand(100, 999));
+            $updateStmt = $pdo->prepare("UPDATE enrollments SET serial_number = ? WHERE id = ?");
+            $updateStmt->execute([$serial, $enrollment['id']]);
+            $generated++;
+        }
+        
+        if ($generated > 0) {
+            logAction($pdo, 'Generated Certificates', "Generated $generated certificates for section $section_name");
+        }
+        
+        header("Location: certificates.php?success=1");
+        exit;
+    }
+}
+
 // ── Certificate batches: sections grouped by component ──────────────────────
 $cert_batches = [];
 try {
@@ -24,16 +60,16 @@ $recent_certs = [];
 try {
     $stmtRecent = $pdo->query("
         SELECT
-            s.full_name,
+            CONCAT(s.last_name, ', ', s.first_name) AS full_name,
             sec.component,
             sec.section_name,
             e.serial_number,
-            e.updated_at
+            e.created_at
         FROM enrollments e
-        JOIN students s  ON e.student_id = s.id
+        JOIN students s  ON e.student_id = s.student_id
         JOIN sections sec ON e.section_id = sec.id
         WHERE e.serial_number IS NOT NULL
-        ORDER BY e.updated_at DESC
+        ORDER BY e.created_at DESC
         LIMIT 6
     ");
     $recent_certs = $stmtRecent->fetchAll();

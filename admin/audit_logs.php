@@ -69,32 +69,40 @@ include '../includes/admin_sidebar.php';
                         if (str_contains($action, 'approve')) {
                             $badge_style = 'background-color: #ECFDF5; color: #059669;';
                             $badge_text = 'Approved';
+                            $category = 'Approvals';
                         } elseif (str_contains($action, 'pass')) {
                             $badge_style = 'background-color: #F5F3FF; color: #7C3AED;';
                             $badge_text = 'Passed';
+                            $category = 'Approvals';
                         } elseif (str_contains($action, 'generate')) {
                             $badge_style = 'background-color: #EFF6FF; color: #2563EB;';
                             $badge_text = 'Generated';
+                            $category = 'Approvals';
                         } elseif (str_contains($action, 'submit')) {
                             $badge_style = 'background-color: #FAF5FF; color: #9333EA;';
                             $badge_text = 'Submitted';
+                            $category = 'Submissions';
                         } elseif (str_contains($action, 'fail') || str_contains($action, 'delete')) {
                             $badge_style = 'background-color: #FEF2F2; color: #DC2626;';
                             $badge_text = str_contains($action, 'fail') ? 'Failed Login Attempt' : 'Deleted';
+                            $category = 'Alerts';
                         } elseif (str_contains($action, 'update') || str_contains($action, 'edit')) {
                             $badge_style = 'background-color: #FFFBEB; color: #D97706;';
                             $badge_text = 'Updated section';
+                            $category = 'Edits';
                         } elseif (str_contains($action, 'request')) {
                             $badge_style = 'background-color: #ECFDF5; color: #059669;';
                             $badge_text = 'Requested revisions';
+                            $category = 'Submissions';
                         } else {
                             $badge_style = 'background-color: #F3F4F6; color: #4B5563;';
+                            $category = 'System Logs';
                         }
                         
                         $is_last = $index === count($logs) - 1;
                         $border_bottom = $is_last ? '' : 'border-bottom: 1px solid #F9FAFB;';
                     ?>
-                        <li class="activity-item d-flex align-items-center py-3 px-4 position-relative" style="<?= $border_bottom ?>">
+                        <li class="activity-item d-flex align-items-center py-3 px-4 position-relative" style="<?= $border_bottom ?>" data-category="<?= $category ?>">
                             <!-- Dot -->
                             <div style="width: 6px; height: 6px; border-radius: 50%; background-color: #D1D5DB; margin-right: 16px; flex-shrink: 0;"></div>
                             
@@ -147,15 +155,51 @@ include '../includes/admin_sidebar.php';
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Simple live search filter
-document.getElementById('logSearch')?.addEventListener('input', function() {
-    const q = this.value.toLowerCase();
-    document.querySelectorAll('.activity-item').forEach(item => {
-        if (item.textContent.toLowerCase().includes(q)) {
-            item.style.setProperty('display', 'flex', 'important');
-        } else {
-            item.style.setProperty('display', 'none', 'important');
-        }
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('logSearch');
+    const filterBtn = document.getElementById('selectedFilter');
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+    const logItems = document.querySelectorAll('.activity-item');
+    
+    let currentCategory = 'All Logs';
+
+    function filterLogs() {
+        const q = searchInput.value.toLowerCase();
+        
+        logItems.forEach(item => {
+            const textMatch = item.textContent.toLowerCase().includes(q);
+            const catMatch = currentCategory === 'All Logs' || item.getAttribute('data-category') === currentCategory;
+            
+            if (textMatch && catMatch) {
+                item.style.setProperty('display', 'flex', 'important');
+            } else {
+                item.style.setProperty('display', 'none', 'important');
+            }
+        });
+    }
+
+    searchInput?.addEventListener('input', filterLogs);
+    
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            dropdownItems.forEach(di => {
+                di.style.backgroundColor = 'transparent';
+                di.classList.remove('text-primary');
+                const i = di.querySelector('i');
+                if(i) i.remove();
+            });
+            
+            item.style.backgroundColor = '#F9FAFB';
+            item.classList.add('text-primary');
+            item.innerHTML += ' <i class="bi bi-check2"></i>';
+            
+            currentCategory = item.textContent.trim();
+            filterBtn.textContent = currentCategory;
+            
+            filterLogs();
+        });
     });
 });
 </script>

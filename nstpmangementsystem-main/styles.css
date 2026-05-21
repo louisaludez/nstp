@@ -1,0 +1,32 @@
+/* Shared overrides on top of Tailwind CDN */
+:root {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+html, body { height: 100%; }
+body { background: #f8fafc; color: #1e293b; margin: 0; }
+
+/* Allow Tailwind utility classes to coexist with our base styles */
+h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+button { font-family: inherit; }
+
+/* Subtle scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+/* Page tab system */
+.page { display: none; }
+.page.active { display: block; }
+
+.nav-btn.active.indigo { background: #4f46e5; color: white; }
+.nav-btn.active.indigo .nav-icon { color: white; }
+.nav-btn.active.emerald { background: #059669; color: white; }
+.nav-btn.active.emerald .nav-icon { color: white; }
+.nav-btn.active.military { background: #fcd34d; color: #0f172a; border-color: #fcd34d; }
+.nav-btn.active.military .nav-icon { color: #0f172a; }
+
+/* drag-and-drop visual */
+.cadet-card { cursor: grab; }
+.cadet-card:active { cursor: grabbing; }
+.drop-zone.over { background: #f1f5f9; outline: 2px dashed #cbd5e1; outline-offset: -4px; }

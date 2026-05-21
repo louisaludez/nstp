@@ -46,7 +46,7 @@ include '../includes/admin_sidebar.php';
     <div class="row g-3 mb-4">
         <!-- CWTS -->
         <div class="col-md-4">
-            <button class="w-100 text-start" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 2px solid #818CF8; outline: none; cursor: pointer;">
+            <button id="card-CWTS" class="w-100 text-start component-card" data-component="CWTS" onclick="filterByComponent('CWTS', this)" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; outline: none; cursor: pointer; transition: all 0.2s;">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div style="width: 36px; height: 36px; border-radius: 50%; background: #4F46E5; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; flex-shrink: 0;">C</div>
                     <div>
@@ -71,7 +71,7 @@ include '../includes/admin_sidebar.php';
         </div>
         <!-- LTS -->
         <div class="col-md-4">
-            <button class="w-100 text-start" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; outline: none; cursor: pointer;">
+            <button id="card-LTS" class="w-100 text-start component-card" data-component="LTS" onclick="filterByComponent('LTS', this)" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; outline: none; cursor: pointer; transition: all 0.2s;">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div style="width: 36px; height: 36px; border-radius: 50%; background: #059669; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; flex-shrink: 0;">L</div>
                     <div>
@@ -96,7 +96,7 @@ include '../includes/admin_sidebar.php';
         </div>
         <!-- ROTC -->
         <div class="col-md-4">
-            <button class="w-100 text-start" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; outline: none; cursor: pointer;">
+            <button id="card-ROTC" class="w-100 text-start component-card" data-component="ROTC" onclick="filterByComponent('ROTC', this)" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; outline: none; cursor: pointer; transition: all 0.2s;">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div style="width: 36px; height: 36px; border-radius: 50%; background: #E11D48; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; flex-shrink: 0;">R</div>
                     <div>
@@ -130,7 +130,7 @@ include '../includes/admin_sidebar.php';
                 </span>
                 <input id="sectionsSearchInput" placeholder="Search section or instructor..." style="width: 100%; padding: 8px 12px 8px 36px; font-size: 0.875rem; border-radius: 8px; background: #F8FAFC; border: 1px solid #E2E8F0; outline: none; transition: all 0.2s;" onfocus="this.style.background='white'; this.style.borderColor='#C7D2FE'" onblur="this.style.background='#F8FAFC'; this.style.borderColor='#E2E8F0'" />
             </div>
-            <button class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #0F172A; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px 16px; font-size: 0.875rem;">
+            <button class="btn btn-sm d-inline-flex align-items-center gap-2" id="btn-all-sections" onclick="filterByComponent('All', this)" style="background: #EEF2FF; color: #4F46E5; border: 1px solid #C7D2FE; border-radius: 8px; padding: 8px 16px; font-size: 0.875rem; font-weight: 500;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
                 All Sections
             </button>
@@ -170,7 +170,7 @@ include '../includes/admin_sidebar.php';
                 if (count($all_sections) > 0):
                     foreach ($all_sections as $sec):
                 ?>
-                <tr style="border-bottom: 1px solid #F8FAFC; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='transparent'">
+                <tr class="section-row" data-component="<?= htmlspecialchars($sec['component']) ?>" style="border-bottom: 1px solid #F8FAFC; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='transparent'">
                     <td style="padding: 12px 16px; color: #0F172A; font-weight: 500;"><?= htmlspecialchars($sec['section_name']) ?></td>
                     <td style="padding: 12px 16px;">
                         <?php 
@@ -366,11 +366,57 @@ function prepareAssign(id, name, currentInstId) {
     document.getElementById('assign_instructor_id').value = currentInstId || '';
 }
 
-// Live search filter
-document.getElementById('sectionSearch')?.addEventListener('input', function() {
+let currentComponentFilter = 'All';
+
+function filterByComponent(component, btnElement) {
+    currentComponentFilter = component;
+
+    // Reset card borders
+    document.querySelectorAll('.component-card').forEach(card => {
+        card.style.border = '1px solid #E2E8F0';
+    });
+
+    // Reset All Sections button
+    const btnAll = document.getElementById('btn-all-sections');
+    if (btnAll) {
+        btnAll.style.background = 'white';
+        btnAll.style.color = '#0F172A';
+        btnAll.style.borderColor = '#E2E8F0';
+        btnAll.style.fontWeight = 'normal';
+    }
+
+    if (component === 'All') {
+        if (btnAll) {
+            btnAll.style.background = '#EEF2FF';
+            btnAll.style.color = '#4F46E5';
+            btnAll.style.borderColor = '#C7D2FE';
+            btnAll.style.fontWeight = '500';
+        }
+    } else {
+        const activeCard = document.getElementById('card-' + component);
+        if (activeCard) {
+            activeCard.style.border = '2px solid #818CF8';
+        }
+    }
+
+    // Trigger the search input event to combine both filters
+    const searchInput = document.getElementById('sectionsSearchInput');
+    if (searchInput) {
+        searchInput.dispatchEvent(new Event('input'));
+    }
+}
+
+// Live search and component filter
+document.getElementById('sectionsSearchInput')?.addEventListener('input', function() {
     const q = this.value.toLowerCase();
-    document.querySelectorAll('.table-figma tbody tr').forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    document.querySelectorAll('table tbody tr.section-row').forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const rowComponent = row.getAttribute('data-component');
+        
+        const matchesSearch = text.includes(q);
+        const matchesComponent = currentComponentFilter === 'All' || rowComponent === currentComponentFilter;
+        
+        row.style.display = (matchesSearch && matchesComponent) ? '' : 'none';
     });
 });
 </script>

@@ -7,32 +7,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ROTC') {
     exit;
 }
 
+$instructor_id = $_SESSION['user_id'];
+$_SESSION['full_name'] = $_SESSION['full_name'] ?? 'ROTC Officer';
+
+require '../instructor/controllers/ReportsController.php';
+
 $extra_css = ['../assets/css/style.css'];
 include '../includes/header.php';
 include '../includes/rotc_sidebar.php';
-
-$reports = [
-    [
-        'title'    => 'Q1 Tactical Drill Accomplishment',
-        'subtitle' => 'Due May 18',
-        'status'   => 'Draft'
-    ],
-    [
-        'title'    => 'Civil-Military Operations Report',
-        'subtitle' => 'Submitted May 8',
-        'status'   => 'Under Review'
-    ],
-    [
-        'title'    => 'Community Outreach — Brgy. San Roque',
-        'subtitle' => 'Approved May 4',
-        'status'   => 'Approved'
-    ],
-    [
-        'title'    => 'Monthly Strength Report — May',
-        'subtitle' => 'Revisions requested',
-        'status'   => 'Revisions'
-    ],
-];
 
 function renderReportStatus($status) {
     if ($status === 'Approved') {
@@ -55,6 +37,13 @@ function renderReportStatus($status) {
         <div class="text-muted" style="font-size:0.85rem;">Document and submit completed ROTC activities</div>
     </div>
 
+    <?php if (!empty($message)): ?>
+        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3">
+            <?= htmlspecialchars($message) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="row g-4">
         <!-- Left Column: All Reports -->
         <div class="col-lg-8">
@@ -63,8 +52,10 @@ function renderReportStatus($status) {
                     <h6 class="mb-0" style="color:#0F172A; font-weight:600; font-size:0.95rem;">All Reports</h6>
                 </div>
                 <div>
-                    <?php foreach ($reports as $index => $r): ?>
-                    <div style="padding: 20px 24px; border-bottom: 1px solid #F8FAFC; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'" data-bs-toggle="modal" data-bs-target="#reportDetailsModal">
+                    <?php if (count($reports) == 0): ?>
+                        <div class="text-center py-5 text-muted">No reports found.</div>
+                    <?php else: foreach ($reports as $r): ?>
+                    <div style="padding: 20px 24px; border-bottom: 1px solid #F8FAFC; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'" data-bs-toggle="modal" data-bs-target="#reportDetailsModal<?= $r['id'] ?>">
                         
                         <!-- Left Side: Icon & Titles -->
                         <div class="d-flex align-items-center gap-3">
@@ -73,17 +64,25 @@ function renderReportStatus($status) {
                             </div>
                             <div>
                                 <div style="font-size: 0.85rem; font-weight: 500; color: #0F172A; margin-bottom: 2px;"><?= htmlspecialchars($r['title']) ?></div>
-                                <div style="font-size: 0.75rem; color: #64748B;"><?= htmlspecialchars($r['subtitle']) ?></div>
+                                <div style="font-size: 0.75rem; color: #64748B;">
+                                    <?php
+                                        if ($r['status'] === 'Draft') {
+                                            echo 'Saved on ' . date('M j, Y', strtotime($r['submitted_date']));
+                                        } else {
+                                            echo 'Submitted on ' . date('M j, Y', strtotime($r['submitted_date']));
+                                        }
+                                    ?>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Right Side: Badge & Chevron -->
                         <div class="d-flex align-items-center gap-3">
-                            <?= renderReportStatus($r['status']) ?>
+                            <?= renderReportStatus($r['status'] === 'Pending' ? 'Under Review' : $r['status']) ?>
                             <i class="bi bi-chevron-right" style="color: #CBD5E1; font-size: 0.85rem;"></i>
                         </div>
                     </div>
-                    <?php endforeach; ?>
+                    <?php endforeach; endif; ?>
                 </div>
             </div>
         </div>
@@ -95,45 +94,51 @@ function renderReportStatus($status) {
                     <h6 class="mb-0" style="color:#0F172A; font-weight:600; font-size:0.95rem;">New Report Draft</h6>
                 </div>
                 <div class="card-body" style="padding: 24px;">
-                    
-                    <div class="mb-3">
-                        <label class="form-label" style="font-size:0.75rem; color:#64748B; font-weight:500;">Linked Activity</label>
-                        <input type="text" class="form-control shadow-none" placeholder="Select or type an activity..." style="border-radius:8px; border:1px solid #E2E8F0; font-size:0.85rem; padding:10px 14px; color:#0F172A;">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label" style="font-size:0.75rem; color:#64748B; font-weight:500;">Cadets Involved</label>
-                        <input type="text" class="form-control shadow-none" placeholder="42" style="border-radius:8px; border:1px solid #E2E8F0; font-size:0.85rem; padding:10px 14px; color:#0F172A;">
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label" style="font-size:0.75rem; color:#64748B; font-weight:500;">Narrative</label>
-                        <textarea class="form-control shadow-none" placeholder="Describe the activity, outputs, and impact..." rows="4" style="border-radius:8px; border:1px solid #E2E8F0; font-size:0.85rem; padding:10px 14px; color:#475569;"></textarea>
-                    </div>
-                    
-                    <!-- Attachments Dropzone -->
-                    <div class="mb-4" style="border: 1px dashed #CBD5E1; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; background: white;">
-                        <i class="bi bi-upload" style="color: #94A3B8; font-size: 1.1rem; margin-bottom: 6px; display: block;"></i>
-                        <div style="font-size: 0.75rem; color: #64748B; font-weight: 400;">Drop photos, attendance sheet, Accomplishment Reports</div>
-                    </div>
-                    
-                    <div class="d-flex gap-2">
-                        <button class="btn" style="background:#fff; border: 1px solid #E2E8F0; border-radius:8px; color:#475569; font-weight: 500; font-size:0.85rem; padding: 10px 20px;">
-                            Save Draft
-                        </button>
-                        <button class="btn d-flex align-items-center justify-content-center gap-2 flex-grow-1" style="background:#0F172A; border: none; border-radius:8px; color:white; font-weight: 500; font-size:0.85rem; padding: 10px 24px;">
-                            <i class="bi bi-send" style="font-size: 0.85rem;"></i> Submit
-                        </button>
-                    </div>
-
+                    <form method="POST" action="accomplishment_reports.php" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size:0.75rem; color:#64748B; font-weight:500;">Linked Activity</label>
+                            <select name="activity_plan_id" required class="form-select shadow-none" style="border-radius:8px; border:1px solid #E2E8F0; font-size:0.85rem; padding:10px 14px; color:#0F172A;">
+                                <option value="" disabled selected>Select an approved activity...</option>
+                                <?php foreach ($approved_plans as $plan): ?>
+                                    <option value="<?= $plan['id'] ?>"><?= htmlspecialchars($plan['title']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size:0.75rem; color:#64748B; font-weight:500;">Cadets Involved</label>
+                            <input type="number" name="beneficiaries" class="form-control shadow-none" placeholder="42" required style="border-radius:8px; border:1px solid #E2E8F0; font-size:0.85rem; padding:10px 14px; color:#0F172A;">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label" style="font-size:0.75rem; color:#64748B; font-weight:500;">Narrative</label>
+                            <textarea name="narrative" class="form-control shadow-none" placeholder="Describe the activity, outputs, and impact..." rows="4" required style="border-radius:8px; border:1px solid #E2E8F0; font-size:0.85rem; padding:10px 14px; color:#475569;"></textarea>
+                        </div>
+                        
+                        <!-- Attachments Dropzone -->
+                        <div class="mb-4" style="border: 1px dashed #CBD5E1; border-radius: 8px; padding: 20px; text-align: center; background: white;">
+                            <input type="file" name="reportFiles[]" multiple class="form-control" style="font-size: 0.85rem; border-radius: 8px;">
+                            <div style="font-size: 0.75rem; color: #64748B; font-weight: 400; margin-top: 8px;">Drop photos, attendance sheet, Accomplishment Reports</div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="save_draft" class="btn" style="background:#fff; border: 1px solid #E2E8F0; border-radius:8px; color:#475569; font-weight: 500; font-size:0.85rem; padding: 10px 20px;">
+                                Save Draft
+                            </button>
+                            <button type="submit" name="submit_report" class="btn d-flex align-items-center justify-content-center gap-2 flex-grow-1" style="background:#0F172A; border: none; border-radius:8px; color:white; font-weight: 500; font-size:0.85rem; padding: 10px 24px;">
+                                <i class="bi bi-send" style="font-size: 0.85rem;"></i> Submit
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<?php foreach($reports as $r): ?>
 <!-- Report Details Modal -->
-<div class="modal fade" id="reportDetailsModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="reportDetailsModal<?= $r['id'] ?>" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
         <div class="modal-content" style="border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
             
@@ -148,46 +153,31 @@ function renderReportStatus($status) {
                 <!-- Top Section -->
                 <div class="d-flex justify-content-between align-items-start mb-4">
                     <div>
-                        <h4 class="fw-bold mb-1" style="color: #0F172A; font-size: 1.25rem;">Community Outreach — Brgy. San Roque</h4>
-                        <div style="color: #64748B; font-size: 0.85rem;">Approved May 4</div>
+                        <h4 class="fw-bold mb-1" style="color: #0F172A; font-size: 1.25rem;"><?= htmlspecialchars($r['title']) ?></h4>
+                        <div style="color: #64748B; font-size: 0.85rem;"><?= date('M j, Y', strtotime($r['submitted_date'])) ?></div>
                     </div>
-                    <span style="background:#ECFDF5; color:#10B981; font-size:0.75rem; font-weight:500; padding:4px 12px; border-radius:20px;">Approved</span>
+                    <?= renderReportStatus($r['status'] === 'Pending' ? 'Under Review' : $r['status']) ?>
                 </div>
                 
                 <!-- Middle Section -->
                 <div class="mb-4">
                     <div style="font-weight: 600; color: #0F172A; font-size: 0.9rem; margin-bottom: 8px;">Narrative</div>
-                    <div style="color: #475569; font-size: 0.85rem; line-height: 1.5;">Succesful community interaction and medical mission.</div>
-                </div>
-                
-                <!-- Attachments Section -->
-                <div>
-                    <div style="font-weight: 600; color: #0F172A; font-size: 0.9rem; margin-bottom: 8px;">Attached Documents</div>
-                    <div style="border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-between;">
-                        <div class="d-flex align-items-center gap-3">
-                            <div style="width: 40px; height: 40px; border-radius: 8px; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; color: #94A3B8; font-size: 1.2rem;">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-                            <div>
-                                <div style="font-weight: 600; color: #0F172A; font-size: 0.85rem;">Community_Outreach_Summary.docx</div>
-                                <div style="color: #64748B; font-size: 0.75rem;">Accomplishment Report · 3.1 MB</div>
-                            </div>
-                        </div>
-                        <i class="bi bi-download" style="color: #CBD5E1; font-size: 1.2rem; cursor: pointer;"></i>
-                    </div>
+                    <div style="color: #475569; font-size: 0.85rem; line-height: 1.5;"><?= nl2br(htmlspecialchars($r['accomplishments'])) ?></div>
                 </div>
             </div>
             
             <!-- Footer -->
+            <?php if ($r['status'] === 'Draft'): ?>
             <div class="modal-footer border-0" style="background: #F8FAFC; padding: 16px 24px; display: flex; justify-content: flex-end; border-top: 1px solid #F1F5F9;">
                 <button type="button" class="btn" style="color: #EF4444; font-weight: 600; font-size: 0.85rem; padding: 8px 16px; display: flex; align-items: center; gap: 6px; border: none; background: transparent;">
                     <i class="bi bi-trash3"></i> Delete
                 </button>
             </div>
-            
+            <?php endif; ?>
         </div>
     </div>
 </div>
+<?php endforeach; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

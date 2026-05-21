@@ -146,7 +146,9 @@ $topbar_title = $titles[$page_slug] ?? ucfirst(str_replace('_', ' ', $page_slug)
                         ?>
                         <li>
                             <a class="dropdown-item py-2 px-3 rounded-3 <?= $bg ?>"
-                                href="<?= htmlspecialchars($notif['link'] ?? '#') ?>" style="white-space:normal;">
+                                href="<?= htmlspecialchars($notif['link'] ?? '#') ?>" 
+                                onclick="markSingleRead(event, <?= $notif['id'] ?>, '<?= htmlspecialchars($notif['link'] ?? '#') ?>')"
+                                style="white-space:normal;">
                                 <div class="<?= $font ?> small"><?= htmlspecialchars($notif['message']) ?></div>
                                 <div class="text-muted" style="font-size:0.70rem;"><?= htmlspecialchars($notif['created_at']) ?>
                                 </div>
@@ -184,5 +186,22 @@ $topbar_title = $titles[$page_slug] ?? ucfirst(str_replace('_', ' ', $page_slug)
     function markAllRead() {
         fetch('../includes/mark_notifications_read.php', { method: 'POST' })
             .then(response => response.ok && window.location.reload());
+    }
+
+    function markSingleRead(event, id, link) {
+        event.preventDefault();
+        fetch('../includes/mark_single_notification_read.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'id=' + id
+        }).then(() => {
+            if (link && link !== '#') {
+                window.location.href = link;
+            } else {
+                window.location.reload();
+            }
+        });
     }
 </script>

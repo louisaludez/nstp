@@ -155,7 +155,7 @@ include '../includes/instructor_sidebar.php';
                     </div>
                     
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light" style="padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; color: #374151; border: 1px solid #E5E7EB; background: white;">Save Draft</button>
+                        <button type="submit" name="save_draft" class="btn btn-light" style="padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; color: #374151; border: 1px solid #E5E7EB; background: white;">Save Draft</button>
                         <button type="submit" name="submit_plan" class="btn btn-success" style="padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; background: #059669; border: none;">Submit for Approval</button>
                     </div>
                 </form>

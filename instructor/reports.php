@@ -7,13 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Instructor') {
     exit;
 }
 
-$instructor_name = $_SESSION['full_name'];
-$instructor_id = $_SESSION['user_id'];
-
-// Fetch activity plans to populate the Linked Activity dropdown
-$stmtPlans = $pdo->prepare("SELECT id, title FROM activity_plans WHERE instructor_id = ? AND status = 'Approved' ORDER BY title ASC");
-$stmtPlans->execute([$instructor_id]);
-$approved_plans = $stmtPlans->fetchAll();
+require 'controllers/ReportsController.php';
 
 $extra_css = ['../assets/css/style.css'];
 include '../includes/header.php';
@@ -30,6 +24,13 @@ include '../includes/instructor_sidebar.php';
         <div class="text-muted" style="font-size: 0.85rem;">Document and submit completed activities</div>
     </div>
 
+    <?php if ($message): ?>
+        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3">
+            <?= htmlspecialchars($message) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="row g-4">
         <!-- Left Panel: All Reports -->
         <div class="col-lg-8">
@@ -39,100 +40,82 @@ include '../includes/instructor_sidebar.php';
                 </div>
                 
                 <div class="list-group list-group-flush">
-                    <!-- Item 1: Draft -->
-                    <div class="list-group-item d-flex justify-content-between align-items-center border-0" style="padding: 16px 24px; border-bottom: 1px solid #F3F4F6 !important;">
-                        <div class="d-flex align-items-center gap-3">
-                            <div style="width: 40px; height: 40px; border-radius: 8px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
-                                <i class="bi bi-file-earmark-text"></i>
+                    <?php if (count($reports) > 0): ?>
+                        <?php foreach ($reports as $idx => $report): 
+                            // Build section label
+                            $sec_label = ($report['component'] ?? '') 
+                                ? htmlspecialchars($report['component']) . ' · ' . htmlspecialchars($report['section_name'] ?? '')
+                                : 'All sections';
+                            
+                            // Determine badge styling based on status
+                            $status = $report['status'];
+                            switch ($status) {
+                                case 'Draft':
+                                    $badgeBg    = 'background: white; border: 1px solid #E5E7EB;';
+                                    $badgeColor = 'color: #4B5563;';
+                                    $badgeIcon  = 'bi-pencil';
+                                    $badgeLabel = 'Draft';
+                                    $date_label = $report['completed_date'] 
+                                        ? 'Due ' . date('M j', strtotime($report['completed_date'])) 
+                                        : 'Draft';
+                                    break;
+                                case 'Pending':
+                                    $badgeBg    = 'background: #EEF2FF;';
+                                    $badgeColor = 'color: #6366F1;';
+                                    $badgeIcon  = 'bi-clock-history';
+                                    $badgeLabel = 'Submitted';
+                                    $date_label = 'Submitted ' . date('M j', strtotime($report['submitted_date']));
+                                    break;
+                                case 'Reviewed':
+                                    $badgeBg    = 'background: #ECFDF5;';
+                                    $badgeColor = 'color: #10B981;';
+                                    $badgeIcon  = 'bi-check-circle';
+                                    $badgeLabel = 'Approved';
+                                    $date_label = 'Approved ' . date('M j', strtotime($report['submitted_date']));
+                                    break;
+                                case 'Revision':
+                                    $badgeBg    = 'background: #FEF2F2;';
+                                    $badgeColor = 'color: #EF4444;';
+                                    $badgeIcon  = 'bi-exclamation-circle';
+                                    $badgeLabel = 'Revisions';
+                                    $date_label = 'Needs revisions';
+                                    break;
+                                default:
+                                    $badgeBg    = 'background: #F3F4F6;';
+                                    $badgeColor = 'color: #4B5563;';
+                                    $badgeIcon  = 'bi-file-earmark';
+                                    $badgeLabel = $status;
+                                    $date_label = date('M j', strtotime($report['submitted_date']));
+                            }
+                            
+                            // Last item should not have bottom border
+                            $isLast = ($idx === count($reports) - 1);
+                            $borderStyle = $isLast ? '' : 'border-bottom: 1px solid #F3F4F6 !important;';
+                        ?>
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0" style="padding: 16px 24px; <?= $borderStyle ?>">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width: 40px; height: 40px; border-radius: 8px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; font-weight: 500; color: #374151; margin-bottom: 2px;"><?= htmlspecialchars($report['title']) ?></div>
+                                    <div style="font-size: 0.75rem; color: #6B7280;"><?= $sec_label ?> · <?= $date_label ?></div>
+                                </div>
                             </div>
-                            <div>
-                                <div style="font-size: 0.9rem; font-weight: 500; color: #374151; margin-bottom: 2px;">Tree-Planting Drive Report</div>
-                                <div style="font-size: 0.75rem; color: #6B7280;">CWTS 1 · Sec A · Due May 15</div>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: white; border: 1px solid #E5E7EB; color: #4B5563; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                                <i class="bi bi-pencil" style="font-size: 0.65rem;"></i> Draft
-                            </span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
-                        </div>
-                    </div>
-
-                    <!-- Item 2: Submitted -->
-                    <div class="list-group-item d-flex justify-content-between align-items-center border-0" style="padding: 16px 24px; border-bottom: 1px solid #F3F4F6 !important;">
-                        <div class="d-flex align-items-center gap-3">
-                            <div style="width: 40px; height: 40px; border-radius: 8px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.9rem; font-weight: 500; color: #374151; margin-bottom: 2px;">Adult Literacy Session #4</div>
-                                <div style="font-size: 0.75rem; color: #6B7280;">LTS 2 · Sec A · Submitted May 9</div>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: #EEF2FF; color: #6366F1; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                                <i class="bi bi-clock-history" style="font-size: 0.65rem;"></i> Submitted
-                            </span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
-                        </div>
-                    </div>
-
-                    <!-- Item 3: Approved -->
-                    <div class="list-group-item d-flex justify-content-between align-items-center border-0" style="padding: 16px 24px; border-bottom: 1px solid #F3F4F6 !important;">
-                        <div class="d-flex align-items-center gap-3">
-                            <div style="width: 40px; height: 40px; border-radius: 8px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.9rem; font-weight: 500; color: #374151; margin-bottom: 2px;">Barangay Clean-Up Plan</div>
-                                <div style="font-size: 0.75rem; color: #6B7280;">CWTS 1 · Sec C · Approved May 6</div>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: #ECFDF5; color: #10B981; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                                <i class="bi bi-check-circle" style="font-size: 0.65rem;"></i> Approved
-                            </span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
-                        </div>
-                    </div>
-
-                    <!-- Item 4: Revisions -->
-                    <div class="list-group-item d-flex justify-content-between align-items-center border-0" style="padding: 16px 24px; border-bottom: 1px solid #F3F4F6 !important;">
-                        <div class="d-flex align-items-center gap-3">
-                            <div style="width: 40px; height: 40px; border-radius: 8px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.9rem; font-weight: 500; color: #374151; margin-bottom: 2px;">Reading Buddies Kick-off</div>
-                                <div style="font-size: 0.75rem; color: #6B7280;">LTS 2 · Sec B · Needs revisions</div>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: #FEF2F2; color: #EF4444; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                                <i class="bi bi-exclamation-circle" style="font-size: 0.65rem;"></i> Revisions
-                            </span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
-                        </div>
-                    </div>
-
-                    <!-- Item 5: Draft -->
-                    <div class="list-group-item d-flex justify-content-between align-items-center border-0" style="padding: 16px 24px;">
-                        <div class="d-flex align-items-center gap-3">
-                            <div style="width: 40px; height: 40px; border-radius: 8px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.9rem; font-weight: 500; color: #374151; margin-bottom: 2px;">Mid-semester Accomplishment</div>
-                                <div style="font-size: 0.75rem; color: #6B7280;">All sections · Due May 22</div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; <?= $badgeBg ?> <?= $badgeColor ?> font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                                    <i class="bi <?= $badgeIcon ?>" style="font-size: 0.65rem;"></i> <?= $badgeLabel ?>
+                                </span>
+                                <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <span style="font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; background: white; border: 1px solid #E5E7EB; color: #4B5563; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                                <i class="bi bi-pencil" style="font-size: 0.65rem;"></i> Draft
-                            </span>
-                            <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="list-group-item border-0 text-center py-5">
+                            <div style="color: #9CA3AF; margin-bottom: 8px;"><i class="bi bi-file-earmark-x" style="font-size: 1.5rem;"></i></div>
+                            <div class="text-muted" style="font-size: 0.85rem;">No reports yet. Submit your first report using the form.</div>
                         </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -147,7 +130,7 @@ include '../includes/instructor_sidebar.php';
                 <form method="POST" action="" style="padding: 24px;">
                     <div class="mb-3">
                         <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Linked Activity</label>
-                        <select name="activity_plan_id" class="form-select" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none; color: #9CA3AF;">
+                        <select name="activity_plan_id" class="form-select" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none; color: #9CA3AF;" required>
                             <option value="" disabled selected>Select or type an activity...</option>
                             <?php if(count($approved_plans) > 0): ?>
                                 <?php foreach($approved_plans as $ap): ?>
@@ -175,7 +158,7 @@ include '../includes/instructor_sidebar.php';
                     </div>
                     
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light" style="padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; color: #374151; border: 1px solid #E5E7EB; background: white;">Save Draft</button>
+                        <button type="submit" name="save_draft" class="btn btn-light" style="padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; color: #374151; border: 1px solid #E5E7EB; background: white;">Save Draft</button>
                         <button type="submit" name="submit_report" class="btn btn-success d-flex align-items-center gap-2" style="padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; background: #059669; border: none;">
                             <i class="bi bi-send"></i> Submit
                         </button>
