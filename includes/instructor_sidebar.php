@@ -45,38 +45,46 @@ try {
     </div>
 
     <!-- Navigation -->
-    <p class="sidebar-section-label">Workspace</p>
+    <div class="flex-grow-1 mb-auto">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="dashboard.php" class="nav-link <?= $page_slug === 'dashboard' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="my_section.php" class="nav-link <?= $page_slug === 'my_section' || $page_slug === 'students' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> My Classes
+                    <?php if ($my_sections_count > 0): ?>
+                        <span class="badge-count"><?= $my_sections_count ?></span>
+                    <?php endif; ?>
+                </a>
+            </li>
+        </ul>
 
-    <ul class="nav flex-column mb-auto">
-        <li class="nav-item">
-            <a href="dashboard.php" class="nav-link <?= $page_slug === 'dashboard' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Overview
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="my_section.php" class="nav-link <?= $page_slug === 'my_section' || $page_slug === 'students' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> My Classes
-                <?php if ($my_sections_count > 0): ?>
-                    <span class="badge-count"><?= $my_sections_count ?></span>
-                <?php endif; ?>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="activity_plans.php" class="nav-link <?= $page_slug === 'activity_plans' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="12" y1="11" x2="16" y2="11"/><line x1="12" y1="16" x2="16" y2="16"/></svg> Activity Plans
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="reports.php" class="nav-link <?= $page_slug === 'reports' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Accomplishment Reports
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="announcements.php" class="nav-link <?= $page_slug === 'announcements' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="m3 11 19-9-9 19-2-8-8-2z"/></svg> Announcements
-            </a>
-        </li>
-    </ul>
+        <p class="sidebar-section-label mt-4">PLANNING & REPORTS</p>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="activity_plans.php" class="nav-link <?= $page_slug === 'activity_plans' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="12" y1="11" x2="16" y2="11"/><line x1="12" y1="16" x2="16" y2="16"/></svg> Activity Plans
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="reports.php" class="nav-link <?= $page_slug === 'reports' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Accomplishment Reports
+                </a>
+            </li>
+        </ul>
+
+        <p class="sidebar-section-label mt-4">UPDATES</p>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="announcements.php" class="nav-link <?= $page_slug === 'announcements' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="m3 11 19-9-9 19-2-8-8-2z"/></svg> Announcements
+                </a>
+            </li>
+        </ul>
+    </div>
 
     <!-- User Info + Sign Out -->
     <?php

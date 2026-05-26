@@ -170,6 +170,8 @@ const ICONS = {
   star: `<path d="M12 2l2.39 6.95H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.56L2 8.95h7.61z" fill="currentColor" stroke="none"/>`,
   trash: `<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>`,
   archive: `<path d="M21 8v13H3V8z"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/>`,
+  eye: `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>`,
+  eyeoff: `<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/>`,
 };
 
 /* ================================================================
@@ -308,6 +310,9 @@ function renderShell({ theme = 'indigo', brand, brandSub, navItems, userName, us
     : `<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`;
 
   const navHtml = navItems.map(item => {
+    if (item.isHeader) {
+      return `<div class="px-3 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-wider ${mil ? 'text-slate-500' : 'text-slate-400/80'}">${item.name}</div>`;
+    }
     const activeClass = item.active ? t.active : t.inactive;
     const icoClass = item.active ? (mil ? 'text-slate-900' : 'text-white') : t.inactiveIco;
     const bdr = mil ? 'rounded-md border' : 'rounded-lg';
@@ -471,7 +476,7 @@ function renderShell({ theme = 'indigo', brand, brandSub, navItems, userName, us
               <div class="text-[11px] text-slate-400 mb-0.5">Password</div>
               <div class="flex items-center gap-2">
                 <div class="text-sm text-slate-900 font-medium font-mono flex-1" id="profilePwDisplay">${showPw ? (pd.password || '—') : '••••••••••'}</div>
-                <button id="profilePwToggle" class="text-slate-400 hover:text-slate-700 p-1 transition" title="${showPw ? 'Hide' : 'Show'} password">${ico(showPw ? 'close' : 'search', 'w-3.5 h-3.5')}</button>
+                <button id="profilePwToggle" class="text-slate-400 hover:text-slate-700 p-1 transition" title="${showPw ? 'Hide' : 'Show'} password">${ico(showPw ? 'eyeoff' : 'eye', 'w-3.5 h-3.5')}</button>
               </div>
             </div>
           </div>
@@ -563,12 +568,9 @@ function renderLogin() {
            </div>`
     : '';
 
-  return `<div class="min-h-screen w-full bg-slate-50 flex items-center justify-center p-6 relative">
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-indigo-200/40 blur-3xl"></div>
-      <div class="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-emerald-200/40 blur-3xl"></div>
-    </div>
-    <div class="relative w-full max-w-5xl bg-white rounded-3xl shadow-xl border border-slate-100 grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+  return `<div class="min-h-screen w-full bg-cover bg-center flex items-center justify-center p-6 relative" style="background-image: url('dnsc_bg2.png')">
+    <div class="absolute inset-0" style="backdrop-filter: blur(3px); background-color: rgba(15, 23, 42, 0.45);"></div>
+    <div class="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
 
       <!-- Left brand panel -->
       <div class="p-8 md:p-10 bg-gradient-to-br from-slate-900 to-slate-800 text-white relative overflow-hidden">
@@ -611,7 +613,10 @@ function renderLogin() {
             <div class="mt-1 relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">${ico('lock', 'w-4 h-4')}</span>
               <input id="loginPassword" type="password" placeholder="Enter your password"
-                class="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-slate-200 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-50 focus:outline-none transition" />
+                class="w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border border-slate-200 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-50 focus:outline-none transition" />
+              <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none" title="Toggle password visibility">
+                ${ico('eye', 'w-4 h-4')}
+              </button>
             </div>
           </label>
         </div>
@@ -1751,7 +1756,7 @@ function cStudentArchive() {
   // Apply Search
   if (S.archiveSearch) {
     const q = S.archiveSearch.toLowerCase();
-    entries = entries.filter(st => 
+    entries = entries.filter(st =>
       st.name.toLowerCase().includes(q) ||
       st.studentNo.toLowerCase().includes(q) ||
       st.section.toLowerCase().includes(q) ||
@@ -3393,13 +3398,16 @@ function renderCoordinator() {
     { name: 'Dashboard', ico: 'dashboard' },
     { name: 'Sections & Students', ico: 'users' },
     { name: 'Instructors & ROTC Officers', ico: 'grad' },
+    { name: 'Reports & Plan', isHeader: true },
     { name: 'Report & Activity Approvals', ico: 'filecheck', badge: 4 },
-    { name: 'OCR Grade Upload', ico: 'scan' },
     { name: 'Activity Calendar', ico: 'calendar' },
+    { name: 'Grades', isHeader: true },
+    { name: 'OCR Grade Upload', ico: 'scan' },
     { name: 'Certificates', ico: 'award' },
+    { name: 'History', isHeader: true },
     { name: 'Student Archive', ico: 'archive' },
     { name: 'Audit Logs', ico: 'scroll' },
-  ].map(n => ({ ...n, active: S.coordPage === n.name }));
+  ].map(n => n.isHeader ? n : ({ ...n, active: S.coordPage === n.name }));
   const pageMap = { 'Dashboard': cDashboard(), 'Sections & Students': cSections(), 'Instructors & ROTC Officers': cInstructors(), 'Report & Activity Approvals': cApprovals(), 'OCR Grade Upload': cOCR(), 'Activity Calendar': cCalendar(), 'Certificates': cCertificates(), 'Student Archive': cStudentArchive(), 'Audit Logs': cAudit() };
   return renderShell({ theme: 'indigo', brand: 'DNSC NSTP', brandSub: 'Coordinator', navItems: nav, userName: userName, userRole: 'Coordinator', userInitials: userInitials, greeting: S.coordPage === 'Dashboard' ? `Welcome back, ${first}` : S.coordPage, context: 'Davao Del Norte State College', ctaLabel: '', content: pageMap[S.coordPage] || '' });
 }
@@ -3412,10 +3420,12 @@ function renderInstructor() {
   const nav = [
     { name: 'Overview', ico: 'grid' },
     { name: 'My Classes', ico: 'book', badge: 4 },
+    { name: 'Planning & Reports', isHeader: true },
     { name: 'Activity Plans', ico: 'clipboard' },
     { name: 'Accomplishment Reports', ico: 'filetext', badge: 3 },
+    { name: 'Updates', isHeader: true },
     { name: 'Announcements', ico: 'megaphone' },
-  ].map(n => ({ ...n, active: S.instrPage === n.name }));
+  ].map(n => n.isHeader ? n : ({ ...n, active: S.instrPage === n.name }));
   const pageMap = { 'Overview': iOverview(), 'My Classes': iClasses(), 'Activity Plans': iPlans(), 'Accomplishment Reports': iReports(), 'Announcements': iAnnouncements() };
   return renderShell({ theme: 'emerald', brand: 'DNSC NSTP', brandSub: 'Instructor Portal', navItems: nav, userName: userName, userRole: 'CWTS · LTS Instructor', userInitials: userInitials, greeting: S.instrPage === 'Overview' ? `Good morning, ${first}` : S.instrPage, context: 'Davao Del Norte State College', ctaLabel: S.instrPage === 'Activity Plans' ? 'New Activity Plan' : S.instrPage === 'Accomplishment Reports' ? 'New Activity Plan' : '', content: pageMap[S.instrPage] || '' });
 }
@@ -3427,9 +3437,11 @@ function renderROTC() {
   const last = userName.split(' ').pop();
   const nav = [
     { name: 'Overview', ico: 'grid' },
+    { name: 'Management', isHeader: true },
     { name: 'Assign Officer Section', ico: 'users', badge: 4 },
+    { name: 'Planning & Reports', isHeader: true },
     { name: 'Activity Designs', ico: 'clipboard', badge: 2 },
-  ].map(n => ({ ...n, active: S.rotcPage === n.name }));
+  ].map(n => n.isHeader ? n : ({ ...n, active: S.rotcPage === n.name }));
   const pageMap = { 'Overview': rOverview(), 'Assign Officer Section': rPlatoon(), 'Activity Designs': rDesigns() };
   return renderShell({ theme: 'military', brand: 'Aurora ROTC', brandSub: 'Officer Console', navItems: nav, userName: userName, userRole: 'First Class Officer', userInitials: userInitials, greeting: S.rotcPage === 'Overview' ? `Stand-to, Lt. ${last}` : S.rotcPage, context: 'Saturday Drill · May 16, 2026', ctaLabel: 'New Activity Design', content: pageMap[S.rotcPage] || '' });
 }
@@ -3451,9 +3463,9 @@ function adminAccountsPage() {
   const rows = accountsList.map((acc, idx) => {
     const pd = PROFILE_DATA[acc.email] || PROFILE_DATA[acc.role] || {};
     const initials = getInitials(pd.fullName || acc.label) || 'US';
-    const roleColor = acc.role === 'coordinator' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' 
-                    : acc.role === 'instructor' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                    : 'bg-slate-100 text-slate-800 border-slate-200';
+    const roleColor = acc.role === 'coordinator' ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+      : acc.role === 'instructor' ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+        : 'bg-slate-100 text-slate-800 border-slate-200';
     return `
     <tr class="border-b border-slate-100 hover:bg-slate-50 transition duration-150">
       <td class="py-3.5 px-4">
@@ -3558,9 +3570,23 @@ function adminAccountsPage() {
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Password</label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">${ico('lock', 'w-4 h-4')}</span>
-            <input id="newAccPassword" type="password" placeholder="Create a secure password" value="${editAcc?.password || ''}" class="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-50 focus:outline-none transition" />
+            <input id="newAccPassword" type="password" placeholder="Create a secure password" value="${editAcc?.password || ''}" class="w-full pl-9 pr-10 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-50 focus:outline-none transition" />
+            <button type="button" onclick="togglePasswordVisibility('newAccPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none" title="Toggle password visibility">
+              ${ico('eye', 'w-4 h-4')}
+            </button>
           </div>
         </div>
+        ${!isEditing ? `
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Confirm Password</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">${ico('lock', 'w-4 h-4')}</span>
+            <input id="newAccConfirmPassword" type="password" placeholder="Confirm your password" class="w-full pl-9 pr-10 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-50 focus:outline-none transition" />
+            <button type="button" onclick="togglePasswordVisibility('newAccConfirmPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none" title="Toggle password visibility">
+              ${ico('eye', 'w-4 h-4')}
+            </button>
+          </div>
+        </div>` : ''}
         <div class="flex gap-3">
           ${isEditing ? `
           <button onclick="cancelEditAccount()" class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-all">
@@ -3608,17 +3634,17 @@ function adminAccountsPage() {
   </div>`;
 }
 
-window.editAccount = function(email) {
+window.editAccount = function (email) {
   S.editingAccEmail = email;
   render();
 };
 
-window.cancelEditAccount = function() {
+window.cancelEditAccount = function () {
   S.editingAccEmail = null;
   render();
 };
 
-window.saveAccountChanges = function() {
+window.saveAccountChanges = function () {
   const email = S.editingAccEmail;
   if (!email) return;
 
@@ -3684,17 +3710,22 @@ window.saveAccountChanges = function() {
   render();
 };
 
-window.createNewAccount = function() {
+window.createNewAccount = function () {
   const name = (document.getElementById('newAccName')?.value || '').trim();
   const contact = (document.getElementById('newAccContact')?.value || '').trim();
   const gmail = (document.getElementById('newAccGmail')?.value || '').trim();
   const degree = document.getElementById('newAccDegree')?.value || '';
   const degreeTitle = (document.getElementById('newAccDegreeTitle')?.value || '').trim();
   const password = (document.getElementById('newAccPassword')?.value || '').trim();
+  const confirmPassword = (document.getElementById('newAccConfirmPassword')?.value || '').trim();
   const role = document.getElementById('newAccRole')?.value || '';
 
-  if (!name || !contact || !gmail || !password) {
-    alert('Please fill out all required fields: Name, Contact, Gmail, and Password.');
+  if (!name || !contact || !gmail || !password || !confirmPassword) {
+    alert('Please fill out all required fields: Name, Contact, Gmail, Password, and Confirm Password.');
+    return;
+  }
+  if (password !== confirmPassword) {
+    alert('Passwords do not match. Please verify your password.');
     return;
   }
   const exists = CREDENTIALS.some(c => c.email.toLowerCase() === gmail.toLowerCase());
@@ -3739,7 +3770,7 @@ window.createNewAccount = function() {
   render();
 };
 
-window.deleteAccount = function(email) {
+window.deleteAccount = function (email) {
   if (email === 'admin123@dnsc.edu.ph') {
     alert("Cannot delete the system administrator account!");
     return;
@@ -3755,13 +3786,26 @@ window.deleteAccount = function(email) {
   }
 };
 
+window.togglePasswordVisibility = function (inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    btnEl.innerHTML = ico('eyeoff', 'w-4 h-4');
+  } else {
+    input.type = 'password';
+    btnEl.innerHTML = ico('eye', 'w-4 h-4');
+  }
+};
+
 function renderAdmin() {
   const pd = PROFILE_DATA[S.email] || PROFILE_DATA.coordinator || {};
   const userName = pd.fullName || 'System Admin';
   const userInitials = getInitials(userName) || 'AD';
   const nav = [
+    { name: 'Administration', isHeader: true },
     { name: 'Accounts', ico: 'users' }
-  ].map(n => ({ ...n, active: S.adminPage === n.name }));
+  ].map(n => n.isHeader ? n : ({ ...n, active: S.adminPage === n.name }));
   return renderShell({ theme: 'purple', brand: 'DNSC NSTP', brandSub: 'Admin Console', navItems: nav, userName: userName, userRole: 'System Administrator', userInitials: userInitials, greeting: `System Administrator Console`, context: 'Davao Del Norte State College', ctaLabel: '', content: adminAccountsPage() });
 }
 
@@ -4572,11 +4616,11 @@ function attachEvents() {
           const ws = wb.Sheets[wb.SheetNames[0]];
           const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
           if (!rows.length) { alert('No data rows found in the XLSX file.'); return; }
-          
+
           const studentNames = [];
           let sectionCode = '';
           let programName = '';
-          
+
           rows.forEach(row => {
             const getVal = (...keys) => {
               for (const k of keys) {
@@ -4585,12 +4629,12 @@ function attachEvents() {
               }
               return '';
             };
-            
+
             const name = getVal('Name', 'Student Name', 'Full Name', 'Student_Name', 'Student');
             if (name) {
               studentNames.push(name);
             }
-            
+
             if (!sectionCode) {
               sectionCode = getVal('Section Code', 'Section', 'Class', 'section');
             }
@@ -4598,22 +4642,22 @@ function attachEvents() {
               programName = getVal('Program', 'NSTP Program', 'Component', 'programme');
             }
           });
-          
+
           if (!studentNames.length) {
             alert('No student names found in the XLSX file. Please ensure there is a "Name" or "Student Name" column.');
             return;
           }
-          
+
           const fileNameNoExt = file.name.replace(/\.[^/.]+$/, "");
           const detectedSection = sectionCode || 'Imported';
           const detectedProgram = programName || (file.name.toUpperCase().includes('LTS') ? 'LTS' : file.name.toUpperCase().includes('ROTC') ? 'ROTC' : 'CWTS');
-          
+
           const batchName = `${detectedProgram} Completion — ${detectedSection} (${fileNameNoExt})`;
           const newBatchIdx = S.batches.length;
-          
+
           // Push to global student list
           BATCH_STUDENTS.push(studentNames);
-          
+
           // Push to S.batches
           S.batches.push({
             name: batchName,
@@ -4622,7 +4666,7 @@ function attachEvents() {
             date: 'Eligible Today',
             program: detectedProgram
           });
-          
+
           // Prepend to S.recentCerts for a premium view
           S.recentCerts.unshift({
             name: studentNames[0],
@@ -4630,10 +4674,10 @@ function attachEvents() {
             id: `2024-00${Math.floor(100 + Math.random() * 900)}`,
             issued: 'Just now'
           });
-          
+
           // Set highlight index
           S.newlyImportedBatchIndex = newBatchIdx;
-          
+
           // Clear highlight after 5 seconds
           setTimeout(() => {
             if (S.newlyImportedBatchIndex === newBatchIdx) {
@@ -4641,10 +4685,10 @@ function attachEvents() {
               render();
             }
           }, 5000);
-          
+
           certXlsxInput.value = '';
           render();
-          
+
           alert(`Successfully imported certificate batch: "${batchName}" with ${studentNames.length} students!`);
         } catch (err) {
           alert('Failed to read the XLSX file. Please make sure it is a valid Excel workbook.');

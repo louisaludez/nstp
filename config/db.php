@@ -9,7 +9,7 @@ if ($is_local) {
     $host = 'localhost';
     $dbname = 'nstp_db';
     $username = 'root';
-    $password = '';
+    $password = '123456789';
 } else {
     // InfinityFree settings
     $host = 'sql204.infinityfree.com';

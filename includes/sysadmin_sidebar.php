@@ -36,13 +36,16 @@ $page_slug = str_replace('.php', '', $current_page);
         </div>
     </div>
 
-    <ul class="nav flex-column mb-auto mt-3 px-2">
-        <li class="nav-item">
-            <a href="accounts.php" class="nav-link <?= $page_slug === 'accounts' ? 'active' : '' ?>" style="<?= $page_slug === 'accounts' ? 'background: #8B5CF6; color: white; border-radius: 8px;' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Accounts
-            </a>
-        </li>
-    </ul>
+    <div class="flex-grow-1 mb-auto mt-3">
+        <p class="sidebar-section-label">ADMINISTRATION</p>
+        <ul class="nav flex-column px-2">
+            <li class="nav-item">
+                <a href="accounts.php" class="nav-link <?= $page_slug === 'accounts' ? 'active' : '' ?>" style="<?= $page_slug === 'accounts' ? 'background: #8B5CF6; color: white; border-radius: 8px;' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Accounts
+                </a>
+            </li>
+        </ul>
+    </div>
 
     <!-- User Info + Sign Out -->
     <?php

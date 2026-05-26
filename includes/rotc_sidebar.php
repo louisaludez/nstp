@@ -63,55 +63,66 @@ $lastName = end($nameParts);
         </div>
     </div>
 
-    <!-- Section label -->
-    <div class="rotc-section-label" style="font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#4B5563;padding:12px 20px 8px;">Command</div>
+    <div class="flex-grow-1 mb-auto">
+        <!-- Nav -->
+        <ul class="nav flex-column" style="padding:0 10px;gap:2px;">
+            <li>
+                <a href="dashboard.php"
+                   class="nav-link <?= $page_slug === 'dashboard' ? 'rotc-active' : 'rotc-link' ?>"
+                   style="border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:11px;font-size:0.875rem;font-weight:500;<?= $page_slug === 'dashboard' ? 'background:#F59E0B;color:#1C1917;font-weight:600;' : 'color:#94A3B8;' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Overview
+                </a>
+            </li>
+        </ul>
 
-    <!-- Nav -->
-    <ul class="nav flex-column mb-auto" style="padding:0 10px;gap:2px;">
-        <li>
-            <a href="dashboard.php"
-               class="nav-link <?= $page_slug === 'dashboard' ? 'rotc-active' : 'rotc-link' ?>"
-               style="border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:11px;font-size:0.875rem;font-weight:500;<?= $page_slug === 'dashboard' ? 'background:#F59E0B;color:#1C1917;font-weight:600;' : 'color:#94A3B8;' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Overview
-            </a>
-        </li>
-        <li>
-            <a href="platoon_management.php"
-               class="nav-link <?= in_array($page_slug, ['platoon_management','platoons']) ? 'rotc-active' : 'rotc-link' ?>"
-               style="border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:11px;font-size:0.875rem;font-weight:500;<?= in_array($page_slug, ['platoon_management','platoons']) ? 'background:#F59E0B;color:#1C1917;font-weight:600;' : 'color:#94A3B8;' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Platoon Management
-                <?php if ($platoon_count > 0): ?>
-                <span style="margin-left:auto;background:rgba(245,158,11,0.15);color:#F59E0B;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:10px;"><?= $platoon_count ?></span>
-                <?php endif; ?>
-            </a>
-        </li>
-        <li>
-            <a href="rosters.php"
-               class="nav-link <?= $page_slug === 'rosters' ? 'rotc-active' : 'rotc-link' ?>"
-               style="border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:11px;font-size:0.875rem;font-weight:500;<?= $page_slug === 'rosters' ? 'background:#F59E0B;color:#1C1917;font-weight:600;' : 'color:#94A3B8;' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Assign Officer Section
-            </a>
-        </li>
-        <li>
-            <a href="activity_designs.php"
-               class="nav-link <?= in_array($page_slug, ['activity_designs','activity_plans']) ? 'rotc-active' : 'rotc-link' ?>"
-               style="border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:11px;font-size:0.875rem;font-weight:500;<?= in_array($page_slug, ['activity_designs','activity_plans']) ? 'background:#F59E0B;color:#1C1917;font-weight:600;' : 'color:#94A3B8;' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="12" y1="11" x2="16" y2="11"/><line x1="12" y1="16" x2="16" y2="16"/></svg>
-                Activity Designs
-                <?php if ($activity_count > 0): ?>
-                <span style="margin-left:auto;background:rgba(245,158,11,0.15);color:#F59E0B;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:10px;"><?= $activity_count ?></span>
-                <?php endif; ?>
-            </a>
-        </li>
-        <li>
-            <a href="accomplishment_reports.php"
-               class="nav-link <?= $page_slug === 'accomplishment_reports' ? 'rotc-active' : 'rotc-link' ?>"
-               style="border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:11px;font-size:0.875rem;font-weight:500;<?= $page_slug === 'accomplishment_reports' ? 'background:#F59E0B;color:#1C1917;font-weight:600;' : 'color:#94A3B8;' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Report Submission
-            </a>
-        </li>
-    </ul>
+        <!-- Section label -->
+        <div class="rotc-section-label" style="font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#4B5563;padding:24px 20px 8px;">MANAGEMENT</div>
+
+        <ul class="nav flex-column" style="padding:0 10px;gap:2px;">
+            <li>
+                <a href="platoon_management.php"
+                   class="nav-link <?= in_array($page_slug, ['platoon_management','platoons']) ? 'rotc-active' : 'rotc-link' ?>"
+                   style="border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:11px;font-size:0.875rem;font-weight:500;<?= in_array($page_slug, ['platoon_management','platoons']) ? 'background:#F59E0B;color:#1C1917;font-weight:600;' : 'color:#94A3B8;' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Platoon Management
+                    <?php if ($platoon_count > 0): ?>
+                    <span style="margin-left:auto;background:rgba(245,158,11,0.15);color:#F59E0B;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:10px;"><?= $platoon_count ?></span>
+                    <?php endif; ?>
+                </a>
+            </li>
+            <li>
+                <a href="rosters.php"
+                   class="nav-link <?= $page_slug === 'rosters' ? 'rotc-active' : 'rotc-link' ?>"
+                   style="border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:11px;font-size:0.875rem;font-weight:500;<?= $page_slug === 'rosters' ? 'background:#F59E0B;color:#1C1917;font-weight:600;' : 'color:#94A3B8;' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Assign Officer Section
+                </a>
+            </li>
+        </ul>
+
+        <!-- Section label -->
+        <div class="rotc-section-label" style="font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#4B5563;padding:24px 20px 8px;">PLANNING & REPORTS</div>
+
+        <ul class="nav flex-column" style="padding:0 10px;gap:2px;">
+            <li>
+                <a href="activity_designs.php"
+                   class="nav-link <?= in_array($page_slug, ['activity_designs','activity_plans']) ? 'rotc-active' : 'rotc-link' ?>"
+                   style="border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:11px;font-size:0.875rem;font-weight:500;<?= in_array($page_slug, ['activity_designs','activity_plans']) ? 'background:#F59E0B;color:#1C1917;font-weight:600;' : 'color:#94A3B8;' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="12" y1="11" x2="16" y2="11"/><line x1="12" y1="16" x2="16" y2="16"/></svg>
+                    Activity Designs
+                    <?php if ($activity_count > 0): ?>
+                    <span style="margin-left:auto;background:rgba(245,158,11,0.15);color:#F59E0B;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:10px;"><?= $activity_count ?></span>
+                    <?php endif; ?>
+                </a>
+            </li>
+            <li>
+                <a href="accomplishment_reports.php"
+                   class="nav-link <?= $page_slug === 'accomplishment_reports' ? 'rotc-active' : 'rotc-link' ?>"
+                   style="border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:11px;font-size:0.875rem;font-weight:500;<?= $page_slug === 'accomplishment_reports' ? 'background:#F59E0B;color:#1C1917;font-weight:600;' : 'color:#94A3B8;' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Report Submission
+                </a>
+            </li>
+        </ul>
+    </div>
 
     <!-- Hover + collapsed styles -->
     <style>

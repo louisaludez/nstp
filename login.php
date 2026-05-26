@@ -68,46 +68,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: center;
             background-color: #F8FAFC;
             padding: 40px 20px;
+            position: relative;
+            z-index: 0;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: url('nstpmangementsystem-main/dnsc_bg2.png') no-repeat center center / cover;
+            filter: blur(3px);
+            z-index: -1;
         }
 
         /* ── Login Card ── */
         .login-card {
             display: flex;
             width: 100%;
-            max-width: 960px;
+            max-width: 1024px;
             min-height: 460px;
-            border-radius: 12px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
         /* ── Left Panel ── */
         .login-left {
             flex: 1;
-            background: #1E293B; /* Slate 800 */
+            background: linear-gradient(to bottom right, #0F172A, #1E293B);
             color: #fff;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 48px 44px;
+            padding: 40px;
             position: relative;
             overflow: hidden;
         }
         .login-left::before {
             content: '';
             position: absolute;
-            width: 400px; height: 400px;
+            width: 224px; height: 224px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.03);
-            top: -80px; right: -80px;
+            background: rgba(255,255,255,0.05);
+            top: -40px; right: -40px;
         }
         .login-left::after {
             content: '';
             position: absolute;
-            width: 300px; height: 300px;
+            width: 288px; height: 288px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.02);
-            bottom: -50px; left: -50px;
+            background: rgba(255,255,255,0.05);
+            bottom: 0px; left: -40px;
         }
         .login-left .brand-icon {
             width: 44px; height: 44px;
@@ -119,27 +133,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             position: relative; z-index: 1;
         }
         .login-left .uni-label {
-            font-size: 0.65rem;
-            font-weight: 600;
-            letter-spacing: 0.15em;
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 0.3em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.45);
-            margin-bottom: 10px;
+            color: #94A3B8;
+            margin-bottom: 8px;
             position: relative; z-index: 1;
         }
         .login-left h1 {
-            font-size: 1.9rem;
-            font-weight: 700;
+            font-size: 1.875rem;
+            font-weight: 400;
             line-height: 1.25;
-            margin-bottom: 14px;
+            margin-bottom: 32px;
             position: relative; z-index: 1;
         }
         .login-left .tagline {
-            font-size: 0.875rem;
-            color: rgba(255,255,255,0.6);
-            line-height: 1.6;
-            margin-bottom: 36px;
-            position: relative; z-index: 1;
+            display: none;
         }
         .feature-list {
             list-style: none; padding: 0;
@@ -159,73 +169,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         /* ── Right Panel ── */
         .login-right {
-            width: 420px;
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 48px 44px;
+            padding: 40px;
             background: #fff;
         }
         .login-right .sign-in-label {
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
+            font-size: 0.75rem;
+            font-weight: 400;
+            letter-spacing: 0.18em;
             text-transform: uppercase;
             color: #94A3B8;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         .login-right h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #111827;
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: #0F172A;
             margin-bottom: 4px;
         }
         .login-right .subtitle {
-            font-size: 0.85rem;
-            color: #6B7280;
-            margin-bottom: 28px;
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-bottom: 24px;
         }
 
         /* ── Form ── */
-        .form-group { margin-bottom: 18px; }
+        .form-group { margin-bottom: 16px; }
         .form-group label {
-            display: block; font-size: 0.78rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;
+            display: block; font-size: 0.75rem; font-weight: 400; color: #64748B; margin-bottom: 4px;
         }
         .input-wrap {
             display: flex; align-items: center; gap: 10px;
-            border: 1px solid #E5E7EB;
-            border-radius: 6px;
-            padding: 10px 14px;
-            transition: border-color 0.15s;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 10px 12px;
+            transition: all 0.15s;
         }
         .input-wrap:focus-within {
-            border-color: #6366F1;
-            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+            border-color: #A5B4FC;
+            box-shadow: 0 0 0 4px rgba(238,242,255,1);
         }
-        .input-wrap i { color: #9CA3AF; font-size: 0.95rem; }
+        .input-wrap i { color: #9CA3AF; font-size: 1rem; }
         .input-wrap input {
             border: none; outline: none; flex: 1;
             font-size: 0.875rem; font-family: 'Inter', sans-serif; color: #111827;
             background: transparent;
         }
-        .input-wrap input::placeholder { color: #D1D5DB; }
+        .input-wrap input::placeholder { color: #94A3B8; }
 
         .btn-signin {
             width: 100%;
-            padding: 11px;
-            border-radius: 6px;
+            padding: 12px 16px;
+            border-radius: 8px;
             border: none;
             background: #0F172A;
             color: #fff;
             font-size: 0.875rem;
-            font-weight: 500;
+            font-weight: 400;
             font-family: 'Inter', sans-serif;
             cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: background 0.15s;
-            margin-top: 6px;
+            transition: all 0.15s;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .btn-signin:hover { background: #1F2937; }
+        .btn-signin:hover { background: #1E293B; }
 
         .help-link {
             text-align: center;
@@ -283,31 +294,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- Left Panel -->
         <div class="login-left">
-            <img src="assets/images/DSNC.png" alt="DNSC Logo" style="width:56px;height:56px;object-fit:contain;margin-bottom:28px;position:relative;z-index:1;">
-            <div class="uni-label">Davao del Norte State College</div>
-            <h1>NSTP Management<br>System</h1>
-            <p class="tagline">One platform for program coordination, classroom delivery, and ROTC command. Sign in to continue.</p>
+            <img src="assets/images/DSNC.png" alt="DNSC Logo" style="width:64px;height:64px;object-fit:contain;margin-bottom:24px;position:relative;z-index:1;">
+            <div class="uni-label">Davao Del Norte State College</div>
+            <h1>NSTP Management System</h1>
             <!-- Role hint cards (matching reference design) -->
-            <div style="position:relative;z-index:1;">
-                <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:10px;">Accounts</div>
+            <div style="position:relative;z-index:1;margin-top:32px;">
+                <div style="font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#64748B;margin-bottom:8px;">Accounts</div>
                 <div style="display:flex;flex-direction:column;gap:8px;">
-                    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
-                        <div style="width:28px;height:28px;border-radius:6px;background:#6366F1;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);">
+                        <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(to bottom right, #4F46E5, #3B82F6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="bi bi-mortarboard-fill" style="font-size:0.75rem;color:#fff;"></i>
                         </div>
-                        <span style="font-size:0.78rem;color:rgba(255,255,255,0.8);">NSTP Coordinator</span>
+                        <span style="font-size:0.75rem;color:rgba(255,255,255,0.8);">NSTP Coordinator</span>
                     </div>
-                    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
-                        <div style="width:28px;height:28px;border-radius:6px;background:#10B981;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);">
+                        <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(to bottom right, #10B981, #14B8A6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="bi bi-book-half" style="font-size:0.75rem;color:#fff;"></i>
                         </div>
-                        <span style="font-size:0.78rem;color:rgba(255,255,255,0.8);">CWTS/LTS Instructor</span>
+                        <span style="font-size:0.75rem;color:rgba(255,255,255,0.8);">CWTS/LTS Instructor</span>
                     </div>
-                    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
-                        <div style="width:28px;height:28px;border-radius:6px;background:#0F172A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);">
+                        <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(to bottom right, #1E293B, #0F172A);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="bi bi-shield-fill" style="font-size:0.75rem;color:#fff;"></i>
                         </div>
-                        <span style="font-size:0.78rem;color:rgba(255,255,255,0.8);">ROTC 1st Class Officer</span>
+                        <span style="font-size:0.75rem;color:rgba(255,255,255,0.8);">ROTC 1st Class Officer</span>
                     </div>
                 </div>
             </div>

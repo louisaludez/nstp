@@ -46,59 +46,71 @@ try {
     </div>
 
     <!-- Navigation (matching reference nav items exactly) -->
-    <p class="sidebar-section-label">Workspace</p>
+    <div class="flex-grow-1 mb-auto">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="dashboard.php" class="nav-link <?= $page_slug === 'dashboard' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="manage_sections.php"
+                    class="nav-link <?= $page_slug === 'manage_sections' || $page_slug === 'manage_students' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Sections & Students
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="manage_instructors.php" class="nav-link <?= $page_slug === 'manage_instructors' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Instructors & ROTC Officers
+                </a>
+            </li>
+        </ul>
 
-    <ul class="nav flex-column mb-auto">
-        <li class="nav-item">
-            <a href="dashboard.php" class="nav-link <?= $page_slug === 'dashboard' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg> Dashboard
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="manage_sections.php"
-                class="nav-link <?= $page_slug === 'manage_sections' || $page_slug === 'manage_students' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Sections & Students
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="manage_instructors.php" class="nav-link <?= $page_slug === 'manage_instructors' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Instructors & ROTC Officers
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="submissions.php" class="nav-link <?= $page_slug === 'submissions' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg> Report & Activity Approvals
-                <?php if ($pending_reports > 0): ?>
-                    <span class="badge-count"><?= $pending_reports ?></span>
-                <?php endif; ?>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="calendar.php" class="nav-link <?= $page_slug === 'calendar' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Activity Calendar
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="scan_grades.php" class="nav-link <?= $page_slug === 'scan_grades' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg> OCR Grade
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="certificates.php" class="nav-link <?= $page_slug === 'certificates' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg> Certificates
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="reports.php" class="nav-link <?= $page_slug === 'reports' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M21 8v13H3V8z"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg> Student Archive
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="audit_logs.php" class="nav-link <?= $page_slug === 'audit_logs' ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12v4"/><line x1="16" y1="13" x2="18" y2="13"/><line x1="10" y1="13" x2="14" y2="13"/><line x1="10" y1="17" x2="14" y2="17"/></svg> Audit Logs
-            </a>
-        </li>
-    </ul>
+        <p class="sidebar-section-label mt-4">REPORTS & PLAN</p>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="submissions.php" class="nav-link <?= $page_slug === 'submissions' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg> Report & Activity Approvals
+                    <?php if ($pending_reports > 0): ?>
+                        <span class="badge-count"><?= $pending_reports ?></span>
+                    <?php endif; ?>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="calendar.php" class="nav-link <?= $page_slug === 'calendar' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Activity Calendar
+                </a>
+            </li>
+        </ul>
+
+        <p class="sidebar-section-label mt-4">GRADES</p>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="scan_grades.php" class="nav-link <?= $page_slug === 'scan_grades' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg> OCR Grade
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="certificates.php" class="nav-link <?= $page_slug === 'certificates' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg> Certificates
+                </a>
+            </li>
+        </ul>
+
+        <p class="sidebar-section-label mt-4">HISTORY</p>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="reports.php" class="nav-link <?= $page_slug === 'reports' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M21 8v13H3V8z"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg> Student Archive
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="audit_logs.php" class="nav-link <?= $page_slug === 'audit_logs' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12v4"/><line x1="16" y1="13" x2="18" y2="13"/><line x1="10" y1="13" x2="14" y2="13"/><line x1="10" y1="17" x2="14" y2="17"/></svg> Audit Logs
+                </a>
+            </li>
+        </ul>
+    </div>
 
     <!-- User Info + Sign Out (matching reference: avatar + name + Coordinator + logout icon) -->
     <?php
