@@ -1,0 +1,5 @@
+Student ID,First Name,Last Name,Course,Year Level,Component,Sex,Contact Number,Email,Date of Birth,Complete Address
+2022-0001,John,Doe,BSIT,1,CWTS,Male,9171234567,john.doe@example.com,14/05/2002,"123 Main St, Cityville"
+2022-0002,Jane,Smith,BSCS,1,LTS,Female,9189876543,jane.smith@example.com,22/08/2003,"456 Elm St, Townsville"
+2022-0003,Mark,Johnson,BSIS,2,ROTC,Male,9191112222,mark.j@example.com,05/11/2001,"789 Pine St, Villageburg"
+2023-0104,Emily,Davis,BSIT,1,,Female,9203334444,emily.d@example.com,30/01/2004,"321 Oak St, Metropolis"

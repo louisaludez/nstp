@@ -26,7 +26,7 @@ include '../includes/admin_sidebar.php';
         <div class="d-flex gap-2">
             <button class="btn btn-sm" style="border: 1px solid #6EE7B7; background: #ECFDF5; color: #047857; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 8px 12px;" data-bs-toggle="modal" data-bs-target="#uploadMasterListModal">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Import Master List XLSX File
+                Import Master List CSV File
             </button>
             <button type="button" class="btn btn-sm" style="background: #4F46E5; color: white; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 8px 12px;" data-bs-toggle="modal" data-bs-target="#createSectionModal" onmouseover="this.style.background='#4338CA'" onmouseout="this.style.background='#4F46E5'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -310,8 +310,8 @@ include '../includes/admin_sidebar.php';
                     <div class="mb-3">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; color: #10B981; margin: 0 auto;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
                     </div>
-                    <p class="text-muted small mb-4">Upload the official student masterlist (CSV or Excel) to be stored in the system and forwarded to the respective instructors and ROTC officers.</p>
-                    <input type="file" name="master_list_file" class="form-control" accept=".csv, .xlsx, .xls" required>
+                    <p class="text-muted small mb-4">Upload the official student masterlist (CSV only) to be stored in the system and forwarded to the respective instructors and ROTC officers.</p>
+                    <input type="file" name="master_list_file" class="form-control" accept=".csv" required>
                 </div>
                 <div class="modal-footer border-top-0 pb-4 pe-4 pt-0 justify-content-center">
                     <button type="button" class="btn-figma outline" data-bs-dismiss="modal">Cancel</button>

@@ -95,6 +95,11 @@ try {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg> Certificates
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="certificate_templates.php" class="nav-link <?= $page_slug === 'certificate_templates' ? 'active' : '' ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> Certificate Templates
+                </a>
+            </li>
         </ul>
 
         <p class="sidebar-section-label mt-4">HISTORY</p>

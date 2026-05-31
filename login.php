@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             left: -20px;
             right: -20px;
             bottom: -20px;
-            background: url('nstpmangementsystem-main/dnsc_bg2.png') no-repeat center center / cover;
+            background: url('assets/images/dnsc_bg2.png') no-repeat center center / cover;
             filter: blur(3px);
             z-index: -1;
         }

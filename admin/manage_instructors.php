@@ -36,64 +36,87 @@ include '../includes/admin_sidebar.php';
         </div>
     <?php endif; ?>
 
-    <!-- Instructor Grid -->
-    <div class="row g-4">
-        <?php if (count($instructors) > 0): ?>
-            <?php foreach ($instructors as $inst): 
-                $bg_color = '#4F46E5'; 
-                
-                $name_parts = explode(' ', trim($inst['full_name']));
-                $initials = strtoupper(substr($name_parts[0], 0, 1));
-                if (count($name_parts) > 1) {
-                    $initials .= strtoupper(substr(end($name_parts), 0, 1));
-                }
+    <!-- Controls -->
+    <div class="d-flex flex-wrap gap-3 mb-4">
+        <div class="position-relative" style="max-width: 320px; flex: 1;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="position-absolute text-muted" style="width: 16px; height: 16px; left: 14px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="instructorSearch" class="form-control" placeholder="Search instructor..." style="padding-left: 40px; border-radius: 8px; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.9rem;">
+        </div>
+        <select id="sectionFilter" class="form-select w-auto" style="border-radius: 8px; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.9rem;">
+            <option value="">All Sections</option>
+            <option value="CWTS">CWTS</option>
+            <option value="LTS">LTS</option>
+            <option value="ROTC">ROTC</option>
+        </select>
+    </div>
 
-                $dept = $inst['primary_component'] ?? 'NSTP';
-                $main_section = !empty($inst['assigned_sections']) ? $inst['assigned_sections'] : 'Unassigned';
-                $status = $inst['status'] ?? 'Active';
-            ?>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100" style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#94A3B8'" onmouseout="this.style.borderColor='#E2E8F0'" onclick="viewInstructorDetails(<?= $inst['id'] ?>, '<?= htmlspecialchars(addslashes($inst['full_name'])) ?>', '<?= addslashes($dept) ?>', '<?= addslashes($main_section) ?>', <?= $inst['student_count'] ?? 0 ?>, '<?= htmlspecialchars(addslashes($inst['email'])) ?>', '<?= $initials ?>', '<?= $bg_color ?>', '<?= $status ?>')">
-                        <div class="d-flex align-items-center gap-3 mb-4">
-                            <div style="width: 42px; height: 42px; border-radius: 50%; background: <?= $bg_color ?>; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; flex-shrink: 0;">
-                                <?= $initials ?>
-                            </div>
-                            <div>
-                                <div style="font-weight: 600; color: #1E293B; font-size: 0.95rem;"><?= htmlspecialchars($inst['full_name']) ?></div>
-                                <div style="font-size: 0.75rem; color: #64748B; margin-top: 2px;"><?= $dept ?></div>
-                            </div>
-                        </div>
+    <!-- Instructor Table -->
+    <div class="table-responsive" style="background: white; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <table class="table table-hover mb-0 align-middle" style="color: #1E293B;">
+            <thead style="background: #F8FAFC; border-bottom: 1px solid #E2E8F0;">
+                <tr>
+                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">INSTRUCTOR</th>
+                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">DEPARTMENT</th>
+                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">EMAIL</th>
+                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">SECTIONS</th>
+                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">STUDENTS</th>
+                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (count($instructors) > 0): ?>
+                    <?php foreach ($instructors as $inst): 
+                        $bg_color = '#6366F1'; 
                         
-                        <div class="row mb-4">
-                            <div class="col-6">
-                                <div style="font-size: 0.7rem; color: #94A3B8; margin-bottom: 4px;">Sections</div>
-                                <div style="font-weight: 600; color: #1E293B; font-size: 0.85rem;"><?= $main_section ?></div>
-                            </div>
-                            <div class="col-6">
-                                <div style="font-size: 0.7rem; color: #94A3B8; margin-bottom: 4px;">Students</div>
-                                <div style="font-weight: 600; color: #1E293B; font-size: 0.85rem;"><?= $inst['student_count'] ?? 0 ?></div>
-                            </div>
-                        </div>
+                        $name_parts = explode(' ', trim($inst['full_name']));
+                        $initials = strtoupper(substr($name_parts[0], 0, 1));
+                        if (count($name_parts) > 1) {
+                            $initials .= strtoupper(substr(end($name_parts), 0, 1));
+                        }
 
-                        <div class="d-flex align-items-center gap-2 mt-auto" style="font-size: 0.75rem; color: #64748B;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                            <?= htmlspecialchars($inst['email']) ?>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="col-12">
-                <div class="text-center py-5 dash-panel">
-                    <i class="bi bi-people text-muted fs-1 mb-2"></i>
-                    <h6 class="fw-bold text-dark">No Instructors Found</h6>
-                    <p class="text-muted small mb-3">Add instructors to start assigning sections.</p>
-                    <button type="button" class="btn-figma primary" data-bs-toggle="modal" data-bs-target="#addInstructorModal">
-                        Invite Instructor
-                    </button>
-                </div>
-            </div>
-        <?php endif; ?>
+                        $dept = $inst['primary_component'] ?? 'NSTP';
+                        $main_section = !empty($inst['assigned_sections']) ? $inst['assigned_sections'] : '-';
+                        $status = $inst['status'] ?? 'Active';
+                        
+                        $status_bg = ($status === 'Active') ? '#ECFDF5' : '#F8FAFC';
+                        $status_text = ($status === 'Active') ? '#10B981' : '#64748B';
+                    ?>
+                        <tr style="cursor: pointer;" onclick="viewInstructorDetails(<?= $inst['id'] ?>, '<?= htmlspecialchars(addslashes($inst['full_name'])) ?>', '<?= addslashes($dept) ?>', '<?= addslashes($main_section) ?>', <?= $inst['student_count'] ?? 0 ?>, '<?= htmlspecialchars(addslashes($inst['email'])) ?>', '<?= $initials ?>', '<?= $bg_color ?>', '<?= $status ?>')">
+                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div style="width: 36px; height: 36px; border-radius: 50%; background: <?= $bg_color ?>; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; flex-shrink: 0;">
+                                        <?= $initials ?>
+                                    </div>
+                                    <span style="font-weight: 500; color: #1E293B;"><?= htmlspecialchars($inst['full_name']) ?></span>
+                                </div>
+                            </td>
+                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0; color: #64748B; font-size: 0.95rem;"><?= htmlspecialchars($dept) ?></td>
+                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0; color: #64748B; font-size: 0.95rem;"><?= htmlspecialchars($inst['email']) ?></td>
+                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0; color: #475569; font-weight: 500; font-size: 0.95rem;"><?= htmlspecialchars($main_section) ?></td>
+                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0; color: #475569; font-size: 0.95rem;"><?= $inst['student_count'] ?? 0 ?></td>
+                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0;">
+                                <span style="background: <?= $status_bg ?>; color: <?= $status_text ?>; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                                    <?= htmlspecialchars($status) ?>
+                                </span>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background: #F1F5F9; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: #94A3B8;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">No Instructors Found</h6>
+                            <p class="text-muted small mb-3">Add instructors to start assigning sections.</p>
+                            <button type="button" class="btn btn-sm" style="background: #6366F1; color: white; border-radius: 8px; padding: 8px 16px; font-weight: 500;" data-bs-toggle="modal" data-bs-target="#addInstructorModal">
+                                Add Personnel
+                            </button>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
     </div>
 
 </div>

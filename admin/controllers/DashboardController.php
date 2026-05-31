@@ -41,6 +41,32 @@ try {
     $recent_activities = [];
 }
 
+// Fetch flagged archived students (missing email, contact_number, or course)
+try {
+    $flagged_stmt = $pdo->query("
+        SELECT 
+            s.student_id, 
+            CONCAT(s.first_name, ' ', s.last_name) as full_name,
+            s.course,
+            s.email,
+            s.contact_number
+        FROM students s
+        JOIN enrollments e ON s.student_id = e.student_id
+        WHERE e.status IN ('Passed', 'Failed')
+          AND (
+              s.email IS NULL OR s.email = '' OR 
+              s.contact_number IS NULL OR s.contact_number = '' OR 
+              s.course IS NULL OR s.course = ''
+          )
+        GROUP BY s.student_id
+    ");
+    $flagged_students = $flagged_stmt->fetchAll();
+    $flagged_count = count($flagged_students);
+} catch (PDOException $e) {
+    $flagged_students = [];
+    $flagged_count = 0;
+}
+
 function time_elapsed_string($datetime) {
     if (!$datetime) return 'just now';
     try {

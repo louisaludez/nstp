@@ -270,6 +270,82 @@ foreach ($upcoming_list as $act) {
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════
+         ROW 4 — Incomplete Student Profiles
+    ═══════════════════════════════════════ -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="dash-panel" style="padding:24px;">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h5 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin-bottom: 4px;">Incomplete Student Profiles</h5>
+                        <p style="font-size: 0.85rem; color: #6B7280; margin: 0;">Flags missing information in archived records</p>
+                    </div>
+                    <span style="background: #D1FAE5; color: #065F46; font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border-radius: 12px;">
+                        <?= $flagged_count ?> Flagged
+                    </span>
+                </div>
+
+                <div class="position-relative mb-4">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #9CA3AF;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="form-control" placeholder="Search flagged students..." style="padding-left: 36px; border-radius: 8px; font-size: 0.9rem; border: 1px solid #E5E7EB; box-shadow: none;">
+                </div>
+
+                <?php if ($flagged_count === 0): ?>
+                    <div class="text-center py-5">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #ECFDF5; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; color: #10B981;">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                        <h6 style="font-size: 1.05rem; font-weight: 600; color: #111827; margin-bottom: 8px;">All Profiles Complete</h6>
+                        <p style="font-size: 0.85rem; color: #9CA3AF; margin: 0;">All archived students have complete data fields.</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-figma">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Course</th>
+                                    <th>Missing Fields</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($flagged_students as $student): 
+                                    $missing = [];
+                                    if (empty($student['email'])) $missing[] = 'Email';
+                                    if (empty($student['contact_number'])) $missing[] = 'Contact';
+                                    if (empty($student['course'])) $missing[] = 'Course';
+                                ?>
+                                    <tr>
+                                        <td><span class="fw-600"><?= htmlspecialchars($student['student_id']) ?></span></td>
+                                        <td><?= htmlspecialchars($student['full_name']) ?></td>
+                                        <td><?= htmlspecialchars($student['course'] ?: '—') ?></td>
+                                        <td>
+                                            <?php foreach ($missing as $m): ?>
+                                                <span class="badge-chip delete me-1"><?= $m ?></span>
+                                            <?php endforeach; ?>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="manage_students.php?search=<?= urlencode($student['student_id']) ?>" class="btn btn-sm btn-figma outline">Update</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
 </div>
 </div>
 
