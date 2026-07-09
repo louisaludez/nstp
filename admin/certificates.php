@@ -24,10 +24,24 @@ include '../includes/admin_sidebar.php';
             <h4 class="fw-bold mb-1" style="color: #111827;">Certificate Overview</h4>
             <p class="text-muted mb-0" style="font-size: 0.85rem;">Click a row to view the student list</p>
         </div>
-        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #ECFDF5; color: #10B981; border: 1px dashed #10B981; border-radius: 8px; padding: 8px 16px; font-weight: 500;" onclick="alert('Import coming soon.')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Import XLSX File of Grades
-        </button>
+        <div class="d-flex gap-2">
+            <form method="POST" class="m-0 p-0">
+                <input type="hidden" name="action" value="toggle_ched_approval">
+                <?php if ($ched_approval_status): ?>
+                    <button type="submit" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #10B981; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 500;">
+                        <i class="bi bi-check-circle-fill"></i> CHED Approval Received
+                    </button>
+                <?php else: ?>
+                    <button type="submit" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; border-radius: 8px; padding: 8px 16px; font-weight: 500;">
+                        <i class="bi bi-exclamation-triangle"></i> Pending CHED Approval
+                    </button>
+                <?php endif; ?>
+            </form>
+            <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #ECFDF5; color: #10B981; border: 1px dashed #10B981; border-radius: 8px; padding: 8px 16px; font-weight: 500;" onclick="alert('Import coming soon.')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Import XLSX File of Grades
+            </button>
+        </div>
     </div>
 
     <!-- ══════════════════════════════════════
@@ -75,16 +89,16 @@ include '../includes/admin_sidebar.php';
                         <span style="font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; <?= $statusClass ?>">
                             <?= $statusLabel ?>
                         </span>
-                        <?php if ($ready): ?>
-                        <form method="POST" class="m-0 p-0 d-inline" onsubmit="return confirm('Are you sure you want to generate certificates for <?= htmlspecialchars($batch['section_name']) ?>?');">
+                        <?php if ($ready && $ched_approval_status): ?>
+                        <form method="POST" class="m-0 p-0 d-inline" id="form-generate-<?= htmlspecialchars($batch['section_name']) ?>">
                             <input type="hidden" name="action" value="generate_certificates">
                             <input type="hidden" name="section_name" value="<?= htmlspecialchars($batch['section_name']) ?>">
-                            <button type="submit" class="btn btn-sm" style="background: #0F172A; color: white; border-radius: 8px; font-weight: 500; padding: 6px 16px; font-size: 0.8rem;">
+                            <button type="button" class="btn btn-sm" style="background: #0F172A; color: white; border-radius: 8px; font-weight: 500; padding: 6px 16px; font-size: 0.8rem;" onclick="confirmGenerate('<?= htmlspecialchars(addslashes($batch['section_name'])) ?>', 'form-generate-<?= htmlspecialchars($batch['section_name']) ?>')">
                                 Generate
                             </button>
                         </form>
                         <?php else: ?>
-                        <button class="btn btn-sm" style="background: #E2E8F0; color: #64748B; border-radius: 8px; font-weight: 500; padding: 6px 16px; font-size: 0.8rem;" disabled>
+                        <button class="btn btn-sm" style="background: #E2E8F0; color: #64748B; border-radius: 8px; font-weight: 500; padding: 6px 16px; font-size: 0.8rem;" disabled title="<?= !$ched_approval_status ? 'Pending CHED Approval' : 'Reviewing' ?>">
                             Generate
                         </button>
                         <?php endif; ?>
@@ -269,5 +283,22 @@ include '../includes/admin_sidebar.php';
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function confirmGenerate(sectionName, formId) {
+    Swal.fire({
+        title: 'Generate Certificates?',
+        text: `Are you sure you want to generate certificates for ${sectionName}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0F172A',
+        cancelButtonColor: '#64748B',
+        confirmButtonText: 'Yes, generate'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById(formId).submit();
+        }
+    });
+}
+</script>
 </body>
 </html>

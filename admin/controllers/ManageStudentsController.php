@@ -29,6 +29,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_student'])) {
     }
 
     try {
+        // Enforce Platoon Limit if section is selected
+        if ($section_id) {
+            $stmtCap = $pdo->prepare("SELECT max_capacity, (SELECT COUNT(*) FROM enrollments WHERE section_id = sections.id) as current_count FROM sections WHERE id = ?");
+            $stmtCap->execute([$section_id]);
+            $capData = $stmtCap->fetch();
+            if ($capData && $capData['current_count'] >= $capData['max_capacity']) {
+                throw new Exception("Platoon / Section is full (Max: {$capData['max_capacity']}). Cannot enroll student.");
+            }
+        }
+
         $stmt = $pdo->prepare("INSERT INTO students (student_id, first_name, last_name, course, year_level, contact_number, email, component) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$student_id, $first_name, $last_name, $course, $year_level, $contact, $email, $component]);
 
@@ -41,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_student'])) {
         $message = "Student successfully added" . ($section_id ? " and enrolled into section." : ".");
         $msgType = "success";
         logAction($pdo, 'Created Student', "Added $first_name $last_name ($student_id) under $course" . ($component ? " [$component]" : ""));
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         if ($e->getCode() == 23000) {
             $message = "Error: A student with ID $student_id already exists.";
             $msgType = "danger";
@@ -107,13 +117,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enroll_student'])) {
     $section_id = $_POST['section_id'];
 
     try {
+        // Enforce Platoon Limit
+        $stmtCap = $pdo->prepare("SELECT max_capacity, (SELECT COUNT(*) FROM enrollments WHERE section_id = sections.id) as current_count FROM sections WHERE id = ?");
+        $stmtCap->execute([$section_id]);
+        $capData = $stmtCap->fetch();
+        if ($capData && $capData['current_count'] >= $capData['max_capacity']) {
+            throw new Exception("Platoon / Section is full (Max: {$capData['max_capacity']}). Cannot enroll student.");
+        }
+
         $stmt = $pdo->prepare("INSERT INTO enrollments (student_id, section_id, status) VALUES (?, ?, 'Pending')");
         $stmt->execute([$student_id, $section_id]);
 
         $message = "Student successfully enrolled into section.";
         $msgType = "success";
         logAction($pdo, 'Enrolled Student', "Enrolled student ($student_id) into section ID $section_id");
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         $message = "Database Error: " . $e->getMessage();
         $msgType = "danger";
     }

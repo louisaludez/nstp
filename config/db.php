@@ -1,7 +1,8 @@
 <?php
 // config/db.php
 
-$is_local = (isset($_SERVER['SERVER_NAME']) && in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1'])) || 
+$is_local = (php_sapi_name() === 'cli') || 
+            (isset($_SERVER['SERVER_NAME']) && in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1'])) || 
             (isset($_SERVER['HTTP_HOST']) && in_array($_SERVER['HTTP_HOST'], ['localhost', '127.0.0.1']));
 
 if ($is_local) {

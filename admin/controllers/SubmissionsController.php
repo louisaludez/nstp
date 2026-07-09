@@ -3,6 +3,12 @@
 
 $message = '';
 $msgType = '';
+$user_id = $_SESSION['user_id'] ?? null;
+
+$stmt_user = $pdo->prepare("SELECT signature_path FROM users WHERE id = ?");
+$stmt_user->execute([$user_id]);
+$current_user = $stmt_user->fetch();
+$signature_path = $current_user['signature_path'] ?? null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['approve_plan'])) {

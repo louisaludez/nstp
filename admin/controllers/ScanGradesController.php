@@ -54,20 +54,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['grade_sheet'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_grades'])) {
     if (isset($_POST['students']) && is_array($_POST['students'])) {
+        require_once '../includes/EmailHelper.php';
+        $emailHelper = new EmailHelper();
         $updated = 0;
         foreach ($_POST['students'] as $student) {
             $sid = $student['student_id'];
             $grade = $student['grade'];
             $status = $student['status'];
-            $stmtCheck = $pdo->prepare("SELECT id FROM enrollments WHERE student_id = ?");
+            $stmtCheck = $pdo->prepare("SELECT e.id, e.serial_number, s.email, s.first_name, s.last_name, s.course, sec.component, sec.section_name FROM enrollments e JOIN students s ON e.student_id = s.student_id JOIN sections sec ON e.section_id = sec.id WHERE e.student_id = ?");
             $stmtCheck->execute([$sid]);
             $enrollment = $stmtCheck->fetch();
             if ($enrollment) {
                 $stmt = $pdo->prepare("UPDATE enrollments SET final_grade = ?, status = ? WHERE student_id = ?");
                 $stmt->execute([$grade, $status, $sid]);
-                if ($status === 'Passed') {
+                if ($status === 'Passed' && empty($enrollment['serial_number'])) {
                     $serial = 'NSTP-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
-                    $pdo->prepare("UPDATE enrollments SET serial_number = ? WHERE student_id = ? AND serial_number IS NULL")->execute([$serial, $sid]);
+                    $pdo->prepare("UPDATE enrollments SET serial_number = ? WHERE student_id = ?")->execute([$serial, $sid]);
+                    
+                    if (!empty($enrollment['email'])) {
+                        $courseInfo = $enrollment['component'] . ' - ' . $enrollment['section_name'];
+                        $studentName = $enrollment['first_name'] . ' ' . $enrollment['last_name'];
+                        $emailHelper->sendPassNotification($enrollment['email'], $studentName, $serial, $courseInfo);
+                    }
                 }
                 $updated++;
             }

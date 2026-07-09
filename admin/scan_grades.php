@@ -16,9 +16,14 @@ include '../includes/admin_sidebar.php';
     
     <?php include '../includes/topbar.php'; ?>
     
-    <div class="mb-4 pb-1">
-        <h4 class="fw-bold mb-1" style="color: #111827;">OCR Grade Upload</h4>
-        <p class="text-muted" style="font-size: 0.9rem;">Scan grade sheets and import directly into student records</p>
+    <div class="mb-4 pb-1 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="fw-bold mb-1" style="color: #111827;">OCR Grade Upload</h4>
+            <p class="text-muted" style="font-size: 0.9rem;">Scan grade sheets and import directly into student records</p>
+        </div>
+        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #4F46E5; border: 1px solid #C7D2FE; border-radius: 8px; font-weight: 500; padding: 8px 16px; transition: all 0.2s;" onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='white'" data-bs-toggle="modal" data-bs-target="#gradeScaleModal">
+            <i class="bi bi-sliders"></i> Grade Scaling
+        </button>
     </div>
 
     <div class="row g-4 align-items-start">
@@ -82,8 +87,12 @@ include '../includes/admin_sidebar.php';
         <div class="col-lg-5 col-xl-4">
             <div class="dash-panel p-0" style="overflow: hidden; border-radius: 12px; border: 1px solid #E2E8F0;">
 
-                <div class="px-4 py-3 border-bottom" style="border-color: #E2E8F0 !important;">
+                <div class="px-4 py-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: #E2E8F0 !important;">
                     <h6 class="fw-bold mb-0" style="font-size: 0.95rem; color: #111827;">Recent Uploads</h6>
+                    <a href="export_passed.php" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #10B981; color: white; border-radius: 6px; font-weight: 500; font-size: 0.75rem; padding: 6px 10px; transition: background 0.2s; text-decoration: none;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10B981'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Export Passed
+                    </a>
                 </div>
 
                 <div class="ocr-upload-list">
@@ -118,6 +127,79 @@ include '../includes/admin_sidebar.php';
 </div>
 
 </div>
+
+<!-- Grade Scaling Modal -->
+<div class="modal fade" id="gradeScaleModal" tabindex="-1" aria-labelledby="gradeScaleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold" id="gradeScaleModalLabel">Configure Grade Scaling</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-3">
+        <p class="text-muted small mb-4">Define how raw OCR scores translate to final grades. This configuration will be applied to all future scans.</p>
+        
+        <form id="gradeScaleForm">
+            <div class="table-responsive">
+                <table class="table table-borderless align-middle mb-0">
+                    <thead class="text-muted small" style="border-bottom: 2px solid #F1F5F9;">
+                        <tr>
+                            <th class="fw-medium pb-2" style="width: 30%;">Min Score</th>
+                            <th class="fw-medium pb-2" style="width: 30%;">Max Score</th>
+                            <th class="fw-medium pb-2">Final Grade</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="gradeScaleBody">
+                        <!-- Example Rows -->
+                        <tr>
+                            <td><input type="number" class="form-control form-control-sm" value="95" style="border-radius: 6px;"></td>
+                            <td><input type="number" class="form-control form-control-sm" value="100" style="border-radius: 6px;"></td>
+                            <td><input type="text" class="form-control form-control-sm" value="1.0" style="border-radius: 6px;"></td>
+                            <td><button type="button" class="btn btn-sm text-danger border-0"><i class="bi bi-trash"></i></button></td>
+                        </tr>
+                        <tr>
+                            <td><input type="number" class="form-control form-control-sm" value="90" style="border-radius: 6px;"></td>
+                            <td><input type="number" class="form-control form-control-sm" value="94" style="border-radius: 6px;"></td>
+                            <td><input type="text" class="form-control form-control-sm" value="1.25" style="border-radius: 6px;"></td>
+                            <td><button type="button" class="btn btn-sm text-danger border-0"><i class="bi bi-trash"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-sm btn-light w-100 mt-2 text-primary fw-medium" style="border: 1px dashed #C7D2FE; border-radius: 6px;" onclick="addScaleRow()">
+                <i class="bi bi-plus"></i> Add Range
+            </button>
+        </form>
+      </div>
+      <div class="modal-footer border-top-0 pt-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
+        <button type="button" class="btn text-white" style="background: #4F46E5; border-radius: 8px; font-weight: 500;" onclick="saveGradeScale()">Save Scaling</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function addScaleRow() {
+    const tbody = document.getElementById('gradeScaleBody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="number" class="form-control form-control-sm" style="border-radius: 6px;"></td>
+        <td><input type="number" class="form-control form-control-sm" style="border-radius: 6px;"></td>
+        <td><input type="text" class="form-control form-control-sm" style="border-radius: 6px;"></td>
+        <td><button type="button" class="btn btn-sm text-danger border-0" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
+    `;
+    tbody.appendChild(tr);
+}
+
+function saveGradeScale() {
+    // In future: send data to backend via fetch
+    alert("Grade scaling saved! (Backend integration pending)");
+    const modal = bootstrap.Modal.getInstance(document.getElementById('gradeScaleModal'));
+    modal.hide();
+}
+</script>
 
 <style>
 /* ── OCR Grade Upload Page Styles ── */

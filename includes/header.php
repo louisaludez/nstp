@@ -29,6 +29,7 @@ if (!isset($_SESSION['user_id']) && !in_array($current_file, $public_pages)) {
     <title>NSTP & Cadet Portal — Davao del Norte State College</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="../assets/css/style.css" rel="stylesheet">
     
     <style>

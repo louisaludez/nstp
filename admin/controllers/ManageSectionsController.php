@@ -23,9 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_section'])) {
     $component = $_POST['component'];
     $school_year = trim($_POST['school_year']);
     $semester = $_POST['semester'];
+    $max_capacity = isset($_POST['max_capacity']) ? (int)$_POST['max_capacity'] : 50;
     try {
-        $stmt = $pdo->prepare("INSERT INTO sections (component, section_name, school_year, semester, instructor_id) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$component, $section_name, $school_year, $semester, $_POST['instructor_id'] ?? null]);
+        $stmt = $pdo->prepare("INSERT INTO sections (component, section_name, school_year, semester, instructor_id, max_capacity) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$component, $section_name, $school_year, $semester, $_POST['instructor_id'] ?? null, $max_capacity]);
         $message = "Section $section_name ($component) successfully created!";
         $msgType = "success";
     } catch (PDOException $e) {

@@ -213,24 +213,32 @@ include '../includes/admin_sidebar.php';
                     <?php endif; ?>
                 </div>
 
-                <form method="POST" class="d-flex gap-3 pt-4 border-top" style="border-color: var(--border-color) !important;">
+                <form method="POST" class="d-flex gap-3 pt-4 border-top flex-wrap" style="border-color: var(--border-color) !important;">
+                    <?php if (!empty($signature_path)): ?>
+                        <div class="w-100 mb-2">
+                            <span class="text-muted small d-block mb-1">Your signature to be attached:</span>
+                            <img src="../<?= htmlspecialchars($signature_path) ?>" alt="Signature" style="max-height: 40px; border: 1px solid #E2E8F0; padding: 2px; border-radius: 4px;">
+                        </div>
+                    <?php endif; ?>
                     <?php if ($active_type === 'plan'): ?>
                         <input type="hidden" name="plan_id" value="<?= $active_item['id'] ?>">
                         <button type="submit" name="approve_plan" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #059669; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 500;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Approve Plan
                         </button>
-                        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #64748B; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 16px; font-weight: 500;" onclick="alert('Requesting revisions will be supported in a future update.');">
+                        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #64748B; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 16px; font-weight: 500;" onclick="Swal.fire('Coming Soon', 'Requesting revisions will be supported in a future update.', 'info');">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Request Revisions
                         </button>
-                        <button type="submit" name="reject_plan" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #EF4444; border: 1px solid #FEE2E2; border-radius: 6px; padding: 8px 16px; font-weight: 500;" onclick="return confirm('Are you sure you want to reject this plan?');">
+                        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #EF4444; border: 1px solid #FEE2E2; border-radius: 6px; padding: 8px 16px; font-weight: 500;" onclick="confirmReject(this)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Reject
                         </button>
+                        <!-- Hidden submit button for rejection -->
+                        <input type="submit" name="reject_plan" id="real_reject_btn" class="d-none">
                     <?php else: ?>
                         <input type="hidden" name="report_id" value="<?= $active_item['id'] ?>">
                         <button type="submit" name="review_report" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #059669; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 500;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Mark as Reviewed
                         </button>
-                        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #64748B; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 16px; font-weight: 500;" onclick="alert('Requesting revisions will be supported in a future update.');">
+                        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #64748B; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 16px; font-weight: 500;" onclick="Swal.fire('Coming Soon', 'Requesting revisions will be supported in a future update.', 'info');">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Request Revisions
                         </button>
                     <?php endif; ?>
@@ -257,5 +265,22 @@ include '../includes/admin_sidebar.php';
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function confirmReject(btn) {
+    Swal.fire({
+        title: 'Reject Plan?',
+        text: "Are you sure you want to reject this plan? This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#64748B',
+        confirmButtonText: 'Yes, reject it'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('real_reject_btn').click();
+        }
+    });
+}
+</script>
 </body>
 </html>

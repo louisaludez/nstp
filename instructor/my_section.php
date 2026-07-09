@@ -38,7 +38,7 @@ include '../includes/instructor_sidebar.php';
                 ['bg' => '#4F46E5', 'text' => '#4F46E5'], // Indigo/Blue
                 ['bg' => '#A855F7', 'text' => '#A855F7'], // Purple
                 ['bg' => '#F97316', 'text' => '#F97316'], // Orange
-                ['bg' => '#10B981', 'text' => '#10B981']  // Green
+                ['bg' => '#10B981', 'text' => '#10B981']    // Green
             ];
             
             $idx = 0;
@@ -65,7 +65,8 @@ include '../includes/instructor_sidebar.php';
                 $semester_text = ($sec['semester'] ?? '1st') === '2nd' ? '2nd Semester' : (($sec['semester'] ?? '1st') === 'Summer' ? 'Summer' : '1st Semester');
             ?>
             <div class="col-md-6">
-                <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
+                <a href="view_class.php?section_id=<?= $sec['id'] ?>" class="text-decoration-none text-dark d-block" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                    <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
                     
                     <!-- Colored Header -->
                     <div style="background-color: <?= $theme['bg'] ?>; padding: 24px; color: white;">
@@ -89,8 +90,8 @@ include '../includes/instructor_sidebar.php';
                             <div class="d-flex align-items-center gap-2"><i class="bi bi-clock" style="font-size: 1rem; color: #9CA3AF;"></i> <span><?= $day . ' · ' . $time ?></span></div>
                         </div>
                     </div>
-                    
-                </div>
+                    </div>
+                </a>
             </div>
             <?php 
                 $idx++;

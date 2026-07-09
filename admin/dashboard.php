@@ -47,10 +47,10 @@ foreach ($upcoming_list as $act) {
     <?php include '../includes/topbar.php'; ?>
 
     <!-- ═══════════════════════════════════════
-         ROW 1 — 4 Stat Cards (matching reference exactly)
+         ROW 1 — 5 Stat Cards
     ═══════════════════════════════════════ -->
     <div class="row g-3 mb-4 mt-1">
-        <div class="col-sm-6 col-xl-3">
+        <div class="col-sm-6 col-lg-4 col-xl">
             <div class="stat-card-figma">
                 <div class="stat-icon coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
@@ -66,7 +66,7 @@ foreach ($upcoming_list as $act) {
                 <span class="stat-delta up">+4.2%</span>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
+        <div class="col-sm-6 col-lg-4 col-xl">
             <div class="stat-card-figma">
                 <div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
@@ -80,7 +80,7 @@ foreach ($upcoming_list as $act) {
                 <span class="stat-delta up">+<?= $active_sections ?></span>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
+        <div class="col-sm-6 col-lg-4 col-xl">
             <div class="stat-card-figma">
                 <div class="stat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
@@ -94,7 +94,7 @@ foreach ($upcoming_list as $act) {
                 <span class="stat-delta up">+1.8%</span>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
+        <div class="col-sm-6 col-lg-6 col-xl">
             <div class="stat-card-figma">
                 <div class="stat-icon indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -108,6 +108,25 @@ foreach ($upcoming_list as $act) {
                     <div class="stat-label">Reports Pending</div>
                 </div>
                 <span class="stat-delta down">-<?= $upcoming_activities ?></span>
+            </div>
+        </div>
+        <div class="col-sm-12 col-lg-6 col-xl">
+            <div class="stat-card-figma position-relative">
+                <div class="stat-icon" style="background-color: #EF4444; color: white;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg></div>
+                <div class="stat-body">
+                    <div class="stat-value"><?= number_format($flagged_count) ?></div>
+                    <div class="stat-label">Incomplete Profiles</div>
+                </div>
+                <?php if ($flagged_count === 0): ?>
+                    <span class="position-absolute" style="top: 16px; right: 16px; background: #ECFDF5; color: #10B981; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">Complete</span>
+                <?php else: ?>
+                    <span class="position-absolute" style="top: 16px; right: 16px; background: #FEF2F2; color: #EF4444; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">Action Needed</span>
+                <?php endif; ?>
             </div>
         </div>
     </div>

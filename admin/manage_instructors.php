@@ -174,10 +174,12 @@ include '../includes/admin_sidebar.php';
             <div class="modal-footer border-top bg-light p-3 d-flex justify-content-between align-items-center" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
                 <form method="POST" action="" class="mb-0">
                     <input type="hidden" name="instructor_id" id="deleteInstId">
-                    <button type="submit" name="delete_instructor" class="btn btn-sm d-flex align-items-center gap-2" style="background: #FFF1F2; color: #E11D48; border: 1px solid #FFE4E6; border-radius: 6px; padding: 6px 12px; font-weight: 500;" onclick="return confirm('Are you sure you want to delete this instructor? This action cannot be undone.');">
+                    <button type="button" class="btn btn-sm d-flex align-items-center gap-2" style="background: #FFF1F2; color: #E11D48; border: 1px solid #FFE4E6; border-radius: 6px; padding: 6px 12px; font-weight: 500;" onclick="confirmDeleteInstructor(this)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M18 6L6 18M6 6l12 12"/></svg>
                         Delete
                     </button>
+                    <!-- Hidden submit button for real form submission -->
+                    <input type="submit" name="delete_instructor" id="real_delete_instructor_btn" class="d-none">
                 </form>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-sm" style="background: white; color: #1E293B; border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 16px; font-weight: 500;" onclick="openEditModal()">Edit</button>
@@ -244,49 +246,63 @@ include '../includes/admin_sidebar.php';
 
 <!-- Add Instructor Modal -->
 <div class="modal fade" id="addInstructorModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
-        <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-            <div class="modal-header border-bottom px-4 pt-4 pb-3">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 550px;">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header border-bottom-0 px-4 pt-4 pb-2">
                 <div>
-                    <h5 class="modal-title fw-bold" style="color: #1E293B; font-size: 1.1rem;">Add Instructor</h5>
-                    <p class="text-muted small mb-0 mt-1" style="color: #64748B;">Add a faculty member to the NSTP program</p>
+                    <h5 class="modal-title fw-bold" style="color: #1E293B; font-size: 1.25rem;">Add Instructor</h5>
+                    <p class="text-muted small mb-0 mt-1" style="color: #64748B;">Create a new faculty account</p>
                 </div>
                 <button type="button" class="btn-close align-self-start mt-1" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="">
-                <!-- Default password fields to maintain backend compatibility if needed -->
-                <input type="hidden" name="password" value="tempPassword123!">
-                <input type="hidden" name="confirm_password" value="tempPassword123!">
-                
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label" style="color: #64748B; font-size: 0.85rem; font-weight: 400;">Full Name</label>
-                        <input type="text" name="full_name" class="form-control" placeholder="e.g. Prof. Juan Santos" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 400; padding: 10px 14px;" required>
+                <div class="modal-body px-4 pb-4 pt-3">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold" style="color: #64748B; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;">SELECT REGISTERED FACULTY <span class="text-danger">*</span></label>
+                        <select name="user_id" class="form-select" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; padding: 10px 14px;" required>
+                            <option value="">— Choose a registered instructor account —</option>
+                            <?php
+                            try {
+                                $potentials_stmt = $pdo->query("SELECT id, full_name FROM users WHERE role != 'Admin'");
+                                $potentials = $potentials_stmt->fetchAll();
+                                foreach($potentials as $p) {
+                                    echo '<option value="' . $p['id'] . '">' . htmlspecialchars($p['full_name']) . '</option>';
+                                }
+                            } catch(Exception $e) {}
+                            ?>
+                        </select>
+                        <div class="form-text mt-2" style="font-size: 0.75rem; color: #94A3B8;">Only user accounts created by the system administrator can be configured here.</div>
                     </div>
-                    <div class="row g-3 mb-3">
+                    
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label" style="color: #64748B; font-size: 0.85rem; font-weight: 400;">Component</label>
-                            <select name="component" class="form-select" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 400; padding: 10px 14px;" required>
-                                <option value="CWTS">CWTS</option>
-                                <option value="LTS">LTS</option>
-                                <option value="ROTC">ROTC</option>
+                            <label class="form-label fw-bold" style="color: #64748B; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;">DEPARTMENT / SCOPE <span class="text-danger">*</span></label>
+                            <select name="component" class="form-select" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; padding: 10px 14px;" required>
+                                <option value="CWTS">CWTS — Civic Welfare</option>
+                                <option value="LTS">LTS — Literacy Training</option>
+                                <option value="ROTC">ROTC — Military Training</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" style="color: #64748B; font-size: 0.85rem; font-weight: 400;">University Email</label>
-                            <input type="email" name="email" class="form-control" placeholder="e.g. j.santos@aurora.edu" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 400; padding: 10px 14px;" required>
+                            <label class="form-label fw-bold" style="color: #64748B; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;">ASSIGN SECTION</label>
+                            <select name="section_id" class="form-select" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; padding: 10px 14px;">
+                                <option value="">— Select a section (optional) —</option>
+                                <?php
+                                if (isset($unassigned_sections)) {
+                                    foreach($unassigned_sections as $sec) {
+                                        echo '<option value="' . $sec['id'] . '">' . htmlspecialchars($sec['section_name']) . '</option>';
+                                    }
+                                }
+                                ?>
+                            </select>
                         </div>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label" style="color: #64748B; font-size: 0.85rem; font-weight: 400;">Section Name</label>
-                        <input type="text" name="section_name" class="form-control" placeholder="e.g. BSCS-2A" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 400; padding: 10px 14px;" required>
-                    </div>
                 </div>
-                <div class="modal-footer border-top-0 pt-0 pe-4 pb-4 mt-2">
-                    <button type="button" class="btn btn-sm" style="background: white; color: #1E293B; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 16px; font-weight: 500;" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" name="add_new_instructor" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #6366F1; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 500;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                        Add Personnel
+                <div class="modal-footer border-top-0 pt-0 pe-4 pb-4 mt-2" style="background: white; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; justify-content: flex-end; gap: 8px;">
+                    <button type="button" class="btn btn-sm" style="background: white; color: #1E293B; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 20px; font-weight: 500;" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="configure_instructor" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #4F46E5; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 500; transition: background 0.2s;" onmouseover="this.style.background='#4338CA'" onmouseout="this.style.background='#4F46E5'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Save Instructor
                     </button>
                 </div>
             </form>
@@ -351,6 +367,22 @@ function openEditModal() {
         var editModal = new bootstrap.Modal(document.getElementById('editPersonnelModal'));
         editModal.show();
     }, 400); // Wait for the first modal to hide completely to prevent backdrop issues
+}
+
+function confirmDeleteInstructor(btn) {
+    Swal.fire({
+        title: 'Delete Instructor?',
+        text: "Are you sure you want to delete this instructor? This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#E11D48',
+        cancelButtonColor: '#64748B',
+        confirmButtonText: 'Yes, delete it'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('real_delete_instructor_btn').click();
+        }
+    });
 }
 </script>
 </body>

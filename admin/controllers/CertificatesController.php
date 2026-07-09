@@ -37,6 +37,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
+// Handle CHED approval toggle
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'toggle_ched_approval') {
+    $pdo->exec("UPDATE settings SET setting_value = IF(setting_value = '1', '0', '1') WHERE setting_key = 'ched_approval'");
+    header("Location: certificates.php");
+    exit;
+}
+
+// Fetch CHED approval status
+$ched_approval_status = false;
+try {
+    $stmtSettings = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'ched_approval'");
+    $setting = $stmtSettings->fetch();
+    if ($setting && $setting['setting_value'] === '1') {
+        $ched_approval_status = true;
+    }
+} catch (Exception $e) {}
+
 // ── Certificate batches: sections grouped by component ──────────────────────
 $cert_batches = [];
 try {

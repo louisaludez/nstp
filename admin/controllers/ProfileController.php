@@ -10,8 +10,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $full_name = trim($_POST['full_name']);
         $email = trim($_POST['email']);
         $contact = trim($_POST['contact_number']);
-        $upd = $pdo->prepare("UPDATE users SET full_name = ?, email = ?, contact_number = ? WHERE id = ?");
-        if ($upd->execute([$full_name, $email, $contact, $user_id])) {
+        
+        $signature_query = "";
+        $params = [$full_name, $email, $contact];
+        
+        // Handle signature upload
+        if (isset($_FILES['signature']) && $_FILES['signature']['error'] === UPLOAD_ERR_OK) {
+            $upload_dir = '../uploads/signatures/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+            
+            $file_tmp = $_FILES['signature']['tmp_name'];
+            $file_name = $_FILES['signature']['name'];
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+            
+            if (in_array($file_ext, ['jpg', 'jpeg', 'png'])) {
+                $new_file_name = 'sig_' . $user_id . '_' . time() . '.' . $file_ext;
+                $dest_path = $upload_dir . $new_file_name;
+                
+                if (move_uploaded_file($file_tmp, $dest_path)) {
+                    $signature_query = ", signature_path = ?";
+                    $params[] = 'uploads/signatures/' . $new_file_name;
+                }
+            }
+        }
+        
+        $params[] = $user_id;
+
+        $upd = $pdo->prepare("UPDATE users SET full_name = ?, email = ?, contact_number = ? $signature_query WHERE id = ?");
+        if ($upd->execute($params)) {
             $_SESSION['full_name'] = $full_name;
             $message = "Profile details updated successfully!";
             $msgType = "success";

@@ -215,11 +215,12 @@ include '../includes/admin_sidebar.php';
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this activity?');" class="m-0 p-0">
+                            <form method="POST" action="" id="form-delete-<?= $act['id'] ?>" class="m-0 p-0">
                                 <input type="hidden" name="activity_id" value="<?= $act['id'] ?>">
-                                <button type="submit" name="delete_activity" class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-danger" onclick="confirmDeleteActivity('form-delete-<?= $act['id'] ?>')">
                                     <i class="bi bi-trash" style="font-size: 0.9rem;"></i> Delete Activity
                                 </button>
+                                <input type="submit" name="delete_activity" class="d-none">
                             </form>
                         </li>
                     </ul>
@@ -486,6 +487,22 @@ document.getElementById('nextWeekBtn').addEventListener('click', () => {
     url.searchParams.set('weekOffset', offset);
     window.location.href = url.toString();
 });
+
+function confirmDeleteActivity(formId) {
+    Swal.fire({
+        title: 'Delete Activity?',
+        text: "Are you sure you want to delete this activity? This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#64748B',
+        confirmButtonText: 'Yes, delete it'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById(formId).submit();
+        }
+    });
+}
 </script>
 </body>
 </html>

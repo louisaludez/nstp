@@ -45,55 +45,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // 3. Add New Instructor
-    elseif (isset($_POST['add_new_instructor'])) {
-        $full_name = trim($_POST['full_name']);
-        $email = trim($_POST['email']);
+    // 3. Configure Existing User as Instructor
+    elseif (isset($_POST['configure_instructor'])) {
+        $user_id = $_POST['user_id'];
         $component = $_POST['component'];
-        $section_name = trim($_POST['section_name']);
-        $password = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
+        $section_id = $_POST['section_id'] ?? null;
         
-        if ($password !== $confirm_password) {
-            $message = "Error: Passwords do not match.";
-            $msgType = "danger";
-        } elseif (strlen($password) < 6) {
-            $message = "Error: Password must be at least 6 characters long.";
-            $msgType = "danger";
-        } else {
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            try {
-                $pdo->beginTransaction();
+        try {
+            $pdo->beginTransaction();
 
-                $stmt = $pdo->prepare("INSERT INTO users (full_name, email, password, role, component) VALUES (?, ?, ?, 'Instructor', ?)");
-                $stmt->execute([$full_name, $email, $hashedPassword, $component]);
-                
-                $instructor_id = $pdo->lastInsertId();
-
-                if (!empty($section_name)) {
-                    $checkSec = $pdo->prepare("SELECT id FROM sections WHERE section_name = ?");
-                    $checkSec->execute([$section_name]);
-                    $existing_section = $checkSec->fetch();
-
-                    if ($existing_section) {
-                        $updSec = $pdo->prepare("UPDATE sections SET instructor_id = ? WHERE id = ?");
-                        $updSec->execute([$instructor_id, $existing_section['id']]);
-                    } else {
-                        $insSec = $pdo->prepare("INSERT INTO sections (component, section_name, school_year, semester, instructor_id) VALUES (?, ?, '2026-2027', '1st', ?)");
-                        $insSec->execute([$component, $section_name, $instructor_id]);
-                    }
-                }
-
-                $pdo->commit();
-
-                $message = "Instructor Prof. $full_name successfully added.";
-                $msgType = "success";
-                logAction($pdo, 'Created Instructor', "Created account for Prof. $full_name ($component)");
-            } catch (PDOException $e) {
-                $pdo->rollBack();
-                $message = ($e->getCode() == 23000) ? "Error: Email already exists." : "Error: " . $e->getMessage();
-                $msgType = "danger";
+            $stmt = $pdo->prepare("UPDATE users SET role = 'Instructor', component = ? WHERE id = ?");
+            $stmt->execute([$component, $user_id]);
+            
+            if (!empty($section_id)) {
+                $updSec = $pdo->prepare("UPDATE sections SET instructor_id = ? WHERE id = ?");
+                $updSec->execute([$user_id, $section_id]);
             }
+
+            $pdo->commit();
+
+            $message = "Instructor successfully configured.";
+            $msgType = "success";
+            logAction($pdo, 'Configured Instructor', "Configured user ID $user_id as Instructor ($component)");
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            $message = "Error: " . $e->getMessage();
+            $msgType = "danger";
         }
     }
 }

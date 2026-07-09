@@ -33,7 +33,7 @@ include '../includes/admin_sidebar.php';
         <div class="col-lg-6">
             <div class="panel-container h-100">
                 <h5 class="fw-bold mb-4">Profile Information</h5>
-                <form method="POST" action="">
+                <form method="POST" action="" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label class="form-label text-dark fw-medium small mb-1">Full Name</label>
                         <input type="text" name="full_name" class="form-control" value="<?= htmlspecialchars($user['full_name']) ?>" required>
@@ -50,6 +50,16 @@ include '../includes/admin_sidebar.php';
                         <label class="form-label text-dark fw-medium small mb-1">Role</label>
                         <input type="text" class="form-control" value="<?= htmlspecialchars($user['role']) ?>" readonly>
                         <small class="text-muted">Role assignments can only be changed by system administrators.</small>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-dark fw-medium small mb-1">Electronic Signature</label>
+                        <?php if (!empty($user['signature_path'])): ?>
+                            <div class="mb-2">
+                                <img src="../<?= htmlspecialchars($user['signature_path']) ?>" alt="Signature" style="max-height: 60px; border: 1px solid #ccc; padding: 4px; border-radius: 4px;">
+                            </div>
+                        <?php endif; ?>
+                        <input type="file" name="signature" class="form-control" accept="image/png, image/jpeg">
+                        <small class="text-muted">Upload a transparent PNG for best results.</small>
                     </div>
                     <button type="submit" name="update_profile" class="btn btn-brand w-100">Save Changes</button>
                 </form>

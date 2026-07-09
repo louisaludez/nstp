@@ -109,21 +109,15 @@ include '../includes/instructor_sidebar.php';
                     <h6 class="fw-bold mb-0" style="color: #374151;">Plan Template</h6>
                 </div>
                 
-                <form method="POST" action="" style="padding: 24px;">
+                <form method="POST" action="" enctype="multipart/form-data" style="padding: 24px;">
                     <div class="mb-3">
                         <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Title</label>
                         <input type="text" name="title" class="form-control" placeholder="e.g. Tree-Planting Drive" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;" required>
                     </div>
                     
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Date</label>
-                            <input type="date" name="scheduled_date" class="form-control" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Duration (hrs)</label>
-                            <input type="number" name="duration" class="form-control" value="3" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;" required>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Date</label>
+                        <input type="date" name="scheduled_date" class="form-control" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;" required>
                     </div>
                     
                     <div class="mb-3">
@@ -148,12 +142,15 @@ include '../includes/instructor_sidebar.php';
                     
                     <div class="mb-4">
                         <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Attachments</label>
-                        <div style="border: 1px dashed #A7F3D0; background-color: #F0FDF4; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                        <input type="file" name="supporting_files[]" id="fileAttachment" multiple class="d-none" onchange="updateFileNames(this)">
+                        <div onclick="document.getElementById('fileAttachment').click()" style="border: 1px dashed #A7F3D0; background-color: #F0FDF4; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;">
                             <i class="bi bi-upload" style="color: #10B981; margin-right: 6px;"></i>
                             <span style="color: #10B981; font-size: 0.8rem; font-weight: 500;">Add File</span>
                         </div>
+                        <div id="fileList" class="mt-2 text-muted" style="font-size: 0.75rem;"></div>
                     </div>
                     
+
                     <div class="d-flex gap-2">
                         <button type="submit" name="save_draft" class="btn btn-light" style="padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; color: #374151; border: 1px solid #E5E7EB; background: white;">Save Draft</button>
                         <button type="submit" name="submit_plan" class="btn btn-success" style="padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; background: #059669; border: none;">Submit for Approval</button>
@@ -167,5 +164,19 @@ include '../includes/instructor_sidebar.php';
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function updateFileNames(input) {
+    const fileList = document.getElementById('fileList');
+    if (input.files.length > 0) {
+        let names = [];
+        for (let i = 0; i < input.files.length; i++) {
+            names.push(input.files[i].name);
+        }
+        fileList.innerHTML = names.join(', ');
+    } else {
+        fileList.innerHTML = '';
+    }
+}
+</script>
 </body>
 </html>

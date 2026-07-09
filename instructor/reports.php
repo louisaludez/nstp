@@ -92,7 +92,20 @@ include '../includes/instructor_sidebar.php';
                             $isLast = ($idx === count($reports) - 1);
                             $borderStyle = $isLast ? '' : 'border-bottom: 1px solid #F3F4F6 !important;';
                         ?>
-                        <div class="list-group-item d-flex justify-content-between align-items-center border-0" style="padding: 16px 24px; <?= $borderStyle ?>">
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 report-item" style="padding: 16px 24px; cursor: pointer; transition: background-color 0.2s; <?= $borderStyle ?>"
+                             onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor='transparent'"
+                             data-bs-toggle="modal" data-bs-target="#reportDetailsModal"
+                             data-id="<?= $report['id'] ?>"
+                             data-title="<?= htmlspecialchars($report['title']) ?>"
+                             data-badge-bg="<?= htmlspecialchars($badgeBg) ?>"
+                             data-badge-color="<?= htmlspecialchars($badgeColor) ?>"
+                             data-badge-icon="<?= htmlspecialchars($badgeIcon) ?>"
+                             data-badge-label="<?= htmlspecialchars($badgeLabel) ?>"
+                             data-section="<?= htmlspecialchars($report['component'] . ' 1 · Sec ' . substr($report['section_name'], -1)) ?>"
+                             data-date="<?= $report['completed_date'] ? 'Due ' . date('M j', strtotime($report['completed_date'])) : '' ?>"
+                             data-beneficiaries="<?= htmlspecialchars($report['participants_count']) ?>"
+                             data-narrative="<?= htmlspecialchars($report['accomplishments']) ?>"
+                             data-files="<?= htmlspecialchars($report['files_attached']) ?>">
                             <div class="d-flex align-items-center gap-3">
                                 <div style="width: 40px; height: 40px; border-radius: 8px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #9CA3AF;">
                                     <i class="bi bi-file-earmark-text"></i>
@@ -171,6 +184,114 @@ include '../includes/instructor_sidebar.php';
 </div>
 </div>
 
+<!-- Report Details Modal -->
+<div class="modal fade" id="reportDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold" style="color: #111827; font-size: 1.1rem;">Report Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.8rem;"></button>
+            </div>
+            
+            <div class="modal-body px-4 py-4">
+                <!-- Title and Status -->
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                    <h4 class="fw-bold mb-0" id="modalReportTitle" style="color: #111827; font-size: 1.25rem;">Report Title</h4>
+                    <span id="modalReportStatus" style="font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                        <i class="bi" id="modalReportStatusIcon" style="font-size: 0.7rem;"></i> <span id="modalReportStatusText">Draft</span>
+                    </span>
+                </div>
+                
+                <!-- Subtitle -->
+                <div class="text-muted mb-4" id="modalReportSubtitle" style="font-size: 0.9rem;">
+                    CWTS 1 &middot; Sec A &middot; Due May 15
+                </div>
+                
+                <!-- Beneficiaries Card -->
+                <div style="background: #F9FAFB; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; width: fit-content; min-width: 150px;">
+                    <div style="font-size: 0.7rem; font-weight: 600; color: #6B7280; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px;">BENEFICIARIES</div>
+                    <div style="font-size: 1.25rem; color: #111827;" id="modalReportBeneficiaries">0</div>
+                </div>
+                
+                <!-- Narrative Section -->
+                <div class="mb-4">
+                    <h6 class="fw-medium mb-2" style="color: #111827; font-size: 0.95rem;">Narrative</h6>
+                    <p class="text-muted" id="modalReportNarrative" style="font-size: 0.9rem; line-height: 1.5;"></p>
+                </div>
+                
+                <!-- Attachments Section -->
+                <div>
+                    <h6 class="fw-medium mb-2" style="color: #111827; font-size: 0.95rem;">Attachments</h6>
+                    <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width: 40px; height: 40px; border-radius: 8px; background: #EEF2FF; color: #4F46E5; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                <i class="bi bi-file-earmark-check"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 500; color: #111827; font-size: 0.9rem;" id="modalReportFileName">attendance.pdf</div>
+                                <div style="color: #6B7280; font-size: 0.75rem;">Document file</div>
+                            </div>
+                        </div>
+                        <a href="#" class="text-decoration-none" style="color: #4F46E5; font-size: 0.85rem; font-weight: 500;">Download</a>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Footer Actions -->
+            <div class="modal-footer border-top-0 pt-0 pb-4 px-4 d-flex justify-content-center gap-4" style="background: #F9FAFB; padding-top: 16px !important; border-radius: 0 0 12px 12px;">
+                <button type="button" class="btn" style="background: #4F46E5; color: white; border-radius: 8px; padding: 8px 24px; font-weight: 500; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-pencil"></i> Edit Report
+                </button>
+                <button type="button" class="btn btn-link text-decoration-none" style="color: #EF4444; font-weight: 500; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; padding: 8px 16px;">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reportModal = document.getElementById('reportDetailsModal');
+    if (reportModal) {
+        reportModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            
+            // Extract info from data-* attributes
+            const title = button.getAttribute('data-title');
+            const statusLabel = button.getAttribute('data-badge-label');
+            const statusBg = button.getAttribute('data-badge-bg');
+            const statusColor = button.getAttribute('data-badge-color');
+            const statusIcon = button.getAttribute('data-badge-icon');
+            const section = button.getAttribute('data-section');
+            const date = button.getAttribute('data-date');
+            const beneficiaries = button.getAttribute('data-beneficiaries');
+            const narrative = button.getAttribute('data-narrative');
+            const filesCount = parseInt(button.getAttribute('data-files') || 0);
+            
+            // Update the modal's content
+            document.getElementById('modalReportTitle').textContent = title;
+            
+            const statusBadge = document.getElementById('modalReportStatus');
+            statusBadge.style.cssText = `font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; font-weight: 500; display: flex; align-items: center; gap: 4px; ${statusBg} ${statusColor}`;
+            document.getElementById('modalReportStatusText').textContent = statusLabel;
+            document.getElementById('modalReportStatusIcon').className = `bi ${statusIcon}`;
+            
+            document.getElementById('modalReportSubtitle').innerHTML = `${section} &middot; ${date}`;
+            document.getElementById('modalReportBeneficiaries').textContent = beneficiaries;
+            document.getElementById('modalReportNarrative').textContent = narrative || 'No narrative provided.';
+            
+            const fileNameElem = document.getElementById('modalReportFileName');
+            if (filesCount > 0) {
+                fileNameElem.textContent = `${filesCount} file(s) attached`;
+            } else {
+                fileNameElem.textContent = 'No attachments';
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>

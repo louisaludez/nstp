@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $scheduled_time = $_POST['scheduled_time'] ?? null;
     $location       = trim($_POST['location'] ?? 'TBA');
     $section_id     = !empty($_POST['section_id']) ? (int)$_POST['section_id'] : null;
-    $duration       = (int)($_POST['duration'] ?? 3);
+
 
     // Basic server-side validation
     if (empty($title) || empty($scheduled_date) || empty($objectives)) {
@@ -51,6 +51,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $location, $scheduled_date, $scheduled_time,
                 $objectives, $files_attached, $status
             ]);
+
+            $plan_id = $pdo->lastInsertId();
+            
+            if ($files_attached > 0) {
+                $upload_dir = '../uploads/activity_plans/' . $plan_id . '/';
+                if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                
+                foreach ($_FILES['supporting_files']['name'] as $key => $name) {
+                    $tmp_name = $_FILES['supporting_files']['tmp_name'][$key];
+                    $basename = basename($name);
+                    move_uploaded_file($tmp_name, $upload_dir . $basename);
+                }
+            }
+
             header("Location: " . basename($_SERVER['PHP_SELF']) . "?msg=$msg_key");
             exit;
         } catch (PDOException $e) {
