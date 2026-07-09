@@ -11,6 +11,29 @@ $current_user = $stmt_user->fetch();
 $signature_path = $current_user['signature_path'] ?? null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Handle e-signature upload if present
+    if (isset($_FILES['signature_upload']) && $_FILES['signature_upload']['error'] === UPLOAD_ERR_OK) {
+        $upload_dir = '../uploads/signatures/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        
+        $file_info = pathinfo($_FILES['signature_upload']['name']);
+        $ext = strtolower($file_info['extension']);
+        $allowed_exts = ['jpg', 'jpeg', 'png'];
+        
+        if (in_array($ext, $allowed_exts)) {
+            $new_filename = 'sig_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+            $destination = $upload_dir . $new_filename;
+            
+            if (move_uploaded_file($_FILES['signature_upload']['tmp_name'], $destination)) {
+                $db_path = 'uploads/signatures/' . $new_filename;
+                $pdo->prepare("UPDATE users SET signature_path = ? WHERE id = ?")->execute([$db_path, $user_id]);
+                $signature_path = $db_path; // Update local variable for current request
+            }
+        }
+    }
+
     if (isset($_POST['approve_plan'])) {
         $plan_id = $_POST['plan_id'];
         $pdo->prepare("UPDATE activity_plans SET status = 'Approved' WHERE id = ?")->execute([$plan_id]);

@@ -213,13 +213,21 @@ include '../includes/admin_sidebar.php';
                     <?php endif; ?>
                 </div>
 
-                <form method="POST" class="d-flex gap-3 pt-4 border-top flex-wrap" style="border-color: var(--border-color) !important;">
-                    <?php if (!empty($signature_path)): ?>
-                        <div class="w-100 mb-2">
-                            <span class="text-muted small d-block mb-1">Your signature to be attached:</span>
-                            <img src="../<?= htmlspecialchars($signature_path) ?>" alt="Signature" style="max-height: 40px; border: 1px solid #E2E8F0; padding: 2px; border-radius: 4px;">
+                <form method="POST" enctype="multipart/form-data" class="d-flex gap-3 pt-4 border-top flex-wrap" style="border-color: var(--border-color) !important;">
+                    <div class="w-100 mb-2">
+                        <label for="signature_upload" class="form-label text-muted small d-block mb-1 fw-medium">
+                            <?= !empty($signature_path) ? 'Update E-Signature (Optional):' : 'Upload E-Signature (Required for approval):' ?>
+                        </label>
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="file" name="signature_upload" id="signature_upload" class="form-control form-control-sm" style="max-width: 250px;" accept="image/png, image/jpeg, image/jpg" <?= empty($signature_path) ? 'required' : '' ?>>
+                            <?php if (!empty($signature_path)): ?>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small">Current:</span>
+                                    <img src="../<?= htmlspecialchars($signature_path) ?>" alt="Signature" style="max-height: 40px; border: 1px solid #E2E8F0; padding: 2px; border-radius: 4px; background: white;">
+                                </div>
+                            <?php endif; ?>
                         </div>
-                    <?php endif; ?>
+                    </div>
                     <?php if ($active_type === 'plan'): ?>
                         <input type="hidden" name="plan_id" value="<?= $active_item['id'] ?>">
                         <button type="submit" name="approve_plan" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #059669; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 500;">
@@ -232,7 +240,7 @@ include '../includes/admin_sidebar.php';
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Reject
                         </button>
                         <!-- Hidden submit button for rejection -->
-                        <input type="submit" name="reject_plan" id="real_reject_btn" class="d-none">
+                        <input type="submit" name="reject_plan" id="real_reject_btn" class="d-none" formnovalidate>
                     <?php else: ?>
                         <input type="hidden" name="report_id" value="<?= $active_item['id'] ?>">
                         <button type="submit" name="review_report" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #059669; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 500;">
