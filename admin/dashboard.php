@@ -9,6 +9,18 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
 
 require 'controllers/DashboardController.php';
 
+if (isset($_POST['simulate_ched'])) {
+    // Send notification to all Instructors and ROTC
+    try {
+        $stmt = $pdo->prepare("INSERT INTO notifications (user_id, role, message, link) SELECT id, role, 'CHED has sent an official Email Notification regarding NSTP requirements.', '#' FROM users WHERE role IN ('Instructor', 'ROTC')");
+        $stmt->execute();
+        $_SESSION['success'] = "CHED Email Notification successfully sent to all Instructors and ROTC officers.";
+    } catch (Exception $e) {
+        $_SESSION['error'] = "Failed to simulate email: " . $e->getMessage();
+    }
+    header("Location: dashboard.php");
+    exit;
+}
 $extra_css = ['../assets/css/style.css'];
 include '../includes/header.php';
 include '../includes/admin_sidebar.php';
@@ -45,6 +57,15 @@ foreach ($upcoming_list as $act) {
 <div class="flex-grow-1 p-4 p-lg-5 w-100">
 
     <?php include '../includes/topbar.php'; ?>
+
+    <!-- Simulate CHED Email Action -->
+    <div class="d-flex justify-content-end mb-3 mt-2">
+        <form method="POST" action="dashboard.php" class="needs-confirmation" data-confirm="Are you sure you want to broadcast a simulated CHED Email Notification to all faculty?" data-btn="Yes, send it" data-icon="question">
+            <button type="submit" name="simulate_ched" class="btn btn-sm text-white px-3" style="background: #10B981; border-radius: 8px; font-weight: 500;">
+                <i class="bi bi-envelope me-1"></i> Simulate CHED Email
+            </button>
+        </form>
+    </div>
 
     <!-- ═══════════════════════════════════════
          ROW 1 — 5 Stat Cards

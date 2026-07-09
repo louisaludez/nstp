@@ -35,12 +35,7 @@ include '../includes/admin_sidebar.php';
         </div>
     </div>
 
-    <?php if ($message): ?>
-        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3">
-            <?= htmlspecialchars($message) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
+
 
     <!-- Program Summary Cards -->
     <div class="row g-3 mb-4">

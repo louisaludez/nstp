@@ -14,10 +14,10 @@ class EmailHelper {
         try {
             // Server settings (Update these with actual SMTP details)
             $this->mail->isSMTP();
-            $this->mail->Host       = 'smtp.example.com'; // Set the SMTP server to send through
+            $this->mail->Host       = 'smtp.gmail.com'; // Set the SMTP server to send through
             $this->mail->SMTPAuth   = true;               // Enable SMTP authentication
-            $this->mail->Username   = 'your_email@example.com'; // SMTP username
-            $this->mail->Password   = 'your_password';    // SMTP password
+            $this->mail->Username   = 'nstpmanagement@gmail.com'; // SMTP username
+            $this->mail->Password   = 'gmbeujuaigbefxss';    // SMTP password
             $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Enable TLS encryption
             $this->mail->Port       = 587;                // TCP port to connect to
 

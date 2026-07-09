@@ -29,12 +29,7 @@ include '../includes/instructor_sidebar.php';
         <div class="text-muted" style="font-size: 0.85rem;">Plan, schedule, and submit activities for coordinator approval</div>
     </div>
 
-    <?php if ($message): ?>
-        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3">
-            <?= htmlspecialchars($message) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
+
 
     <div class="row g-4">
         <!-- Left Panel: Upcoming & Drafts -->
@@ -109,7 +104,7 @@ include '../includes/instructor_sidebar.php';
                     <h6 class="fw-bold mb-0" style="color: #374151;">Plan Template</h6>
                 </div>
                 
-                <form method="POST" action="" enctype="multipart/form-data" style="padding: 24px;">
+                <form method="POST" action="" enctype="multipart/form-data" class="needs-confirmation" data-confirm="Are you sure you want to submit this activity plan?" style="padding: 24px;">
                     <div class="mb-3">
                         <label class="form-label" style="font-size: 0.75rem; font-weight: 500; color: #6B7280; margin-bottom: 6px;">Title</label>
                         <input type="text" name="title" class="form-control" placeholder="e.g. Tree-Planting Drive" style="border-radius: 8px; border-color: #E5E7EB; font-size: 0.85rem; padding: 10px 12px; box-shadow: none;" required>

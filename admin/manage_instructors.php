@@ -29,12 +29,7 @@ include '../includes/admin_sidebar.php';
         </button>
     </div>
 
-    <?php if ($message): ?>
-        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3">
-            <?= htmlspecialchars($message) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
+
 
     <!-- Controls -->
     <div class="d-flex flex-wrap gap-3 mb-4">

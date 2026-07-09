@@ -25,12 +25,7 @@ ob_start();
 </div>
 <p class="text-muted mb-4">Manage student enrollment and information</p>
 
-<?php if ($message): ?>
-    <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3">
-        <?= htmlspecialchars($message) ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-<?php endif; ?>
+
 
 <div class="search-bar-container p-2 mb-4 d-flex align-items-center">
     <i class="bi bi-search ms-3 text-muted"></i>

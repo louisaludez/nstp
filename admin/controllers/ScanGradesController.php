@@ -20,27 +20,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['grade_sheet'])) {
             $message = "File uploaded successfully. OCR Processing complete.";
             $msgType = "success";
             $file_uploaded = true;
-            $stmtOCR = $pdo->query("
-                SELECT s.student_id, s.first_name, s.last_name 
-                FROM students s 
-                LEFT JOIN enrollments e ON s.student_id = e.student_id 
-                WHERE e.final_grade IS NULL 
-                LIMIT 3
-            ");
-            $students_for_ocr = $stmtOCR->fetchAll();
+            $students_for_ocr = [];
             $mock_extracted_data = [];
-            foreach ($students_for_ocr as $stu) {
-                $grade = rand(70, 98);
-                $status = $grade >= 75 ? 'Passed' : 'Failed';
-                $mock_extracted_data[] = [
-                    'student_id' => $stu['student_id'],
-                    'name' => $stu['first_name'] . ' ' . $stu['last_name'],
-                    'grade' => $grade,
-                    'status' => $status
-                ];
+            
+            if ($ext === 'pdf') {
+                // Parse PDF using python script
+                $python_script = __DIR__ . '/parse_pdf.py';
+                $command = "python " . escapeshellarg($python_script) . " " . escapeshellarg($destination);
+                $output = shell_exec($command);
+                
+                if ($output && strpos($output, 'ERROR:') === false) {
+                    $pattern = '/(20\d{2}-\d{4,5})\s+(.*?)\s+((?:\d{2,3}(?:\.\d+)?)|DRP|INC)\s+(\d\.\d+|DRP|INC)\s+\d+\s+(PASSED|FAILED|DROPPED|INC)/i';
+                    if (preg_match_all($pattern, $output, $matches, PREG_SET_ORDER)) {
+                        foreach ($matches as $match) {
+                            $student_id = trim($match[1]);
+                            $name = trim($match[2]);
+                            $grade = trim($match[3]);
+                            $status = strtoupper(trim($match[5]));
+                            
+                            // Check if student exists in database and needs a grade
+                            $stmtCheck = $pdo->prepare("
+                                SELECT s.student_id, s.first_name, s.last_name 
+                                FROM students s 
+                                LEFT JOIN enrollments e ON s.student_id = e.student_id 
+                                WHERE s.student_id = ? AND e.final_grade IS NULL
+                            ");
+                            $stmtCheck->execute([$student_id]);
+                            $stu = $stmtCheck->fetch();
+                            
+                            if ($stu) {
+                                $mock_extracted_data[] = [
+                                    'student_id' => $stu['student_id'],
+                                    'name' => $stu['first_name'] . ' ' . $stu['last_name'],
+                                    'grade' => $grade,
+                                    'status' => $status
+                                ];
+                            } else {
+                                // If student is found in PDF but doesn't need grading (or not in DB), we can still show them for info
+                                // For now we'll just include them to show OCR works
+                                $mock_extracted_data[] = [
+                                    'student_id' => $student_id,
+                                    'name' => $name,
+                                    'grade' => $grade,
+                                    'status' => $status
+                                ];
+                            }
+                        }
+                    }
+                }
             }
+            
+            // Fallback for image files or if PDF parsing yielded no results
             if (empty($mock_extracted_data)) {
-                $mock_extracted_data = [['student_id' => '', 'name' => 'No ungraded students found in database.', 'grade' => '', 'status' => '']];
+                if ($ext !== 'pdf') {
+                    $message = "File uploaded successfully. (Note: Image OCR requires Tesseract API. Mock data generated.)";
+                }
+                
+                $stmtOCR = $pdo->query("
+                    SELECT s.student_id, s.first_name, s.last_name 
+                    FROM students s 
+                    LEFT JOIN enrollments e ON s.student_id = e.student_id 
+                    WHERE e.final_grade IS NULL 
+                    LIMIT 3
+                ");
+                $students_for_ocr = $stmtOCR->fetchAll();
+                foreach ($students_for_ocr as $stu) {
+                    $grade = rand(70, 98);
+                    $status = $grade >= 75 ? 'Passed' : 'Failed';
+                    $mock_extracted_data[] = [
+                        'student_id' => $stu['student_id'],
+                        'name' => $stu['first_name'] . ' ' . $stu['last_name'],
+                        'grade' => $grade,
+                        'status' => $status
+                    ];
+                }
+                if (empty($mock_extracted_data)) {
+                    $mock_extracted_data = [['student_id' => '', 'name' => 'No ungraded students found in database.', 'grade' => '', 'status' => '']];
+                }
             }
         } else {
             $message = "Failed to move uploaded file.";

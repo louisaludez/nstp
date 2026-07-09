@@ -205,3 +205,41 @@ $topbar_title = $titles[$page_slug] ?? ucfirst(str_replace('_', ' ', $page_slug)
         });
     }
 </script>
+
+<script src="../assets/js/swal-interactions.js"></script>
+
+<?php
+// Global SweetAlert Feedback Logic
+$swalTitle = '';
+$swalText = '';
+$swalIcon = '';
+
+if (!empty($_SESSION['success'])) {
+    $swalTitle = 'Success!';
+    $swalText = $_SESSION['success'];
+    $swalIcon = 'success';
+    unset($_SESSION['success']);
+} elseif (!empty($_SESSION['error'])) {
+    $swalTitle = 'Error!';
+    $swalText = $_SESSION['error'];
+    $swalIcon = 'error';
+    unset($_SESSION['error']);
+} elseif (!empty($message)) { // from standard variable
+    $swalTitle = (isset($msgType) && $msgType === 'success') ? 'Success!' : 'Notice';
+    $swalText = $message;
+    $swalIcon = (isset($msgType) && $msgType === 'success') ? 'success' : ((isset($msgType) && $msgType === 'danger') ? 'error' : 'info');
+}
+
+if ($swalText !== ''):
+?>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            icon: '<?= $swalIcon ?>',
+            title: '<?= $swalTitle ?>',
+            text: '<?= addslashes($swalText) ?>',
+            confirmButtonColor: '#4F46E5'
+        });
+    });
+</script>
+<?php endif; ?>

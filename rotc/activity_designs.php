@@ -42,12 +42,7 @@ function renderDesignStatus($status) {
         <div class="text-muted" style="font-size:0.85rem;">Plan drill exercises, training, and community operations</div>
     </div>
 
-    <?php if (!empty($message)): ?>
-        <div class="alert alert-<?= $msgType ?> alert-dismissible fade show rounded-3">
-            <?= htmlspecialchars($message) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
+
 
     <div class="row g-4">
         <!-- Left Column: Designs in Cycle -->
@@ -103,7 +98,7 @@ function renderDesignStatus($status) {
                     <h6 class="mb-0" style="color:#0F172A; font-weight:600; font-size:0.95rem;">New Design Brief</h6>
                 </div>
                 <div class="card-body" style="padding: 24px;">
-                    <form method="POST" action="activity_designs.php" enctype="multipart/form-data">
+                    <form method="POST" action="" enctype="multipart/form-data" class="needs-confirmation" data-confirm="Are you sure you want to submit this activity design?" style="padding: 24px;">
                         <div class="mb-3">
                             <label class="form-label" style="font-size:0.75rem; color:#64748B; font-weight:500;">Activity Title</label>
                             <input type="text" name="title" class="form-control shadow-none" placeholder="e.g. Tactical Drill Sequence" required style="border-radius:8px; border:1px solid #E2E8F0; font-size:0.85rem; padding:10px 14px; color:#0F172A;">

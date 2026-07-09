@@ -241,7 +241,7 @@ include '../includes/rotc_sidebar.php';
                     <div style="color: #94A3B8; font-size: 0.85rem;"><?= $p['cadet_count'] ?> assigned</div>
                 </div>
                 <div class="d-flex align-items-center gap-3">
-                    <form method="POST" action="platoon_management.php" onsubmit="return confirm('Are you sure you want to delete this platoon?');">
+                    <form method="POST" action="platoon_management.php" class="needs-confirmation" data-confirm="Are you sure you want to delete this platoon?">
                         <input type="hidden" name="action" value="delete_platoon">
                         <input type="hidden" name="section_id" value="<?= $p['id'] ?>">
                         <button type="submit" class="btn btn-outline-danger" style="border-radius: 8px; font-size: 0.8rem; font-weight: 500; padding: 6px 16px; border-color: rgba(239,68,68,0.3); color: #FCA5A5; display: flex; align-items: center; gap: 6px;">

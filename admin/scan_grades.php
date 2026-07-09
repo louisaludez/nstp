@@ -1,6 +1,11 @@
 <?php
 session_start();
 require '../config/db.php';
+require_once 'controllers/ScanGradesController.php';
+
+// Fetch grade scaling configurations
+$stmtScale = $pdo->query("SELECT * FROM grade_scaling ORDER BY min_score DESC");
+$gradeScales = $stmtScale->fetchAll();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
     header("Location: ../login.php");
@@ -80,6 +85,10 @@ include '../includes/admin_sidebar.php';
                     </div>
                 </div>
 
+                <?php if (!empty($mock_extracted_data)): ?>
+                <!-- The table is now rendered inside a modal below -->
+                <?php endif; ?>
+
             </div>
         </div>
 
@@ -151,19 +160,23 @@ include '../includes/admin_sidebar.php';
                         </tr>
                     </thead>
                     <tbody id="gradeScaleBody">
-                        <!-- Example Rows -->
-                        <tr>
-                            <td><input type="number" class="form-control form-control-sm" value="95" style="border-radius: 6px;"></td>
-                            <td><input type="number" class="form-control form-control-sm" value="100" style="border-radius: 6px;"></td>
-                            <td><input type="text" class="form-control form-control-sm" value="1.0" style="border-radius: 6px;"></td>
-                            <td><button type="button" class="btn btn-sm text-danger border-0"><i class="bi bi-trash"></i></button></td>
-                        </tr>
-                        <tr>
-                            <td><input type="number" class="form-control form-control-sm" value="90" style="border-radius: 6px;"></td>
-                            <td><input type="number" class="form-control form-control-sm" value="94" style="border-radius: 6px;"></td>
-                            <td><input type="text" class="form-control form-control-sm" value="1.25" style="border-radius: 6px;"></td>
-                            <td><button type="button" class="btn btn-sm text-danger border-0"><i class="bi bi-trash"></i></button></td>
-                        </tr>
+                        <?php if (count($gradeScales) > 0): ?>
+                            <?php foreach ($gradeScales as $scale): ?>
+                            <tr>
+                                <td><input type="number" step="0.01" class="form-control form-control-sm min-score" value="<?= htmlspecialchars($scale['min_score']) ?>" style="border-radius: 6px;"></td>
+                                <td><input type="number" step="0.01" class="form-control form-control-sm max-score" value="<?= htmlspecialchars($scale['max_score']) ?>" style="border-radius: 6px;"></td>
+                                <td><input type="text" class="form-control form-control-sm final-grade" value="<?= htmlspecialchars($scale['final_grade']) ?>" style="border-radius: 6px;"></td>
+                                <td><button type="button" class="btn btn-sm text-danger border-0" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td><input type="number" step="0.01" class="form-control form-control-sm min-score" value="95" style="border-radius: 6px;"></td>
+                                <td><input type="number" step="0.01" class="form-control form-control-sm max-score" value="100" style="border-radius: 6px;"></td>
+                                <td><input type="text" class="form-control form-control-sm final-grade" value="1.0" style="border-radius: 6px;"></td>
+                                <td><button type="button" class="btn btn-sm text-danger border-0" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -180,24 +193,130 @@ include '../includes/admin_sidebar.php';
   </div>
 </div>
 
+<?php if (!empty($mock_extracted_data)): ?>
+<!-- Extracted Grades Modal -->
+<div class="modal fade" id="extractedGradesModal" tabindex="-1" aria-labelledby="extractedGradesModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+      <div class="modal-header border-bottom-0 pt-4 pb-2">
+        <h5 class="modal-title fw-bold text-dark" id="extractedGradesModalLabel">Extracted Grades Review</h5>
+        <span class="badge ms-3" style="background-color: #EEF2FF; color: #4F46E5; padding: 6px 12px; font-weight: 600; border-radius: 8px;">
+            Total: <?= count($mock_extracted_data) ?> students
+        </span>
+        <button type="button" class="btn-close" onclick="window.location.href='scan_grades.php'" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="" method="POST" id="saveGradesForm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="text-muted small">
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Grade</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($mock_extracted_data as $index => $student): ?>
+                        <tr>
+                            <td>
+                                <?= htmlspecialchars($student['student_id']) ?>
+                                <input type="hidden" name="students[<?= $index ?>][student_id]" value="<?= htmlspecialchars($student['student_id']) ?>">
+                            </td>
+                            <td><?= htmlspecialchars($student['name']) ?></td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm" name="students[<?= $index ?>][grade]" value="<?= htmlspecialchars($student['grade']) ?>" required style="max-width: 80px; border-radius: 6px;">
+                            </td>
+                            <td>
+                                <select class="form-select form-select-sm" name="students[<?= $index ?>][status]" required style="border-radius: 6px;">
+                                    <option value="Passed" <?= strtoupper($student['status']) === 'PASSED' ? 'selected' : '' ?>>Passed</option>
+                                    <option value="Failed" <?= strtoupper($student['status']) === 'FAILED' ? 'selected' : '' ?>>Failed</option>
+                                    <option value="Dropped" <?= strtoupper($student['status']) === 'DROPPED' ? 'selected' : '' ?>>Dropped</option>
+                                    <option value="Incomplete" <?= strtoupper($student['status']) === 'INC' ? 'selected' : '' ?>>Incomplete</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer border-top-0 pt-0">
+        <button type="button" class="btn btn-light" onclick="window.location.href='scan_grades.php'" style="border-radius: 8px; font-weight: 500;">Cancel</button>
+        <button type="submit" form="saveGradesForm" name="save_grades" class="btn text-white px-4 py-2" style="background: #4F46E5; border-radius: 8px; font-weight: 500;">
+            <i class="bi bi-save me-1"></i> Save Grades to Database
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
 <script>
 function addScaleRow() {
     const tbody = document.getElementById('gradeScaleBody');
     const tr = document.createElement('tr');
     tr.innerHTML = `
-        <td><input type="number" class="form-control form-control-sm" style="border-radius: 6px;"></td>
-        <td><input type="number" class="form-control form-control-sm" style="border-radius: 6px;"></td>
-        <td><input type="text" class="form-control form-control-sm" style="border-radius: 6px;"></td>
+        <td><input type="number" step="0.01" class="form-control form-control-sm min-score" style="border-radius: 6px;"></td>
+        <td><input type="number" step="0.01" class="form-control form-control-sm max-score" style="border-radius: 6px;"></td>
+        <td><input type="text" class="form-control form-control-sm final-grade" style="border-radius: 6px;"></td>
         <td><button type="button" class="btn btn-sm text-danger border-0" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
     `;
     tbody.appendChild(tr);
 }
 
 function saveGradeScale() {
-    // In future: send data to backend via fetch
-    alert("Grade scaling saved! (Backend integration pending)");
-    const modal = bootstrap.Modal.getInstance(document.getElementById('gradeScaleModal'));
-    modal.hide();
+    const rows = document.querySelectorAll('#gradeScaleBody tr');
+    let scales = [];
+    rows.forEach(row => {
+        let min = row.querySelector('.min-score').value;
+        let max = row.querySelector('.max-score').value;
+        let grade = row.querySelector('.final-grade').value;
+        if (min !== '' && max !== '' && grade !== '') {
+            scales.push({ min: parseFloat(min), max: parseFloat(max), grade: grade });
+        }
+    });
+
+    fetch('controllers/GradeScaleController.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ scales: scales })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+                confirmButtonColor: '#4F46E5'
+            }).then(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('gradeScaleModal'));
+                modal.hide();
+                window.location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: data.message,
+                confirmButtonColor: '#d33'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!',
+            confirmButtonColor: '#d33'
+        });
+    });
 }
 </script>
 
@@ -361,5 +480,29 @@ function handleDrop(e) {
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<?php if (!empty($message)): ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            icon: '<?= $msgType === 'success' ? 'success' : 'error' ?>',
+            title: '<?= $msgType === 'success' ? 'Success!' : 'Error!' ?>',
+            text: '<?= addslashes($message) ?>',
+            showCancelButton: true,
+            confirmButtonColor: '#4F46E5',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'View extracted students',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var extractedModal = new bootstrap.Modal(document.getElementById('extractedGradesModal'));
+                extractedModal.show();
+            } else {
+                window.location.href = 'scan_grades.php';
+            }
+        });
+    });
+</script>
+<?php endif; ?>
 </body>
 </html>
