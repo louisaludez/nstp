@@ -8,7 +8,7 @@ $mock_extracted_data = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['grade_sheet'])) {
     $file = $_FILES['grade_sheet'];
-    $allowed_exts = ['pdf', 'png', 'jpg', 'jpeg'];
+    $allowed_exts = ['xlsx', 'xls', 'pdf'];
     $file_parts = explode('.', $file['name']);
     $ext = strtolower(end($file_parts));
     if (in_array($ext, $allowed_exts)) {
@@ -23,8 +23,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['grade_sheet'])) {
             $students_for_ocr = [];
             $mock_extracted_data = [];
             
-            if ($ext === 'pdf') {
-                // Parse PDF using python script
+            if (in_array($ext, ['xlsx', 'xls'])) {
+                require_once '../vendor/autoload.php';
+                if ($xlsx = \Shuchkin\SimpleXLSX::parse($destination)) {
+                    $header_values = [];
+                    $student_id_index = -1;
+                    $name_index = -1;
+                    $grade_index = -1;
+                    
+                    foreach ($xlsx->rows() as $row_index => $row) {
+                        if ($row_index === 0) {
+                            $header_values = array_map('trim', array_map('strtolower', $row));
+                            foreach ($header_values as $idx => $val) {
+                                if (strpos($val, 'student id') !== false || strpos($val, 'id number') !== false) $student_id_index = $idx;
+                                elseif (strpos($val, 'name') !== false || strpos($val, 'student name') !== false) $name_index = $idx;
+                                elseif (strpos($val, 'grade') !== false || strpos($val, 'gwa') !== false || strpos($val, 'final') !== false) $grade_index = $idx;
+                            }
+                            continue;
+                        }
+                        
+                        if ($name_index === -1 && $grade_index === -1) {
+                            break; // Could not find required columns
+                        }
+                        
+                        $student_id = $student_id_index !== -1 ? trim($row[$student_id_index] ?? '') : '';
+                        $name = $name_index !== -1 ? trim($row[$name_index] ?? '') : '';
+                        $grade = $grade_index !== -1 ? trim($row[$grade_index] ?? '') : '';
+                        
+                        if (empty($name) && empty($student_id)) continue;
+                        
+                        $grade_val = floatval($grade);
+                        $status = 'Failed';
+                        if ($grade_val >= 75 || ($grade_val >= 1.0 && $grade_val <= 3.0)) {
+                            $status = 'Passed';
+                        }
+                        
+                        $stu = false;
+                        if (!empty($student_id)) {
+                            $stmtCheck = $pdo->prepare("SELECT s.student_id, s.first_name, s.last_name FROM students s LEFT JOIN enrollments e ON s.student_id = e.student_id WHERE s.student_id = ?");
+                            $stmtCheck->execute([$student_id]);
+                            $stu = $stmtCheck->fetch();
+                        }
+                        
+                        if (!$stu && !empty($name)) {
+                            $stmtCheck = $pdo->prepare("SELECT s.student_id, s.first_name, s.last_name FROM students s LEFT JOIN enrollments e ON s.student_id = e.student_id WHERE CONCAT(s.last_name, ', ', s.first_name) LIKE ? OR CONCAT(s.first_name, ' ', s.last_name) LIKE ?");
+                            $stmtCheck->execute(['%'.$name.'%', '%'.$name.'%']);
+                            $stu = $stmtCheck->fetch();
+                        }
+                        
+                        if ($stu) {
+                            $mock_extracted_data[] = [
+                                'student_id' => $stu['student_id'],
+                                'name' => $stu['first_name'] . ' ' . $stu['last_name'],
+                                'grade' => $grade,
+                                'status' => $status
+                            ];
+                        } else {
+                            $mock_extracted_data[] = [
+                                'student_id' => $student_id ?: 'Unknown',
+                                'name' => $name,
+                                'grade' => $grade,
+                                'status' => $status
+                            ];
+                        }
+                    }
+                    if (empty($mock_extracted_data)) {
+                        $message = "No valid student grades found in the Excel file. Please check the column names.";
+                        $msgType = "danger";
+                    }
+                } else {
+                    $message = "Failed to parse Excel file: " . \Shuchkin\SimpleXLSX::parseError();
+                    $msgType = "danger";
+                }
+            } elseif ($ext === 'pdf') {
                 $python_script = __DIR__ . '/parse_pdf.py';
                 $command = "python " . escapeshellarg($python_script) . " " . escapeshellarg($destination);
                 $output = shell_exec($command);
@@ -35,16 +106,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['grade_sheet'])) {
                         foreach ($matches as $match) {
                             $student_id = trim($match[1]);
                             $name = trim($match[2]);
-                            $grade = trim($match[3]);
-                            $status = strtoupper(trim($match[5]));
+                            $percentage = trim($match[3]);
+                            $final_grade = trim($match[4]);
+                            $status_raw = strtoupper(trim($match[5]));
                             
-                            // Check if student exists in database and needs a grade
-                            $stmtCheck = $pdo->prepare("
-                                SELECT s.student_id, s.first_name, s.last_name 
-                                FROM students s 
-                                LEFT JOIN enrollments e ON s.student_id = e.student_id 
-                                WHERE s.student_id = ? AND e.final_grade IS NULL
-                            ");
+                            $status_mapped = 'Failed';
+                            if ($status_raw === 'PASSED') $status_mapped = 'Passed';
+                            
+                            // Check if student exists in database
+                            $stmtCheck = $pdo->prepare("SELECT s.student_id, s.first_name, s.last_name FROM students s LEFT JOIN enrollments e ON s.student_id = e.student_id WHERE s.student_id = ?");
                             $stmtCheck->execute([$student_id]);
                             $stu = $stmtCheck->fetch();
                             
@@ -52,50 +122,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['grade_sheet'])) {
                                 $mock_extracted_data[] = [
                                     'student_id' => $stu['student_id'],
                                     'name' => $stu['first_name'] . ' ' . $stu['last_name'],
-                                    'grade' => $grade,
-                                    'status' => $status
+                                    'grade' => $percentage,
+                                    'status' => $status_mapped
                                 ];
                             } else {
-                                // If student is found in PDF but doesn't need grading (or not in DB), we can still show them for info
-                                // For now we'll just include them to show OCR works
                                 $mock_extracted_data[] = [
                                     'student_id' => $student_id,
                                     'name' => $name,
-                                    'grade' => $grade,
-                                    'status' => $status
+                                    'grade' => $percentage,
+                                    'status' => $status_mapped
                                 ];
                             }
                         }
                     }
-                }
-            }
-            
-            // Fallback for image files or if PDF parsing yielded no results
-            if (empty($mock_extracted_data)) {
-                if ($ext !== 'pdf') {
-                    $message = "File uploaded successfully. (Note: Image OCR requires Tesseract API. Mock data generated.)";
-                }
-                
-                $stmtOCR = $pdo->query("
-                    SELECT s.student_id, s.first_name, s.last_name 
-                    FROM students s 
-                    LEFT JOIN enrollments e ON s.student_id = e.student_id 
-                    WHERE e.final_grade IS NULL 
-                    LIMIT 3
-                ");
-                $students_for_ocr = $stmtOCR->fetchAll();
-                foreach ($students_for_ocr as $stu) {
-                    $grade = rand(70, 98);
-                    $status = $grade >= 75 ? 'Passed' : 'Failed';
-                    $mock_extracted_data[] = [
-                        'student_id' => $stu['student_id'],
-                        'name' => $stu['first_name'] . ' ' . $stu['last_name'],
-                        'grade' => $grade,
-                        'status' => $status
-                    ];
-                }
-                if (empty($mock_extracted_data)) {
-                    $mock_extracted_data = [['student_id' => '', 'name' => 'No ungraded students found in database.', 'grade' => '', 'status' => '']];
+                    if (empty($mock_extracted_data)) {
+                        $message = "No valid student grades found in the PDF. Ensure the PDF format matches the standard grading sheet.";
+                        $msgType = "danger";
+                    }
+                } else {
+                    $message = "Failed to parse PDF file. Ensure Python and pypdf are installed.";
+                    $msgType = "danger";
                 }
             }
         } else {
@@ -103,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['grade_sheet'])) {
             $msgType = "danger";
         }
     } else {
-        $message = "Invalid file format. Please upload PDF, PNG, or JPG.";
+        $message = "Invalid file format. Please upload XLSX, XLS, or PDF.";
         $msgType = "danger";
     }
 }

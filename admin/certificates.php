@@ -39,7 +39,7 @@ include '../includes/admin_sidebar.php';
             </form>
             <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #ECFDF5; color: #10B981; border: 1px dashed #10B981; border-radius: 8px; padding: 8px 16px; font-weight: 500;" onclick="alert('Import coming soon.')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Import XLSX File of Grades
+                Import XLSX Grades
             </button>
         </div>
     </div>
@@ -63,42 +63,40 @@ include '../includes/admin_sidebar.php';
                             ? "ROTC Basic Course — " . htmlspecialchars($batch['section_name']) 
                             : htmlspecialchars($batch['component']) . " Completion";
                 ?>
-                <div class="dash-panel d-flex align-items-center justify-content-between p-3 px-4" style="border-radius: 12px; border: 1px solid #E2E8F0; background: white; cursor: pointer;">
+                <div class="dash-panel d-flex align-items-center justify-content-between p-3 px-4 mb-3" style="border-radius: 12px; border: 1px solid #E2E8F0; background: white;">
                     <div class="d-flex align-items-center gap-3">
                         <!-- Award Icon -->
-                        <div style="width: 44px; height: 44px; border-radius: 12px; background: #6366F1; color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #4F46E5; color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-hexagon" style="font-size: 1.2rem;"></i>
                         </div>
 
                         <!-- Info -->
                         <div>
-                            <div style="font-size: 0.95rem; font-weight: 600; color: #0F172A; margin-bottom: 2px;">
-                                <?= $title ?>
+                            <div style="font-size: 1rem; font-weight: 600; color: #0F172A; margin-bottom: 2px;">
+                                <?= htmlspecialchars($batch['section_name']) ?>
                             </div>
-                            <div style="font-size: 0.75rem; color: #64748B;">
-                                <?= (int)$batch['student_count'] ?> students
-                                <?php if ($batch['passed_count'] > 0): ?>
-                                    · Eligible <?= date('M j', strtotime('+17 days')) ?>
-                                <?php endif; ?>
+                            <div style="font-size: 0.85rem; color: #64748B;">
+                                <?= htmlspecialchars($batch['component']) ?> · <?= (int)$batch['passed_count'] ?> passed student(s)
                             </div>
                         </div>
                     </div>
 
                     <!-- Status + Action -->
                     <div class="d-flex align-items-center gap-3">
-                        <span style="font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; <?= $statusClass ?>">
+                        <span style="font-size: 0.75rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; <?= $statusClass ?>">
                             <?= $statusLabel ?>
                         </span>
+                        
+                        <button type="button" class="btn btn-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 8px; background: #FEF2F2; color: #EF4444; border: 1px solid #FEE2E2;">
+                            <i class="bi bi-trash"></i>
+                        </button>
+
                         <?php if ($ready && $ched_approval_status): ?>
-                        <form method="POST" class="m-0 p-0 d-inline" id="form-generate-<?= htmlspecialchars($batch['section_name']) ?>">
-                            <input type="hidden" name="action" value="generate_certificates">
-                            <input type="hidden" name="section_name" value="<?= htmlspecialchars($batch['section_name']) ?>">
-                            <button type="button" class="btn btn-sm" style="background: #0F172A; color: white; border-radius: 8px; font-weight: 500; padding: 6px 16px; font-size: 0.8rem;" onclick="confirmGenerate('<?= htmlspecialchars(addslashes($batch['section_name'])) ?>', 'form-generate-<?= htmlspecialchars($batch['section_name']) ?>')">
-                                Generate
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-sm" style="background: #0F172A; color: white; border-radius: 8px; font-weight: 500; padding: 6px 20px; font-size: 0.85rem;" onclick="openGenerateModal('<?= htmlspecialchars(addslashes($batch['section_name'])) ?>', '<?= htmlspecialchars(addslashes($batch['component'])) ?>', <?= (int)$batch['passed_count'] ?>)">
+                            Generate
+                        </button>
                         <?php else: ?>
-                        <button class="btn btn-sm" style="background: #E2E8F0; color: #64748B; border-radius: 8px; font-weight: 500; padding: 6px 16px; font-size: 0.8rem;" disabled title="<?= !$ched_approval_status ? 'Pending CHED Approval' : 'Reviewing' ?>">
+                        <button class="btn btn-sm" style="background: #E2E8F0; color: #64748B; border-radius: 8px; font-weight: 500; padding: 6px 20px; font-size: 0.85rem;" disabled title="<?= !$ched_approval_status ? 'Pending CHED Approval' : 'Reviewing' ?>">
                             Generate
                         </button>
                         <?php endif; ?>
@@ -163,13 +161,11 @@ include '../includes/admin_sidebar.php';
                     </div>
                     <?php endforeach; else: ?>
 
-                <div class="text-center py-5 px-4">
-                    <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--bg-light);
-                                display: flex; align-items: center; justify-content: center;
-                                margin: 0 auto 12px; color: var(--text-muted); font-size: 1.2rem;">
-                        <i class="bi bi-inbox"></i>
+                <div class="text-center py-5 px-4 h-100 d-flex flex-column justify-content-center align-items-center" style="min-height: 200px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #E2E8F0; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #CBD5E1; font-size: 1.2rem;">
+                        <i class="bi bi-check"></i>
                     </div>
-                    <p class="text-muted small mb-0">No certificates issued yet.</p>
+                    <p class="text-muted small mb-0" style="color: #94A3B8 !important;">No certificates recently issued.</p>
                 </div>
 
                 <?php endif; ?>
@@ -284,20 +280,179 @@ include '../includes/admin_sidebar.php';
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function confirmGenerate(sectionName, formId) {
-    Swal.fire({
-        title: 'Generate Certificates?',
-        text: `Are you sure you want to generate certificates for ${sectionName}?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#0F172A',
-        cancelButtonColor: '#64748B',
-        confirmButtonText: 'Yes, generate'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.getElementById(formId).submit();
-        }
-    });
+<!-- Generate Certificates Modal -->
+<div class="modal fade" id="generateCertModal" tabindex="-1" aria-labelledby="generateCertModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+      <div class="modal-header border-bottom-0 pt-4 pb-0 px-4">
+        <div>
+            <h5 class="modal-title fw-bold" id="generateCertModalLabel" style="color: #0F172A; font-size: 1.25rem;">Generate Certificates — <span id="modalSectionName"></span></h5>
+            <p class="text-muted mb-0" style="font-size: 0.9rem;" id="modalSubtitle">CWTS-1A · CWTS · <span style="color: #10B981; font-weight: 500;">1 eligible</span></p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body px-4 pt-4 pb-4">
+        
+        <form id="generateCertForm" method="POST" action="">
+            <input type="hidden" name="action" value="generate_certificates">
+            <input type="hidden" name="section_name" id="formSectionName">
+
+            <!-- Select Certificate Design -->
+            <h6 class="fw-bold mb-3" style="font-size: 0.75rem; color: #94A3B8; letter-spacing: 0.5px;">SELECT CERTIFICATE DESIGN</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="cert-design-card active" id="design-CWTS" onclick="selectDesign(this)">
+                        <div class="cert-preview"><span class="fw-bold" style="font-size: 0.75rem; color: #1E293B;">CWTS</span></div>
+                        <div class="fw-bold mt-2" style="font-size: 0.85rem; color: #0F172A;">Default CWTS Completi...</div>
+                        <div style="font-size: 0.75rem; color: #94A3B8;">Default Border</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="cert-design-card" id="design-LTS" onclick="selectDesign(this)">
+                        <div class="cert-preview"><span class="fw-bold" style="font-size: 0.75rem; color: #1E293B;">LTS</span></div>
+                        <div class="fw-bold mt-2" style="font-size: 0.85rem; color: #0F172A;">Default LTS Achievemen...</div>
+                        <div style="font-size: 0.75rem; color: #94A3B8;">Default Border</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="cert-design-card" id="design-ROTC" onclick="selectDesign(this)">
+                        <div class="cert-preview"><span class="fw-bold" style="font-size: 0.75rem; color: #1E293B;">ROTC</span></div>
+                        <div class="fw-bold mt-2" style="font-size: 0.85rem; color: #0F172A;">Default ROTC Military Se...</div>
+                        <div style="font-size: 0.75rem; color: #94A3B8;">Default Border</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Eligible Students -->
+            <h6 class="fw-bold mb-3" style="font-size: 0.75rem; color: #94A3B8; letter-spacing: 0.5px;">ELIGIBLE STUDENTS (<span id="modalEligibleCount">0</span>)</h6>
+            
+            <div id="eligibleStudentsList" class="d-flex flex-column gap-3">
+                <div class="text-center text-muted py-3">Loading...</div>
+            </div>
+            
+        </form>
+
+      </div>
+      <div class="modal-footer border-top-0 pt-0 px-4 pb-4 justify-content-between">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500; font-size: 0.9rem; padding: 10px 20px; color: #64748B; background: transparent; border: none;">Cancel</button>
+        <button type="submit" form="generateCertForm" class="btn text-white" style="background: #4F46E5; border-radius: 8px; font-weight: 500; font-size: 0.95rem; padding: 10px 24px;">
+            <i class="bi bi-download me-2"></i> Download All Certificates
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ... existing styles ... */
+.cert-design-card {
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+.cert-design-card:hover {
+    border-color: #CBD5E1;
+}
+.cert-design-card.active {
+    border-color: #4F46E5;
+    background: #F5F3FF;
+    box-shadow: 0 0 0 1px #4F46E5;
+}
+.cert-preview {
+    height: 60px;
+    border: 3px solid #312E81;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function selectDesign(element) {
+    document.querySelectorAll('.cert-design-card').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+}
+
+function openGenerateModal(sectionName, component, count) {
+    document.getElementById('modalSectionName').innerText = sectionName;
+    document.getElementById('formSectionName').value = sectionName;
+    document.getElementById('modalSubtitle').innerHTML = `${sectionName} · ${component} · <span style="color: #10B981; font-weight: 500;">${count} eligible</span>`;
+    document.getElementById('modalEligibleCount').innerText = count;
+    
+    // Auto-select design based on component
+    document.querySelectorAll('.cert-design-card').forEach(el => el.classList.remove('active'));
+    let designCard = document.getElementById('design-' + component);
+    if(designCard) designCard.classList.add('active');
+
+    const modal = new bootstrap.Modal(document.getElementById('generateCertModal'));
+    modal.show();
+
+    // Fetch eligible students
+    const listDiv = document.getElementById('eligibleStudentsList');
+    listDiv.innerHTML = '<div class="text-center text-muted py-3">Loading students...</div>';
+
+    fetch(`ajax_get_eligible_students.php?section_name=${encodeURIComponent(sectionName)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                listDiv.innerHTML = '';
+                if(data.students.length === 0) {
+                    listDiv.innerHTML = '<div class="text-center text-muted py-3">No eligible students found.</div>';
+                    return;
+                }
+                data.students.forEach((student, index) => {
+                    const row = `
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: #EEF2FF; color: #4F46E5; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.8rem;">
+                                ${index + 1}
+                            </div>
+                            <div>
+                                <div style="font-weight: 500; color: #0F172A; font-size: 0.95rem; margin-bottom: 2px;">${student.full_name}</div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span style="font-size: 0.75rem; color: #94A3B8; font-weight: 600;">SERIAL:</span>
+                                    <input type="text" name="serials[${student.enrollment_id}]" class="form-control form-control-sm" value="${student.serial_preview}" style="font-size: 0.8rem; padding: 2px 8px; height: auto; max-width: 140px;">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1" style="background: #4F46E5; color: white; border-radius: 6px; font-weight: 500; font-size: 0.8rem; padding: 6px 12px;" onclick="alert('Individual PDF download coming soon!')">
+                            <i class="bi bi-download"></i> PDF
+                        </button>
+                    </div>
+                    `;
+                    listDiv.insertAdjacentHTML('beforeend', row);
+                });
+            } else {
+                listDiv.innerHTML = `<div class="text-center text-danger py-3">Error: ${data.error}</div>`;
+            }
+        })
+        .catch(err => {
+            listDiv.innerHTML = `<div class="text-center text-danger py-3">Failed to load students.</div>`;
+        });
+}
+
+// Check for download trigger on page load
+window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('success') && urlParams.has('download_section')) {
+        const section = urlParams.get('download_section');
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Certificates generated and saved.',
+            confirmButtonColor: '#4F46E5'
+        });
+        window.open(`generate_pdf.php?section=${encodeURIComponent(section)}`, '_blank');
+        
+        // Remove params from URL to prevent re-triggering
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 }
 </script>
 </body>

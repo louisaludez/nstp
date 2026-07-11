@@ -13,8 +13,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'create_template') {
         $name = trim($_POST['template_name']);
         $program_type = $_POST['program_type'];
-        $badge_color = $_POST['badge_color'];
+        $badge_color = $_POST['badge_color'] ?? 'Indigo';
+        $header_title = trim($_POST['header_title'] ?? '');
+        $body_statement = trim($_POST['body_statement'] ?? '');
+        $signatory_name = trim($_POST['signatory_name'] ?? '');
+        $signatory_title = trim($_POST['signatory_title'] ?? '');
+        $is_active = isset($_POST['is_active']) ? 1 : 0;
         $image_path = '';
+
+        if ($is_active) {
+            $stmt = $pdo->prepare("UPDATE certificate_templates SET is_active = 0 WHERE program_type = ?");
+            $stmt->execute([$program_type]);
+        }
 
         if (isset($_FILES["design_image"]) && $_FILES["design_image"]["error"] == 0) {
             $ext = pathinfo($_FILES["design_image"]["name"], PATHINFO_EXTENSION);
@@ -26,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             }
         }
 
-        $stmt = $pdo->prepare("INSERT INTO certificate_templates (name, program_type, badge_color, image_path, status) VALUES (?, ?, ?, ?, 'Active')");
-        $stmt->execute([$name, $program_type, $badge_color, $image_path]);
+        $stmt = $pdo->prepare("INSERT INTO certificate_templates (name, program_type, badge_color, image_path, status, header_title, body_statement, signatory_name, signatory_title, is_active) VALUES (?, ?, ?, ?, 'Active', ?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $program_type, $badge_color, $image_path, $header_title, $body_statement, $signatory_name, $signatory_title, $is_active]);
         
         logAction($pdo, 'Created Certificate Template', "Template '$name' created.");
         
@@ -40,8 +50,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $id = $_POST['template_id'];
         $name = trim($_POST['template_name']);
         $program_type = $_POST['program_type'];
-        $badge_color = $_POST['badge_color'];
+        $badge_color = $_POST['badge_color'] ?? 'Indigo';
+        $header_title = trim($_POST['header_title'] ?? '');
+        $body_statement = trim($_POST['body_statement'] ?? '');
+        $signatory_name = trim($_POST['signatory_name'] ?? '');
+        $signatory_title = trim($_POST['signatory_title'] ?? '');
+        $is_active = isset($_POST['is_active']) ? 1 : 0;
         
+        if ($is_active) {
+            $stmt = $pdo->prepare("UPDATE certificate_templates SET is_active = 0 WHERE program_type = ?");
+            $stmt->execute([$program_type]);
+        }
+
         // Fetch existing record
         $stmtFetch = $pdo->prepare("SELECT image_path FROM certificate_templates WHERE id = ?");
         $stmtFetch->execute([$id]);
@@ -62,8 +82,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             }
         }
         
-        $stmt = $pdo->prepare("UPDATE certificate_templates SET name = ?, program_type = ?, badge_color = ?, image_path = ? WHERE id = ?");
-        $stmt->execute([$name, $program_type, $badge_color, $image_path, $id]);
+        $stmt = $pdo->prepare("UPDATE certificate_templates SET name = ?, program_type = ?, badge_color = ?, image_path = ?, header_title = ?, body_statement = ?, signatory_name = ?, signatory_title = ?, is_active = ? WHERE id = ?");
+        $stmt->execute([$name, $program_type, $badge_color, $image_path, $header_title, $body_statement, $signatory_name, $signatory_title, $is_active, $id]);
         
         logAction($pdo, 'Updated Certificate Template', "Template '$name' updated.");
         

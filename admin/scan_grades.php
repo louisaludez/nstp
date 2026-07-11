@@ -3,9 +3,33 @@ session_start();
 require '../config/db.php';
 require_once 'controllers/ScanGradesController.php';
 
-// Fetch grade scaling configurations
-$stmtScale = $pdo->query("SELECT * FROM grade_scaling ORDER BY min_score DESC");
-$gradeScales = $stmtScale->fetchAll();
+// Fetch grade settings
+$stmtSettings = $pdo->query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('grade_scale_range', 'pass_range', 'fail_range')");
+$settingsRows = $stmtSettings->fetchAll(PDO::FETCH_KEY_PAIR);
+$gradeScaleRange = $settingsRows['grade_scale_range'] ?? '1.0 - 5.0';
+$passRange = $settingsRows['pass_range'] ?? '1.0 - 3.0';
+$failRange = $settingsRows['fail_range'] ?? '5.0';
+
+// Fetch Import History
+$upload_dir = '../uploads/ocr/';
+$import_history = [];
+if (is_dir($upload_dir)) {
+    $files = scandir($upload_dir);
+    foreach ($files as $file) {
+        if ($file !== '.' && $file !== '..') {
+            $filepath = $upload_dir . $file;
+            $import_history[] = [
+                'name' => basename($file),
+                'date' => filemtime($filepath),
+                'size' => filesize($filepath)
+            ];
+        }
+    }
+    // Sort by newest first
+    usort($import_history, function($a, $b) {
+        return $b['date'] - $a['date'];
+    });
+}
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
     header("Location: ../login.php");
@@ -21,26 +45,21 @@ include '../includes/admin_sidebar.php';
     
     <?php include '../includes/topbar.php'; ?>
     
-    <div class="mb-4 pb-1 d-flex justify-content-between align-items-center">
-        <div>
-            <h4 class="fw-bold mb-1" style="color: #111827;">OCR Grade Upload</h4>
-            <p class="text-muted" style="font-size: 0.9rem;">Scan grade sheets and import directly into student records</p>
-        </div>
-        <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: white; color: #4F46E5; border: 1px solid #C7D2FE; border-radius: 8px; font-weight: 500; padding: 8px 16px; transition: all 0.2s;" onmouseover="this.style.background='#EEF2FF'" onmouseout="this.style.background='white'" data-bs-toggle="modal" data-bs-target="#gradeScaleModal">
-            <i class="bi bi-sliders"></i> Grade Scaling
-        </button>
+    <div class="mb-4 pb-1">
+        <h4 class="fw-bold mb-1" style="color: #111827;">OCR Grade Import</h4>
+        <p class="text-muted" style="font-size: 0.9rem;">Upload XLSX/XLS grade sheets to automatically record grades and enrollments in the database</p>
     </div>
 
     <div class="row g-4 align-items-start">
 
         <!-- Left Panel: Upload & Stats -->
         <div class="col-lg-7 col-xl-8">
-            <div class="dash-panel d-flex flex-column gap-3" style="padding: 24px;">
+            <div class="dash-panel" style="padding: 32px; border-radius: 12px; background: white; border: 1px solid #E2E8F0;">
 
                 <!-- Dropzone -->
-                <form action="" method="POST" enctype="multipart/form-data" id="uploadForm">
+                <form action="" method="POST" enctype="multipart/form-data" id="uploadForm" class="mb-4">
                     <input type="file" name="grade_sheet" id="fileInput" class="d-none"
-                           accept=".pdf,.png,.jpg,.jpeg"
+                           accept=".xlsx,.xls,.pdf"
                            onchange="document.getElementById('uploadForm').submit();">
 
                     <div id="dropzone"
@@ -48,87 +67,97 @@ include '../includes/admin_sidebar.php';
                          onclick="document.getElementById('fileInput').click();"
                          ondragover="handleDragOver(event)"
                          ondragleave="handleDragLeave(event)"
-                         ondrop="handleDrop(event)">
+                         ondrop="handleDrop(event)"
+                         style="border: 2px dashed #C7D2FE; background-color: #ffffff; border-radius: 12px; padding: 60px 32px; cursor: pointer; transition: all 0.2s ease;">
 
-                        <div class="ocr-upload-icon mb-4">
-                            <i class="bi bi-upload"></i>
+                        <div class="mb-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: white; border: 1px solid #E2E8F0; border-radius: 12px; color: #4F46E5; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                            <i class="bi bi-upload" style="font-size: 1.5rem;"></i>
                         </div>
 
-                        <h6 class="fw-bold mb-2" style="color: var(--text-dark); font-size: 1.05rem; letter-spacing: -0.01em;">
-                            Drop grade sheets here or click to upload
+                        <h6 class="fw-bold mb-2" style="color: #1E293B; font-size: 1.05rem;">
+                            Drop your XLSX grade sheet here or <span style="color: #4F46E5; text-decoration: underline;">click to browse</span>
                         </h6>
-                        <p class="mb-4" style="font-size: 0.82rem; color: var(--text-muted); max-width: 320px; line-height: 1.5;">
-                            PDF, PNG, JPG up to 25 MB. Supports multi-page scans.
+                        <p class="mb-0" style="font-size: 0.85rem; color: #94A3B8;">
+                            Supports formats (.xlsx, .xls, .pdf) - up to 25 MB
                         </p>
-                        <div class="ocr-engine-badge">
-                            <i class="bi bi-upc-scan"></i>
-                            OCR engine v3.2
-                        </div>
                     </div>
                 </form>
 
-                <!-- Stats Row -->
-                <div class="ocr-stats-row">
-                    <div class="ocr-stat-cell">
-                        <div class="ocr-stat-label">Confidence</div>
-                        <div class="ocr-stat-value">98.4%</div>
+                <!-- Grade Scaling editable boxes -->
+                <div class="d-flex gap-3 mb-3 flex-wrap flex-md-nowrap">
+                    <div class="flex-fill p-3 rounded text-center" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; transition: all 0.2s;">
+                        <div class="text-muted fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">GRADE SCALE</div>
+                        <input type="text" id="setting-grade-scale" class="form-control form-control-sm text-center fw-bold border-0 bg-transparent" style="font-size: 1.1rem; color: #1E293B; outline: none; box-shadow: none;" value="<?= htmlspecialchars($gradeScaleRange) ?>">
                     </div>
-                    <div class="ocr-stat-divider"></div>
-                    <div class="ocr-stat-cell">
-                        <div class="ocr-stat-label">Queue</div>
-                        <div class="ocr-stat-value">2 files</div>
+                    <div class="flex-fill p-3 rounded text-center" style="background-color: #ECFDF5; border: 1px solid #D1FAE5; transition: all 0.2s;">
+                        <div class="fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px; color: #10B981;">PASS RANGE</div>
+                        <input type="text" id="setting-pass-range" class="form-control form-control-sm text-center fw-bold border-0 bg-transparent" style="font-size: 1.1rem; color: #059669; outline: none; box-shadow: none;" value="<?= htmlspecialchars($passRange) ?>">
                     </div>
-                    <div class="ocr-stat-divider"></div>
-                    <div class="ocr-stat-cell">
-                        <div class="ocr-stat-label">Avg time</div>
-                        <div class="ocr-stat-value">~12s / page</div>
+                    <div class="flex-fill p-3 rounded text-center" style="background-color: #FEF2F2; border: 1px solid #FEE2E2; transition: all 0.2s;">
+                        <div class="fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px; color: #EF4444;">FAIL RANGE</div>
+                        <input type="text" id="setting-fail-range" class="form-control form-control-sm text-center fw-bold border-0 bg-transparent" style="font-size: 1.1rem; color: #DC2626; outline: none; box-shadow: none;" value="<?= htmlspecialchars($failRange) ?>">
+                    </div>
+                </div>
+                
+                <div class="text-end mb-4">
+                    <button type="button" class="btn btn-sm text-white px-4 py-2" style="background-color: #4F46E5; border-radius: 6px; font-weight: 500;" onclick="saveGradeSettings()">
+                        <i class="bi bi-save me-1"></i> Save Settings
+                    </button>
+                </div>
+
+                <!-- Info notice -->
+                <div class="p-3 rounded d-flex align-items-start gap-3" style="background-color: #FEFEF5; border: 1px solid #FEF08A;">
+                    <div style="color: #CA8A04; font-size: 1.25rem;">
+                        <i class="bi bi-exclamation-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1" style="color: #854D0E; font-size: 0.85rem;">Expected XLSX Column Structure:</h6>
+                        <p class="mb-0" style="color: #A16207; font-size: 0.82rem; line-height: 1.5;">
+                            The sheet must contain at least a <strong>Student Name</strong> column and a <strong>Final Grade (or GWA)</strong> column. A <strong>Section</strong> column is optional; if missing, it will be inferred from the filename.
+                        </p>
                     </div>
                 </div>
 
                 <?php if (!empty($mock_extracted_data)): ?>
-                <!-- The table is now rendered inside a modal below -->
+                <!-- The table is rendered inside a modal below -->
                 <?php endif; ?>
 
             </div>
         </div>
 
-        <!-- Right Panel: Recent Uploads -->
+        <!-- Right Panel: Import History -->
         <div class="col-lg-5 col-xl-4">
-            <div class="dash-panel p-0" style="overflow: hidden; border-radius: 12px; border: 1px solid #E2E8F0;">
-
-                <div class="px-4 py-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: #E2E8F0 !important;">
-                    <h6 class="fw-bold mb-0" style="font-size: 0.95rem; color: #111827;">Recent Uploads</h6>
-                    <a href="export_passed.php" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #10B981; color: white; border-radius: 6px; font-weight: 500; font-size: 0.75rem; padding: 6px 10px; transition: background 0.2s; text-decoration: none;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10B981'">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Export Passed
-                    </a>
+            <div class="dash-panel p-4" style="border-radius: 12px; border: 1px solid #E2E8F0; background: white; height: 100%; min-height: 400px;">
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-1" style="font-size: 1.05rem; color: #111827;">Import History</h6>
+                    <p class="text-muted mb-0" style="font-size: 0.85rem;"><?= count($import_history) ?> file(s) processed</p>
                 </div>
 
-                <div class="ocr-upload-list">
-                    <!-- Item 1 -->
-                    <div class="ocr-upload-item">
-                        <div class="ocr-file-icon">
-                            <i class="bi bi-file-earmark-pdf"></i>
-                        </div>
-                        <div class="ocr-file-info">
-                            <div class="ocr-file-name" style="color: #1E293B; font-weight: 600; font-size: 0.85rem;">BSCS-2A_Midterm.pdf</div>
-                            <div class="ocr-file-meta" style="color: #64748B; font-size: 0.75rem;">BSCS-2A · 42 students · Today 10:14 AM</div>
-                        </div>
-                        <span class="badge-status-new processed">Processed</span>
-                    </div>
-
-                    <!-- Item 2 -->
-                    <div class="ocr-upload-item" style="border-bottom: none;">
-                        <div class="ocr-file-icon">
-                            <i class="bi bi-file-earmark-image"></i>
-                        </div>
-                        <div class="ocr-file-info">
-                            <div class="ocr-file-name" style="color: #1E293B; font-weight: 600; font-size: 0.85rem;">BSIT-3B_Finals.jpg</div>
-                            <div class="ocr-file-meta" style="color: #64748B; font-size: 0.75rem;">BSIT-3B · 41 students · Today 9:02 AM</div>
-                        </div>
-                        <span class="badge-status-new reviewing">Reviewing</span>
-                    </div>
+                <?php if (empty($import_history)): ?>
+                <div class="d-flex flex-column align-items-center justify-content-center text-center h-100 py-5">
+                    <i class="bi bi-upload mb-3" style="font-size: 2rem; color: #CBD5E1;"></i>
+                    <p class="text-muted" style="font-size: 0.85rem; max-width: 200px;">No uploads yet. Drop an XLSX file to get started.</p>
                 </div>
+                <?php else: ?>
+                <div class="ocr-upload-list" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                    <?php foreach ($import_history as $history_file): ?>
+                    <div class="d-flex align-items-center gap-3 py-3" style="border-bottom: 1px solid #F1F5F9;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: #F8FAFC; color: #94A3B8; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                            <i class="bi bi-file-earmark-excel"></i>
+                        </div>
+                        <div class="flex-grow-1 min-w-0" style="min-width: 0;">
+                            <div class="text-truncate" style="color: #1E293B; font-weight: 600; font-size: 0.85rem;"><?= htmlspecialchars($history_file['name']) ?></div>
+                            <div class="text-truncate" style="color: #64748B; font-size: 0.75rem;">
+                                <?= date('M d, Y h:i A', $history_file['date']) ?>
+                            </div>
+                        </div>
+                        <div style="flex-shrink: 0;">
+                            <a href="<?= htmlspecialchars($upload_dir . $history_file['name']) ?>" download class="btn btn-sm text-muted" style="padding: 2px 6px;"><i class="bi bi-download"></i></a>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -137,154 +166,74 @@ include '../includes/admin_sidebar.php';
 
 </div>
 
-<!-- Grade Scaling Modal -->
-<div class="modal fade" id="gradeScaleModal" tabindex="-1" aria-labelledby="gradeScaleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-      <div class="modal-header border-bottom-0 pb-0">
-        <h5 class="modal-title fw-bold" id="gradeScaleModalLabel">Configure Grade Scaling</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body pt-3">
-        <p class="text-muted small mb-4">Define how raw OCR scores translate to final grades. This configuration will be applied to all future scans.</p>
-        
-        <form id="gradeScaleForm">
-            <div class="table-responsive">
-                <table class="table table-borderless align-middle mb-0">
-                    <thead class="text-muted small" style="border-bottom: 2px solid #F1F5F9;">
-                        <tr>
-                            <th class="fw-medium pb-2" style="width: 30%;">Min Score</th>
-                            <th class="fw-medium pb-2" style="width: 30%;">Max Score</th>
-                            <th class="fw-medium pb-2">Final Grade</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="gradeScaleBody">
-                        <?php if (count($gradeScales) > 0): ?>
-                            <?php foreach ($gradeScales as $scale): ?>
-                            <tr>
-                                <td><input type="number" step="0.01" class="form-control form-control-sm min-score" value="<?= htmlspecialchars($scale['min_score']) ?>" style="border-radius: 6px;"></td>
-                                <td><input type="number" step="0.01" class="form-control form-control-sm max-score" value="<?= htmlspecialchars($scale['max_score']) ?>" style="border-radius: 6px;"></td>
-                                <td><input type="text" class="form-control form-control-sm final-grade" value="<?= htmlspecialchars($scale['final_grade']) ?>" style="border-radius: 6px;"></td>
-                                <td><button type="button" class="btn btn-sm text-danger border-0" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td><input type="number" step="0.01" class="form-control form-control-sm min-score" value="95" style="border-radius: 6px;"></td>
-                                <td><input type="number" step="0.01" class="form-control form-control-sm max-score" value="100" style="border-radius: 6px;"></td>
-                                <td><input type="text" class="form-control form-control-sm final-grade" value="1.0" style="border-radius: 6px;"></td>
-                                <td><button type="button" class="btn btn-sm text-danger border-0" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-            <button type="button" class="btn btn-sm btn-light w-100 mt-2 text-primary fw-medium" style="border: 1px dashed #C7D2FE; border-radius: 6px;" onclick="addScaleRow()">
-                <i class="bi bi-plus"></i> Add Range
-            </button>
-        </form>
-      </div>
-      <div class="modal-footer border-top-0 pt-0">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">Cancel</button>
-        <button type="button" class="btn text-white" style="background: #4F46E5; border-radius: 8px; font-weight: 500;" onclick="saveGradeScale()">Save Scaling</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <?php if (!empty($mock_extracted_data)): ?>
-<!-- Extracted Grades Modal -->
-<div class="modal fade" id="extractedGradesModal" tabindex="-1" aria-labelledby="extractedGradesModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-      <div class="modal-header border-bottom-0 pt-4 pb-2">
-        <h5 class="modal-title fw-bold text-dark" id="extractedGradesModalLabel">Extracted Grades Review</h5>
-        <span class="badge ms-3" style="background-color: #EEF2FF; color: #4F46E5; padding: 6px 12px; font-weight: 600; border-radius: 8px;">
-            Total: <?= count($mock_extracted_data) ?> students
-        </span>
-        <button type="button" class="btn-close" onclick="window.location.href='scan_grades.php'" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form action="" method="POST" id="saveGradesForm">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="text-muted small">
-                        <tr>
-                            <th>Student ID</th>
-                            <th>Name</th>
-                            <th>Grade</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($mock_extracted_data as $index => $student): ?>
-                        <tr>
-                            <td>
-                                <?= htmlspecialchars($student['student_id']) ?>
-                                <input type="hidden" name="students[<?= $index ?>][student_id]" value="<?= htmlspecialchars($student['student_id']) ?>">
-                            </td>
-                            <td><?= htmlspecialchars($student['name']) ?></td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm" name="students[<?= $index ?>][grade]" value="<?= htmlspecialchars($student['grade']) ?>" required style="max-width: 80px; border-radius: 6px;">
-                            </td>
-                            <td>
-                                <select class="form-select form-select-sm" name="students[<?= $index ?>][status]" required style="border-radius: 6px;">
-                                    <option value="Passed" <?= strtoupper($student['status']) === 'PASSED' ? 'selected' : '' ?>>Passed</option>
-                                    <option value="Failed" <?= strtoupper($student['status']) === 'FAILED' ? 'selected' : '' ?>>Failed</option>
-                                    <option value="Dropped" <?= strtoupper($student['status']) === 'DROPPED' ? 'selected' : '' ?>>Dropped</option>
-                                    <option value="Incomplete" <?= strtoupper($student['status']) === 'INC' ? 'selected' : '' ?>>Incomplete</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer border-top-0 pt-0">
-        <button type="button" class="btn btn-light" onclick="window.location.href='scan_grades.php'" style="border-radius: 8px; font-weight: 500;">Cancel</button>
-        <button type="submit" form="saveGradesForm" name="save_grades" class="btn text-white px-4 py-2" style="background: #4F46E5; border-radius: 8px; font-weight: 500;">
-            <i class="bi bi-save me-1"></i> Save Grades to Database
-        </button>
-      </div>
+<div class="modal fade" id="extractedGradesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <form action="scan_grades.php" method="POST">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">Review Extracted Grades</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-hover align-middle">
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th>Student ID</th>
+                  <th>Name</th>
+                  <th>Grade</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($mock_extracted_data as $index => $data): ?>
+                  <tr>
+                    <td>
+                      <?= htmlspecialchars($data['student_id']) ?>
+                      <input type="hidden" name="students[<?= $index ?>][student_id]" value="<?= htmlspecialchars($data['student_id']) ?>">
+                    </td>
+                    <td><?= htmlspecialchars($data['name']) ?></td>
+                    <td>
+                      <?= htmlspecialchars($data['grade']) ?>
+                      <input type="hidden" name="students[<?= $index ?>][grade]" value="<?= htmlspecialchars($data['grade']) ?>">
+                    </td>
+                    <td>
+                      <?php if ($data['status'] === 'Passed'): ?>
+                        <span class="badge bg-success">Passed</span>
+                      <?php else: ?>
+                        <span class="badge bg-danger">Failed</span>
+                      <?php endif; ?>
+                      <input type="hidden" name="students[<?= $index ?>][status]" value="<?= htmlspecialchars($data['status']) ?>">
+                    </td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" name="save_grades" class="btn btn-primary px-4" style="background-color: #4F46E5; border: none;">Save Grades to Database</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
 <?php endif; ?>
 
 <script>
-function addScaleRow() {
-    const tbody = document.getElementById('gradeScaleBody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input type="number" step="0.01" class="form-control form-control-sm min-score" style="border-radius: 6px;"></td>
-        <td><input type="number" step="0.01" class="form-control form-control-sm max-score" style="border-radius: 6px;"></td>
-        <td><input type="text" class="form-control form-control-sm final-grade" style="border-radius: 6px;"></td>
-        <td><button type="button" class="btn btn-sm text-danger border-0" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
-    `;
-    tbody.appendChild(tr);
-}
+function saveGradeSettings() {
+    const scale = document.getElementById('setting-grade-scale').value;
+    const pass = document.getElementById('setting-pass-range').value;
+    const fail = document.getElementById('setting-fail-range').value;
 
-function saveGradeScale() {
-    const rows = document.querySelectorAll('#gradeScaleBody tr');
-    let scales = [];
-    rows.forEach(row => {
-        let min = row.querySelector('.min-score').value;
-        let max = row.querySelector('.max-score').value;
-        let grade = row.querySelector('.final-grade').value;
-        if (min !== '' && max !== '' && grade !== '') {
-            scales.push({ min: parseFloat(min), max: parseFloat(max), grade: grade });
-        }
-    });
-
-    fetch('controllers/GradeScaleController.php', {
+    fetch('controllers/GradeSettingsController.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ scales: scales })
+        body: JSON.stringify({ grade_scale_range: scale, pass_range: pass, fail_range: fail })
     })
     .then(response => response.json())
     .then(data => {
@@ -294,10 +243,6 @@ function saveGradeScale() {
                 title: 'Success!',
                 text: data.message,
                 confirmButtonColor: '#4F46E5'
-            }).then(() => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('gradeScaleModal'));
-                modal.hide();
-                window.location.reload();
             });
         } else {
             Swal.fire({
@@ -488,18 +433,27 @@ function handleDrop(e) {
             icon: '<?= $msgType === 'success' ? 'success' : 'error' ?>',
             title: '<?= $msgType === 'success' ? 'Success!' : 'Error!' ?>',
             text: '<?= addslashes($message) ?>',
+            <?php if (isset($file_uploaded) && $file_uploaded && $msgType === 'success' && !empty($mock_extracted_data)): ?>
             showCancelButton: true,
             confirmButtonColor: '#4F46E5',
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'View extracted students',
             cancelButtonText: 'Cancel'
+            <?php else: ?>
+            confirmButtonColor: '#4F46E5',
+            <?php endif; ?>
         }).then((result) => {
+            <?php if (isset($file_uploaded) && $file_uploaded && $msgType === 'success' && !empty($mock_extracted_data)): ?>
             if (result.isConfirmed) {
-                var extractedModal = new bootstrap.Modal(document.getElementById('extractedGradesModal'));
-                extractedModal.show();
+                var modalEl = document.getElementById('extractedGradesModal');
+                if (modalEl) {
+                    var extractedModal = new bootstrap.Modal(modalEl);
+                    extractedModal.show();
+                }
             } else {
                 window.location.href = 'scan_grades.php';
             }
+            <?php endif; ?>
         });
     });
 </script>

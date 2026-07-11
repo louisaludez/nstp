@@ -3,36 +3,34 @@
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'generate_certificates') {
     $section_name = $_POST['section_name'] ?? '';
+    $serials = $_POST['serials'] ?? []; // array of [enrollment_id => serial_number]
     
     // Find the section id
     $stmt = $pdo->prepare("SELECT id, component FROM sections WHERE section_name = ?");
     $stmt->execute([$section_name]);
     $section = $stmt->fetch();
     
-    if ($section) {
+    if ($section && !empty($serials)) {
         $section_id = $section['id'];
         $component = $section['component'];
         
-        // Find passed students without serial numbers in this section
-        $stmtStudents = $pdo->prepare("SELECT id FROM enrollments WHERE section_id = ? AND status = 'Passed' AND serial_number IS NULL");
-        $stmtStudents->execute([$section_id]);
-        $enrollmentsToGenerate = $stmtStudents->fetchAll();
-        
-        $year = date('Y');
         $generated = 0;
         
-        foreach ($enrollmentsToGenerate as $enrollment) {
-            $serial = sprintf("%s-%s-%04d-%03d", $component, $year, $enrollment['id'], rand(100, 999));
-            $updateStmt = $pdo->prepare("UPDATE enrollments SET serial_number = ? WHERE id = ?");
-            $updateStmt->execute([$serial, $enrollment['id']]);
-            $generated++;
+        foreach ($serials as $enrollment_id => $serial) {
+            if (!empty($serial)) {
+                $updateStmt = $pdo->prepare("UPDATE enrollments SET serial_number = ? WHERE id = ? AND section_id = ?");
+                $updateStmt->execute([$serial, $enrollment_id, $section_id]);
+                if ($updateStmt->rowCount() > 0) {
+                    $generated++;
+                }
+            }
         }
         
         if ($generated > 0) {
             logAction($pdo, 'Generated Certificates', "Generated $generated certificates for section $section_name");
         }
         
-        header("Location: certificates.php?success=1");
+        header("Location: certificates.php?success=1&download_section=" . urlencode($section_name));
         exit;
     }
 }
