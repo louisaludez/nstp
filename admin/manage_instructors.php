@@ -20,79 +20,73 @@ include '../includes/admin_sidebar.php';
 
     <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
         <div>
-            <h4 class="fw-bold mb-1" style="color: #111827;">Instructors & OIC List</h4>
-            <p class="text-muted mb-0" style="font-size: 0.85rem;">Faculty directory and section load</p>
+            <h4 class="fw-bold mb-1" style="color: #111827;">Instructor Management</h4>
+            <p class="text-muted mb-0" style="font-size: 0.85rem;">Manage faculty profiles, department assignments, and contact details</p>
         </div>
         <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-2" style="background: #6366F1; color: white; border-radius: 8px; padding: 8px 16px; font-weight: 500; border: none;" data-bs-toggle="modal" data-bs-target="#addInstructorModal">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-            Add Personnel
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+            Add Instructor
         </button>
     </div>
 
 
 
     <!-- Controls -->
-    <div class="d-flex flex-wrap gap-3 mb-4">
-        <div class="position-relative" style="max-width: 320px; flex: 1;">
+    <div class="mb-4">
+        <div class="position-relative" style="width: 400px; max-width: 100%;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="position-absolute text-muted" style="width: 16px; height: 16px; left: 14px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="instructorSearch" class="form-control" placeholder="Search instructor..." style="padding-left: 40px; border-radius: 8px; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.9rem;">
+            <input type="text" id="instructorSearch" class="form-control" placeholder="Search instructors..." style="padding-left: 40px; border-radius: 8px; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.9rem;">
         </div>
-        <select id="sectionFilter" class="form-select w-auto" style="border-radius: 8px; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.9rem;">
-            <option value="">All Sections</option>
-            <option value="CWTS">CWTS</option>
-            <option value="LTS">LTS</option>
-            <option value="ROTC">ROTC</option>
-        </select>
     </div>
 
     <!-- Instructor Table -->
-    <div class="table-responsive" style="background: white; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <table class="table table-hover mb-0 align-middle" style="color: #1E293B;">
-            <thead style="background: #F8FAFC; border-bottom: 1px solid #E2E8F0;">
-                <tr>
-                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">INSTRUCTOR</th>
-                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">DEPARTMENT</th>
-                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">EMAIL</th>
-                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">SECTIONS</th>
-                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">STUDENTS</th>
-                    <th class="text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em; padding: 16px 24px; border: none;">STATUS</th>
-                </tr>
-            </thead>
-            <tbody>
+    <div style="background: white; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div class="p-4 border-bottom" style="border-color: #F8FAFC !important;">
+            <h6 class="mb-0 fw-semibold" style="color: #1E293B;">Registered Instructors</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle" style="color: #1E293B;">
+                <thead style="background: #FAFAF9; border-bottom: 1px solid #F1F5F9;">
+                    <tr style="text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748B;">
+                        <th style="padding: 16px 24px; font-weight: 600; border: none;">INSTRUCTOR NAME</th>
+                        <th style="padding: 16px 24px; font-weight: 600; border: none;">DEPARTMENT</th>
+                        <th style="padding: 16px 24px; font-weight: 600; border: none;">EMAIL</th>
+                        <th style="padding: 16px 24px; font-weight: 600; border: none;">NO. OF SECTIONS</th>
+                        <th style="padding: 16px 24px; font-weight: 600; border: none;">STATUS</th>
+                        <th style="padding: 16px 24px; font-weight: 600; border: none; text-align: center;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
                 <?php if (count($instructors) > 0): ?>
                     <?php foreach ($instructors as $inst): 
-                        $bg_color = '#6366F1'; 
-                        
-                        $name_parts = explode(' ', trim($inst['full_name']));
-                        $initials = strtoupper(substr($name_parts[0], 0, 1));
-                        if (count($name_parts) > 1) {
-                            $initials .= strtoupper(substr(end($name_parts), 0, 1));
-                        }
-
                         $dept = $inst['primary_component'] ?? 'NSTP';
                         $main_section = !empty($inst['assigned_sections']) ? $inst['assigned_sections'] : '-';
                         $status = $inst['status'] ?? 'Active';
                         
-                        $status_bg = ($status === 'Active') ? '#ECFDF5' : '#F8FAFC';
-                        $status_text = ($status === 'Active') ? '#10B981' : '#64748B';
+                        $status_bg = ($status === 'Active') ? '#DCFCE7' : '#F1F5F9';
+                        $status_text = ($status === 'Active') ? '#16A34A' : '#64748B';
                     ?>
-                        <tr style="cursor: pointer;" onclick="viewInstructorDetails(<?= $inst['id'] ?>, '<?= htmlspecialchars(addslashes($inst['full_name'])) ?>', '<?= addslashes($dept) ?>', '<?= addslashes($main_section) ?>', <?= $inst['student_count'] ?? 0 ?>, '<?= htmlspecialchars(addslashes($inst['email'])) ?>', '<?= $initials ?>', '<?= $bg_color ?>', '<?= $status ?>')">
-                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div style="width: 36px; height: 36px; border-radius: 50%; background: <?= $bg_color ?>; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; flex-shrink: 0;">
-                                        <?= $initials ?>
-                                    </div>
-                                    <span style="font-weight: 500; color: #1E293B;"><?= htmlspecialchars($inst['full_name']) ?></span>
-                                </div>
+                        <tr style="border-bottom: 1px solid #F8FAFC; transition: background 0.15s; cursor: pointer;" onmouseover="this.style.background='#FAFAFA'" onmouseout="this.style.background='transparent'" onclick="window.location.href='view_instructor.php?id=<?= $inst['id'] ?>'">
+                            <td style="padding: 16px 24px; color: #1E293B; font-weight: 500;"><?= htmlspecialchars($inst['full_name']) ?></td>
+                            <td style="padding: 16px 24px;">
+                                <span style="font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; font-weight: 500; <?= ($dept==='CWTS')?'background:#F3E8FF;color:#9333EA;':(($dept==='LTS')?'background:#DCFCE7;color:#16A34A;':'background:#FFE4E6;color:#E11D48;') ?>"><?= htmlspecialchars($dept) ?></span>
                             </td>
-                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0; color: #64748B; font-size: 0.95rem;"><?= htmlspecialchars($dept) ?></td>
-                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0; color: #64748B; font-size: 0.95rem;"><?= htmlspecialchars($inst['email']) ?></td>
-                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0; color: #475569; font-weight: 500; font-size: 0.95rem;"><?= htmlspecialchars($main_section) ?></td>
-                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0; color: #475569; font-size: 0.95rem;"><?= $inst['student_count'] ?? 0 ?></td>
-                            <td style="padding: 16px 24px; border-bottom: 1px solid #E2E8F0;">
-                                <span style="background: <?= $status_bg ?>; color: <?= $status_text ?>; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                            <td style="padding: 16px 24px; color: #64748B;"><?= htmlspecialchars($inst['email']) ?></td>
+                            <td style="padding: 16px 24px; color: #475569; font-weight: 500;"><?= substr_count($main_section, ',') + (!empty($main_section) && $main_section !== '-' ? 1 : 0) ?></td>
+                            <td style="padding: 16px 24px;">
+                                <span style="font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; font-weight: 500; background: <?= $status_bg ?>; color: <?= $status_text ?>;">
                                     <?= htmlspecialchars($status) ?>
                                 </span>
+                            </td>
+                            <td style="padding: 16px 24px; text-align: center;">
+                                <button class="btn btn-sm p-1 text-muted" title="Edit" onclick="event.stopPropagation(); openEditInstructorModal(this)"
+                                    data-id="<?= $inst['id'] ?>"
+                                    data-name="<?= htmlspecialchars($inst['full_name']) ?>"
+                                    data-dept="<?= htmlspecialchars($dept) ?>"
+                                    data-status="<?= htmlspecialchars($status) ?>"
+                                    style="border: none; background: transparent; cursor: pointer;">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#94A3B8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" onmouseover="this.style.stroke='#4F46E5'" onmouseout="this.style.stroke='#94A3B8'"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                </button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -111,128 +105,66 @@ include '../includes/admin_sidebar.php';
                     </tr>
                 <?php endif; ?>
             </tbody>
-        </table>
-    </div>
-
-</div>
-
-<!-- Instructor Details Modal -->
-<div class="modal fade" id="instructorDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-            <div class="modal-header border-bottom px-4 pt-4 pb-3">
-                <h5 class="modal-title fw-bold" style="color: #111827;">Personnel Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div id="detailInitials" style="width: 56px; height: 56px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.2rem; flex-shrink: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        CO
-                    </div>
-                    <div>
-                        <div id="detailName" style="font-weight: 700; color: #111827; font-size: 1.1rem; margin-bottom: 2px;">Name</div>
-                        <div id="detailDept" style="font-size: 0.85rem; color: #64748B; margin-bottom: 6px;">Dept</div>
-                        <span id="detailStatus" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; background: #ECFDF5; color: #10B981; font-weight: 500;">Active</span>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-start gap-3 mb-4">
-                    <div style="width: 40px; height: 40px; border-radius: 8px; background: #F8FAFC; display: flex; align-items: center; justify-content: center; color: #64748B;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.7rem; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Assigned Sections</div>
-                        <div id="detailSections" style="font-weight: 600; color: #1E293B; font-size: 0.95rem;">CWTS-1A</div>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-start gap-3 mb-4">
-                    <div style="width: 40px; height: 40px; border-radius: 8px; background: #F8FAFC; display: flex; align-items: center; justify-content: center; color: #64748B;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.7rem; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Total Handled Students</div>
-                        <div id="detailStudents" style="font-weight: 600; color: #1E293B; font-size: 0.95rem;">158 Cadets / Students</div>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-start gap-3 mb-2">
-                    <div style="width: 40px; height: 40px; border-radius: 8px; background: #F8FAFC; display: flex; align-items: center; justify-content: center; color: #64748B;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.7rem; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Official Email</div>
-                        <div id="detailEmail" style="font-weight: 500; color: #4F46E5; font-size: 0.95rem;">class@aurora.edu</div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-top bg-light p-3 d-flex justify-content-between align-items-center" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
-                <form method="POST" action="" class="mb-0">
-                    <input type="hidden" name="instructor_id" id="deleteInstId">
-                    <button type="button" class="btn btn-sm d-flex align-items-center gap-2" style="background: #FFF1F2; color: #E11D48; border: 1px solid #FFE4E6; border-radius: 6px; padding: 6px 12px; font-weight: 500;" onclick="confirmDeleteInstructor(this)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                        Delete
-                    </button>
-                    <!-- Hidden submit button for real form submission -->
-                    <input type="submit" name="delete_instructor" id="real_delete_instructor_btn" class="d-none">
-                </form>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-sm" style="background: white; color: #1E293B; border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 16px; font-weight: 500;" onclick="openEditModal()">Edit</button>
-                    <button type="button" class="btn btn-sm" style="background: #0F172A; color: white; border: none; border-radius: 6px; padding: 6px 16px; font-weight: 500;" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
         </div>
     </div>
+
 </div>
 
-<!-- Edit Personnel Modal -->
-<div class="modal fade" id="editPersonnelModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-            <div class="modal-header border-bottom px-4 pt-4 pb-3">
-                <h5 class="modal-title fw-bold" style="color: #111827;">Edit Personnel</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Edit Instructor Modal -->
+<div class="modal fade" id="editInstructorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; background: #FAFAFA;">
+            <div class="modal-header border-bottom pb-3 pt-4 px-4 bg-white" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <div>
+                    <h5 class="modal-title fw-bold" style="color: #1E293B;">Edit Instructor</h5>
+                    <div style="font-size: 0.85rem; color: #64748B;">Modify instructor configuration</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size: 0.75rem;"></button>
             </div>
             <form method="POST" action="">
                 <input type="hidden" name="instructor_id" id="editInstId">
-                <div class="modal-body p-4">
+                <div class="modal-body p-4 bg-white">
                     <div class="mb-3">
-                        <label class="form-label text-muted fw-bold small" style="font-size: 0.7rem; letter-spacing: 0.05em;">FULL NAME</label>
-                        <input type="text" name="full_name" id="editFullName" class="form-control" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 500;" required>
+                        <label class="form-label fw-bold" style="font-size: 0.75rem; color: #64748B; letter-spacing: 0.5px; text-transform: uppercase;">INSTRUCTOR NAME</label>
+                        <input type="text" name="full_name" id="editFullName" class="form-control" style="border-radius:8px; border-color: #E2E8F0; padding: 10px 14px;" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label text-muted fw-bold small" style="font-size: 0.7rem; letter-spacing: 0.05em;">COMPONENT</label>
-                        <select name="component" id="editDept" class="form-select" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 500;" required>
-                            <option value="CWTS">CWTS</option>
-                            <option value="LTS">LTS</option>
-                            <option value="ROTC">ROTC</option>
-                        </select>
-                    </div>
+                    
                     <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label text-muted fw-bold small" style="font-size: 0.7rem; letter-spacing: 0.05em;">SECTIONS LOAD</label>
-                            <input type="text" id="editSections" class="form-control bg-light" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 500;" readonly>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold" style="font-size: 0.75rem; color: #64748B; letter-spacing: 0.5px; text-transform: uppercase;">DEPARTMENT / SCOPE <span class="text-danger">*</span></label>
+                            <select name="component" id="editDept" class="form-select" style="border-radius:8px; border-color: #E2E8F0; padding: 10px 14px;" required>
+                                <option value="CWTS">CWTS — Civic Welfare</option>
+                                <option value="LTS">LTS — Literacy Training</option>
+                                <option value="ROTC">ROTC — Reserve Officers</option>
+                            </select>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label text-muted fw-bold small" style="font-size: 0.7rem; letter-spacing: 0.05em;">STUDENTS COUNT</label>
-                            <input type="text" id="editStudents" class="form-control bg-light" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 500;" readonly>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold" style="font-size: 0.75rem; color: #64748B; letter-spacing: 0.5px; text-transform: uppercase;">STATUS <span class="text-danger">*</span></label>
+                            <select name="status" id="editStatus" class="form-select" style="border-radius:8px; border-color: #E2E8F0; padding: 10px 14px;" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label text-muted fw-bold small" style="font-size: 0.7rem; letter-spacing: 0.05em;">EMAIL ADDRESS</label>
-                        <input type="email" name="email" id="editEmail" class="form-control" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 500;" required>
-                    </div>
+
                     <div class="mb-2">
-                        <label class="form-label text-muted fw-bold small" style="font-size: 0.7rem; letter-spacing: 0.05em;">STATUS</label>
-                        <select name="status" id="editStatus" class="form-select" style="border-radius:8px; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 500;">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
+                        <label class="form-label fw-bold" style="font-size: 0.75rem; color: #64748B; letter-spacing: 0.5px; text-transform: uppercase;">ASSIGN NEW SECTION</label>
+                        <select name="assign_section_id" class="form-select" style="border-radius:8px; border-color: #E2E8F0; padding: 10px 14px;">
+                            <option value="">— Select a section (optional) —</option>
+                            <?php if (!empty($unassigned_sections)): ?>
+                                <?php foreach($unassigned_sections as $sec): ?>
+                                    <option value="<?= $sec['id'] ?>"><?= htmlspecialchars($sec['section_name']) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer border-top-0 bg-light p-3 d-flex justify-content-end gap-2" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
-                    <button type="button" class="btn btn-sm" style="background: white; color: #1E293B; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 16px; font-weight: 500;" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" name="edit_instructor" class="btn btn-sm" style="background: #6366F1; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 500;">Save Changes</button>
+                <div class="modal-footer border-top p-3" style="background: #FAFAFA; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; border-color: #F1F5F9 !important;">
+                    <button type="button" class="btn px-4" data-bs-dismiss="modal" style="background: white; border: 1px solid #E2E8F0; color: #1E293B; font-weight: 500; border-radius: 8px;">Cancel</button>
+                    <button type="submit" name="edit_instructor" class="btn px-4 d-inline-flex align-items-center gap-2" style="background: #4F46E5; color: white; font-weight: 500; border-radius: 8px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        Save Changes
+                    </button>
                 </div>
             </form>
         </div>
@@ -309,75 +241,16 @@ include '../includes/admin_sidebar.php';
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-let currentInstructor = {};
-
-function viewInstructorDetails(id, name, dept, section, students, email, initials, bgColor, status) {
-    // Save for edit modal
-    currentInstructor = { id, name, dept, section, students, email, status };
-
-    // Populate Details Modal
-    document.getElementById('detailInitials').innerText = initials;
-    document.getElementById('detailInitials').style.backgroundColor = bgColor;
-    document.getElementById('detailName').innerText = name;
-    document.getElementById('detailDept').innerText = dept;
-    document.getElementById('detailSections').innerText = section || 'None';
-    document.getElementById('detailStudents').innerText = `${students} Cadets / Students`;
-    document.getElementById('detailEmail').innerText = email;
+function openEditInstructorModal(btn) {
+    document.getElementById('editInstId').value = btn.getAttribute('data-id');
+    document.getElementById('editFullName').value = btn.getAttribute('data-name');
     
-    let statusEl = document.getElementById('detailStatus');
-    statusEl.innerText = status;
-    if (status === 'Active') {
-        statusEl.style.background = '#ECFDF5';
-        statusEl.style.color = '#10B981';
-    } else {
-        statusEl.style.background = '#FEF2F2';
-        statusEl.style.color = '#EF4444';
-    }
-
-    // Set delete form ID
-    document.getElementById('deleteInstId').value = id;
-
-    // Show Details Modal
-    var detailsModal = new bootstrap.Modal(document.getElementById('instructorDetailsModal'));
-    detailsModal.show();
-}
-
-function openEditModal() {
-    // Hide details modal
-    var detailsModalEl = document.getElementById('instructorDetailsModal');
-    var detailsModal = bootstrap.Modal.getInstance(detailsModalEl);
-    if (detailsModal) detailsModal.hide();
-
-    // Populate Edit Modal
-    document.getElementById('editInstId').value = currentInstructor.id;
-    document.getElementById('editFullName').value = currentInstructor.name;
-    document.getElementById('editDept').value = currentInstructor.dept;
-    document.getElementById('editSections').value = currentInstructor.section || 'None';
-    document.getElementById('editStudents').value = currentInstructor.students;
-    document.getElementById('editEmail').value = currentInstructor.email;
-    document.getElementById('editStatus').value = currentInstructor.status || 'Active';
-
-    // Show Edit Modal
-    setTimeout(() => {
-        var editModal = new bootstrap.Modal(document.getElementById('editPersonnelModal'));
-        editModal.show();
-    }, 400); // Wait for the first modal to hide completely to prevent backdrop issues
-}
-
-function confirmDeleteInstructor(btn) {
-    Swal.fire({
-        title: 'Delete Instructor?',
-        text: "Are you sure you want to delete this instructor? This action cannot be undone.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#E11D48',
-        cancelButtonColor: '#64748B',
-        confirmButtonText: 'Yes, delete it'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.getElementById('real_delete_instructor_btn').click();
-        }
-    });
+    // Check if component mapped exactly or if it needs logic
+    let dept = btn.getAttribute('data-dept');
+    document.getElementById('editDept').value = dept;
+    document.getElementById('editStatus').value = btn.getAttribute('data-status');
+    
+    new bootstrap.Modal(document.getElementById('editInstructorModal')).show();
 }
 </script>
 </body>

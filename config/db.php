@@ -36,7 +36,7 @@ $options = [
 try {
     $pdo = new PDO($dsn, $username, $password, $options);
 } catch (PDOException $e) {
-    // Note: In a live production environment, you would log this to a file instead of showing it to the user
+    
     die("Database connection failed. Please check your XAMPP/MySQL status: " . $e->getMessage());
 }
 function logAction($pdo, $action_type, $details)

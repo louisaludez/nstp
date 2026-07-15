@@ -35,6 +35,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_section'])) {
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_section'])) {
+    $section_id = $_POST['section_id'];
+    $section_name = trim($_POST['section_name']);
+    $component = $_POST['component'];
+    $school_year = trim($_POST['school_year']);
+    $semester = $_POST['semester'];
+    $room = trim($_POST['room'] ?? '');
+    $instructor_id = !empty($_POST['instructor_id']) ? $_POST['instructor_id'] : null;
+
+    try {
+        $stmt = $pdo->prepare("UPDATE sections SET component = ?, section_name = ?, school_year = ?, semester = ?, room = ?, instructor_id = ? WHERE id = ?");
+        $stmt->execute([$component, $section_name, $school_year, $semester, $room, $instructor_id, $section_id]);
+        $message = "Section successfully updated!";
+        $msgType = "success";
+    } catch (PDOException $e) {
+        $message = "Database Error: " . $e->getMessage();
+        $msgType = "danger";
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_section'])) {
+    $section_id = $_POST['section_id'];
+    try {
+        $stmt = $pdo->prepare("DELETE FROM sections WHERE id = ?");
+        $stmt->execute([$section_id]);
+        $message = "Section successfully deleted!";
+        $msgType = "success";
+    } catch (PDOException $e) {
+        $message = "Database Error: " . $e->getMessage();
+        $msgType = "danger";
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_instructor'])) {
     $section_id = $_POST['section_id'];
     $instructor_id = $_POST['instructor_id'];

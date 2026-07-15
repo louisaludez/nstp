@@ -63,75 +63,45 @@ include '../includes/admin_sidebar.php';
                 <ul class="list-unstyled mb-0" id="auditList">
                     <?php foreach ($logs as $index => $log): 
                         $action = strtolower($log['action_type']);
-                        $badge_text = htmlspecialchars($log['action_type']);
-                        $badge_style = '';
                         
-                        if (str_contains($action, 'approve')) {
-                            $badge_style = 'background-color: #ECFDF5; color: #059669;';
-                            $badge_text = 'Approved';
-                            $category = 'Approvals';
-                        } elseif (str_contains($action, 'pass')) {
-                            $badge_style = 'background-color: #F5F3FF; color: #7C3AED;';
-                            $badge_text = 'Passed';
-                            $category = 'Approvals';
-                        } elseif (str_contains($action, 'generate')) {
-                            $badge_style = 'background-color: #EFF6FF; color: #2563EB;';
-                            $badge_text = 'Generated';
-                            $category = 'Approvals';
-                        } elseif (str_contains($action, 'submit')) {
-                            $badge_style = 'background-color: #FAF5FF; color: #9333EA;';
-                            $badge_text = 'Submitted';
-                            $category = 'Submissions';
-                        } elseif (str_contains($action, 'fail') || str_contains($action, 'delete')) {
-                            $badge_style = 'background-color: #FEF2F2; color: #DC2626;';
-                            $badge_text = str_contains($action, 'fail') ? 'Failed Login Attempt' : 'Deleted';
-                            $category = 'Alerts';
-                        } elseif (str_contains($action, 'update') || str_contains($action, 'edit')) {
-                            $badge_style = 'background-color: #FFFBEB; color: #D97706;';
-                            $badge_text = 'Updated section';
+                        if (str_contains($action, 'create') || str_contains($action, 'update') || str_contains($action, 'edit') || str_contains($action, 'delete')) {
+                            $badge_text = 'Edit';
                             $category = 'Edits';
-                        } elseif (str_contains($action, 'request')) {
-                            $badge_style = 'background-color: #ECFDF5; color: #059669;';
-                            $badge_text = 'Requested revisions';
-                            $category = 'Submissions';
+                            $dot_color = '#F59E0B'; // Yellow
                         } else {
-                            $badge_style = 'background-color: #F3F4F6; color: #4B5563;';
+                            $badge_text = 'System';
                             $category = 'System Logs';
+                            $dot_color = '#8B5CF6'; // Purple
                         }
                         
                         $is_last = $index === count($logs) - 1;
-                        $border_bottom = $is_last ? '' : 'border-bottom: 1px solid #F9FAFB;';
+                        $border_bottom = $is_last ? '' : 'border-bottom: 1px solid #F3F4F6;';
                     ?>
-                        <li class="activity-item d-flex align-items-center py-3 px-4 position-relative" style="<?= $border_bottom ?>" data-category="<?= $category ?>">
+                        <li class="activity-item d-flex align-items-start py-4 px-4 position-relative" style="<?= $border_bottom ?>" data-category="<?= $category ?>">
                             <!-- Dot -->
-                            <div style="width: 6px; height: 6px; border-radius: 50%; background-color: #D1D5DB; margin-right: 16px; flex-shrink: 0;"></div>
+                            <div style="width: 7px; height: 7px; border-radius: 50%; background-color: <?= $dot_color ?>; margin-top: 6px; margin-right: 16px; flex-shrink: 0;"></div>
                             
                             <!-- Content -->
-                            <div class="flex-grow-1 d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1 d-flex justify-content-between align-items-start">
                                 <div>
-                                    <p class="mb-0" style="font-size: 0.85rem; color: #4B5563;">
-                                        <strong style="color: #111827; font-weight: 500;"><?= htmlspecialchars($log['user_name']) ?></strong> 
-                                        <?= htmlspecialchars($log['details']) ?>
+                                    <p class="mb-1" style="font-size: 0.9rem; color: #6B7280; line-height: 1.4;">
+                                        <strong style="color: #374151; font-weight: 600;"><?= htmlspecialchars($log['user_name']) ?></strong> 
+                                        <?= htmlspecialchars(strtolower($log['action_type'])) ?>
                                     </p>
-                                    <div style="font-size: 0.75rem; color: #9CA3AF; margin-top: 2px;">
+                                    <div style="font-size: 0.82rem; color: #9CA3AF; font-style: italic; margin-bottom: 4px;">
+                                        <?= htmlspecialchars($log['details']) ?>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: #9CA3AF;">
                                         <?php
                                             $log_date = strtotime($log['created_at']);
-                                            $today = strtotime('today');
-                                            $yesterday = strtotime('yesterday');
-                                            if ($log_date >= $today) {
-                                                echo 'Today ' . date('g:i A', $log_date);
-                                            } elseif ($log_date >= $yesterday) {
-                                                echo 'Yesterday';
-                                            } else {
-                                                echo date('M j', $log_date);
-                                            }
+                                            echo date('M j, Y g:i A', $log_date);
                                         ?>
                                     </div>
                                 </div>
                                 
                                 <!-- Badge -->
-                                <div>
-                                    <span class="badge rounded-pill fw-normal" style="<?= $badge_style ?> padding: 4px 10px; font-size: 0.65rem; border: 1px solid rgba(0,0,0,0.03);">
+                                <div style="margin-top: 2px;">
+                                    <span class="badge rounded-pill fw-medium" style="background-color: #ffffff; color: #4B5563; border: 1px solid #E5E7EB; padding: 5px 14px; font-size: 0.72rem; letter-spacing: 0.2px;">
                                         <?= $badge_text ?>
                                     </span>
                                 </div>

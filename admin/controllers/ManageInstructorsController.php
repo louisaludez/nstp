@@ -30,17 +30,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $instructor_id = $_POST['instructor_id'];
         $full_name = trim($_POST['full_name']);
         $component = $_POST['component']; 
-        $email = trim($_POST['email']);
         $status = $_POST['status'];
+        $assign_section_id = $_POST['assign_section_id'] ?? '';
 
         try {
-            $stmt = $pdo->prepare("UPDATE users SET full_name = ?, component = ?, email = ?, status = ? WHERE id = ?");
-            $stmt->execute([$full_name, $component, $email, $status, $instructor_id]);
+            $pdo->beginTransaction();
+
+            $stmt = $pdo->prepare("UPDATE users SET full_name = ?, component = ?, status = ? WHERE id = ?");
+            $stmt->execute([$full_name, $component, $status, $instructor_id]);
+
+            if (!empty($assign_section_id)) {
+                $updSec = $pdo->prepare("UPDATE sections SET instructor_id = ? WHERE id = ?");
+                $updSec->execute([$instructor_id, $assign_section_id]);
+            }
+
+            $pdo->commit();
             $message = "Instructor details successfully updated.";
             $msgType = "success";
             logAction($pdo, 'Updated Instructor', "Updated details for Prof. $full_name");
         } catch (PDOException $e) {
-            $message = ($e->getCode() == 23000) ? "Error: Email already exists." : "Error: " . $e->getMessage();
+            $pdo->rollBack();
+            $message = "Error: " . $e->getMessage();
             $msgType = "danger";
         }
     }

@@ -153,7 +153,7 @@ include '../includes/admin_sidebar.php';
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label text-xs fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px; font-size: 0.75rem;">BACKGROUND IMAGE DESIGN <span class="text-lowercase fw-normal">(.png, .jpg)</span> <span style="color:#9CA3AF;font-size:0.65rem;text-transform:lowercase">(optional)</span></label>
-                                    <input type="file" name="design_image" class="form-control form-control-lg" accept="image/*" style="font-size: 0.95rem; border-radius: 8px; padding: 6px 12px;">
+                                    <input type="file" name="design_image" id="inp_bg_image" class="form-control form-control-lg" accept="image/*" style="font-size: 0.95rem; border-radius: 8px; padding: 6px 12px;" onchange="previewBackgroundImage(this)">
                                 </div>
                             </div>
 
@@ -281,6 +281,14 @@ function openModal(mode, data = null) {
         formAction.value = 'edit_template';
         formTemplateId.value = data.id;
         
+        if (data.image_path) {
+            const canvas = document.getElementById('previewCanvas');
+            canvas.style.backgroundImage = 'url(../' + data.image_path + ')';
+            canvas.style.backgroundSize = 'cover';
+            canvas.style.backgroundPosition = 'center';
+            canvas.style.backgroundRepeat = 'no-repeat';
+        }
+        
         document.getElementById('inp_name').value = data.name;
         document.getElementById('inp_program').value = data.program_type;
         document.getElementById('inp_header').value = data.header_title || '';
@@ -294,6 +302,7 @@ function openModal(mode, data = null) {
         title.innerText = 'New Design Template';
         formAction.value = 'create_template';
         formTemplateId.value = '';
+        document.getElementById('previewCanvas').style.backgroundImage = 'none';
     }
     
     updatePreview();
@@ -316,6 +325,22 @@ function updatePreview() {
     document.getElementById('prev_body').innerHTML = body;
     document.getElementById('prev_sig_name').innerText = sigName;
     document.getElementById('prev_sig_title').innerText = sigTitle;
+}
+
+function previewBackgroundImage(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            const canvas = document.getElementById('previewCanvas');
+            canvas.style.backgroundImage = 'url(' + e.target.result + ')';
+            canvas.style.backgroundSize = 'cover';
+            canvas.style.backgroundPosition = 'center';
+            canvas.style.backgroundRepeat = 'no-repeat';
+        }
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        document.getElementById('previewCanvas').style.backgroundImage = 'none';
+    }
 }
 
 // Initial preview update
